@@ -23,9 +23,7 @@ class VideoCallApplication : Application() {
         val client = Voximplant.getClientInstance(
             Executors.newSingleThreadExecutor(),
             applicationContext,
-            ClientConfig().also {
-                it.packageName = packageName
-            }
+            ClientConfig()
         )
 
         val notificationHelper = NotificationHelper(
