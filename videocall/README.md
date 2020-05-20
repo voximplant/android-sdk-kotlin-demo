@@ -46,7 +46,7 @@ install [SDK tutorial](https://manage.voximplant.com/marketplace/sdk_tutorial) f
 ![marketplace](screenshots/market.png)
 
 ### Manual
-You can set up it manually using our [quickstart guide](https://voximplant.com/docs/references/articles/quickstart) and tutorials
+You can set up it manually using our [Getting started guide](https://voximplant.com/docs/introduction) and tutorials
 
 #### VoxEngine scenario example:
   ```
@@ -100,8 +100,8 @@ See the following files for code details:
 - [CallPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/call)
 
 ## Useful links
-1. [Quickstart](https://voximplant.com/docs/references/articles/quickstart)
+1. [Getting started](https://voximplant.com/docs/introduction)
 2. [Voximplant Android SDK reference](https://voximplant.com/docs/references/androidsdk)
-3. [Using Voximplant Android SDK](https://voximplant.com/docs/references/androidsdk/using-android-sdk)
+3. [Using Voximplant Android SDK](https://voximplant.com/docs/introduction/integration/adding_sdks/installing/android_sdk)
 4. [HowTo's](https://voximplant.com/blog/howto) 
-5. [Push Notifications Tutorial](https://voximplant.com/docs/references/androidsdk/push-notifications-for-android)
+5. [Push Notifications Tutorial](https://voximplant.com/docs/introduction/integration/adding_sdks/push_notifications/android_sdk)
