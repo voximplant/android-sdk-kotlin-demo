@@ -111,9 +111,9 @@ class AuthService(
 
     private fun enablePushNotifications(enable: Boolean) {
         if (enable) {
-            client.registerForPushNotifications(firebaseToken)
+            client.registerForPushNotifications(firebaseToken, null)
         } else {
-            client.unregisterFromPushNotifications(firebaseToken)
+            client.unregisterFromPushNotifications(firebaseToken, null)
         }
     }
 
