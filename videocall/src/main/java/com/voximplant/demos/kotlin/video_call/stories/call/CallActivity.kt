@@ -2,12 +2,16 @@ package com.voximplant.demos.kotlin.video_call.stories.call
 
 import android.animation.Animator
 import android.animation.AnimatorInflater
+import android.content.Context
 import android.content.Intent
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import com.voximplant.demos.kotlin.video_call.R
@@ -19,6 +23,9 @@ import kotlinx.android.synthetic.main.activity_call.*
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
+    private var screenSharingRequestCompletion: ((Intent?) -> Unit)? = null
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call)
@@ -46,6 +53,12 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             false
         }
 
+        sharing_button.setOnTouchListener { view, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
+            if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
+            false
+        }
+
         video_button.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
@@ -68,6 +81,10 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
         hold_button.setOnClickListener {
             model.hold()
+        }
+
+        sharing_button.setOnClickListener {
+            model.shareScreen(::requestScreenCapture)
         }
 
         video_button.setOnClickListener {
@@ -101,6 +118,14 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
                 local_video_view.visibility = VISIBLE
                 card_hold.background = resources.getDrawable(R.drawable.normal_call_option_back)
                 hold_button.setImageDrawable(resources.getDrawable(R.drawable.ic_call_hold))
+            }
+        })
+
+        model.sharingScreen.observe(this, Observer { sharingScreen ->
+            if (sharingScreen) {
+                card_sharing.background = resources.getDrawable(R.drawable.red_call_option_back)
+            } else {
+                card_sharing.background = resources.getDrawable(R.drawable.normal_call_option_back  )
             }
         })
 
@@ -139,6 +164,10 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             }
         })
 
+        model.enableSharingButton.observe(this, Observer {
+            sharing_button.isEnabled = it
+        })
+
         model.enableHoldButton.observe(this, Observer {
             hold_button.isEnabled = it
         })
@@ -150,6 +179,14 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
     }
 
     override fun onBackPressed() { }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == screenSharingRequestCode) {
+            screenSharingRequestCompletion?.invoke(data)
+            screenSharingRequestCompletion = null
+        }
+    }
 
     private fun showAudioDeviceSelectionDialog(audioDevices: List<String>) {
         AlertDialog.Builder(this).setTitle(R.string.alert_select_audio_device)
@@ -163,5 +200,20 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
     private fun animate(view: View, animator: Animator) {
         animator.setTarget(view)
         animator.start()
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private fun requestScreenCapture(completion: (Intent?) -> Unit) {
+        val mediaProjectionManager =
+            getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        screenSharingRequestCompletion = completion
+        startActivityForResult(
+            mediaProjectionManager.createScreenCaptureIntent(),
+            screenSharingRequestCode
+        )
+    }
+
+    private companion object {
+        const val screenSharingRequestCode = 1
     }
 }

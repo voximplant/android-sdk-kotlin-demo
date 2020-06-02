@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
         android:name=".VideoCallApplication"
@@ -45,7 +48,8 @@
             android:name=".stories.call_failed.CallFailedActivity"
             android:screenOrientation="nosensor" />
 
-        <service android:name=".services.CallService" />
+        <service android:name=".services.CallService"
+            android:foregroundServiceType="mediaProjection"/>
         <service
             android:name=".services.FirebasePushService"
             android:exported="false">

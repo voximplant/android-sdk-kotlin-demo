@@ -1,6 +1,6 @@
 # Voximplant Video Call Demo (Android)
 
-This demo demonstrates basic video call functionality of the Voximplant Android SDK. 
+This demo demonstrates basic video call and screen sharing functionality of the Voximplant Android SDK. 
 The application supports video calls between this Android app and other apps that use any Voximplant SDK.
 Based on MVVM architectural pattern.
 
@@ -13,6 +13,7 @@ The application is able to:
 - change an audio device (speaker, receiver, wired headset, bluetooth headset) during a call
 - mute audio during a call
 - enable/disable sending video
+- share screen
 - change video camera
 - receive push notifications (requires additional setup)
 - turn off the touch screen during calls when your ear is close to the screen (proximity sensor usage)
@@ -32,7 +33,7 @@ See the following file for code details:
 - [NotificationHelper](src/main/java/com/voximplant/demos/kotlin/video_call/utils/NotificationHelper.kt)
 
 ## Getting started
-To get started, you'll need to [register](https://manage.voximplant.com/auth/sign_up) a free Voximplant developer account.
+To get started, you'll need to [register](https://voximplant.com) a free Voximplant developer account.
 
 You'll need the following:
 - Voximplant application
@@ -46,7 +47,7 @@ install [SDK tutorial](https://manage.voximplant.com/marketplace/sdk_tutorial) f
 ![marketplace](screenshots/market.png)
 
 ### Manual
-You can set up it manually using our [Getting started guide](https://voximplant.com/docs/introduction) and tutorials
+You can set up it manually using our [quickstart guide](https://voximplant.com/docs/references/articles/quickstart) and tutorials
 
 #### VoxEngine scenario example:
   ```
@@ -100,11 +101,11 @@ See the following files for code details:
 - [CallPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/call)
 
 ## Useful links
-1. [Getting started](https://voximplant.com/docs/introduction)
+1. [Quickstart](https://voximplant.com/docs/references/articles/quickstart)
 2. [Voximplant Android SDK reference](https://voximplant.com/docs/references/androidsdk)
-3. [Using Voximplant Android SDK](https://voximplant.com/docs/introduction/integration/adding_sdks/installing/android_sdk)
-4. [HowTo's](https://voximplant.com/docs/howtos) 
-5. [Push Notifications Tutorial](https://voximplant.com/docs/introduction/integration/adding_sdks/push_notifications/android_sdk)
+3. [Using Voximplant Android SDK](https://voximplant.com/docs/references/androidsdk/using-android-sdk)
+4. [HowTo's](https://voximplant.com/blog/howto) 
+5. [Push Notifications Tutorial](https://voximplant.com/docs/references/androidsdk/push-notifications-for-android)
 
 ## Have a question
 - contact us via `support@voximplant.com`

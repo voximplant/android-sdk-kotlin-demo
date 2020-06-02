@@ -5,8 +5,6 @@ const val APP_TAG = "Voximplant"
 const val IS_INCOMING_CALL = "is incoming"
 const val FAIL_REASON = "fail reason"
 
-const val DISPLAY_NAME = "display_name"
-
 const val ACTION_DECLINE_CALL = "action_decline_call"
 const val CALL_ANSWERED = "call_answered"
 

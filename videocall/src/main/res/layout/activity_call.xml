@@ -10,71 +10,175 @@
     tools:context=".stories.call.CallActivity">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_video"
+        android:id="@+id/card_sharing"
         android:layout_width="45dp"
         android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         app:cardBackgroundColor="@color/call_option_default_back"
         app:cardCornerRadius="6dp"
         app:layout_constraintBottom_toBottomOf="@+id/card_hold"
-        app:layout_constraintEnd_toStartOf="@+id/card_hangup"
-        app:layout_constraintStart_toEndOf="@+id/card_hold"
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toTopOf="@+id/card_hold">
 
         <ImageButton
-            android:id="@+id/video_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="2dp"
+            android:id="@+id/sharing_button"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
             android:background="#00FFFFFF"
+            android:contentDescription="@string/enable_video_button"
             android:scaleType="centerCrop"
             android:tint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_camon"
-            android:contentDescription="@string/enable_video_button" />
+            app:srcCompat="@drawable/ic_screensharingicon" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_video"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        app:cardBackgroundColor="@color/call_option_default_back"
+        app:cardCornerRadius="6dp"
+        app:layout_constraintBottom_toBottomOf="@+id/card_hold"
+        app:layout_constraintStart_toEndOf="@+id/card_sharing"
+        app:layout_constraintTop_toTopOf="@+id/card_hold">
+
+        <ImageButton
+            android:id="@+id/video_button"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/enable_video_button"
+            android:scaleType="centerCrop"
+            android:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_camon" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_hold"
         android:layout_width="45dp"
         android:layout_height="45dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:cardBackgroundColor="#1AFFFFFF"
         app:cardCornerRadius="6dp"
         app:layout_constraintBottom_toTopOf="@+id/hold_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintEnd_toStartOf="@+id/guideline3">
 
         <ImageButton
             android:id="@+id/hold_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
             android:background="#00FFFFFF"
+            android:contentDescription="@string/hold_button"
             android:scaleType="centerCrop"
             android:tint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_call_hold"
-            android:contentDescription="@string/hold_button" />
+            app:srcCompat="@drawable/ic_call_hold" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_hangup"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        app:cardBackgroundColor="#1AFFFFFF"
+        app:cardCornerRadius="6dp"
+        app:layout_constraintBottom_toBottomOf="@+id/card_hold"
+        app:layout_constraintStart_toEndOf="@+id/card_video"
+        app:layout_constraintTop_toTopOf="@+id/card_hold">
+
+        <ImageButton
+            android:id="@+id/hangup_button"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/hangup_button"
+            android:scaleType="centerCrop"
+            android:tint="@color/colorRed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_call_decline" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_audio"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        app:cardBackgroundColor="#1AFFFFFF"
+        app:cardCornerRadius="6dp"
+        app:layout_constraintEnd_toStartOf="@+id/card_hold"
+        app:layout_constraintTop_toTopOf="@+id/card_hold">
+
+        <ImageButton
+            android:id="@+id/audio_button"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/change_audio_device_button"
+            android:scaleType="fitXY"
+            android:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_audio" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_mute"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginEnd="16dp"
@@ -82,92 +186,28 @@
         app:cardBackgroundColor="#1AFFFFFF"
         app:cardCornerRadius="6dp"
         app:layout_constraintBottom_toBottomOf="@+id/card_hold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/card_hold">
-
-        <ImageButton
-            android:id="@+id/hangup_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="2dp"
-            android:background="#00FFFFFF"
-            android:scaleType="centerCrop"
-            android:tint="@color/colorRed"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_call_decline"
-            android:contentDescription="@string/hangup_button" />
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_audio"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        app:cardBackgroundColor="#1AFFFFFF"
-        app:cardCornerRadius="6dp"
-        app:layout_constraintEnd_toStartOf="@+id/card_hold"
-        app:layout_constraintStart_toEndOf="@+id/card_mute"
-        app:layout_constraintTop_toTopOf="@+id/card_hold">
-
-        <ImageButton
-            android:id="@+id/audio_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="2dp"
-            android:background="#00FFFFFF"
-            android:scaleType="centerCrop"
-            android:tint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_audio"
-            android:contentDescription="@string/change_audio_device_button" />
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_mute"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        app:cardBackgroundColor="#1AFFFFFF"
-        app:cardCornerRadius="6dp"
-        app:layout_constraintBottom_toBottomOf="@+id/card_hold"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/card_audio"
         app:layout_constraintTop_toTopOf="@+id/card_hold">
 
         <ImageButton
             android:id="@+id/mute_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
             android:background="#00FFFFFF"
-            android:scaleType="centerCrop"
+            android:contentDescription="@string/mute_button"
+            android:scaleType="fitXY"
             android:tint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_micon"
-            android:contentDescription="@string/mute_button"/>
+            app:srcCompat="@drawable/ic_micon" />
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -177,8 +217,18 @@
         android:layout_marginBottom="8dp"
         android:text="@string/hold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/card_hold"
+        app:layout_constraintStart_toStartOf="@+id/card_hold" />
+
+    <TextView
+        android:id="@+id/sharing_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/sharing"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/card_sharing"
+        app:layout_constraintStart_toStartOf="@+id/card_sharing" />
 
     <TextView
         android:id="@+id/audio_label"
@@ -265,5 +315,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

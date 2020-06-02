@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -108,6 +109,13 @@ class IncomingCallActivity: BaseActivity<IncomingCallViewModel>(IncomingCallView
     private fun requestPermissions() {
         val missingPermissions =
             Voximplant.getMissingPermissions(applicationContext, true)
+        // due to the bug in android 6.0:
+        // https://stackoverflow.com/questions/32185628/connectivitymanager-requestnetwork-in-android-6-0
+        if (Build.VERSION.SDK_INT == 23) {
+            if (missingPermissions.contains(Manifest.permission.CHANGE_NETWORK_STATE)) {
+                missingPermissions.remove(Manifest.permission.CHANGE_NETWORK_STATE)
+            }
+        }
         if (missingPermissions.isEmpty()) {
             permissionsRequestCompletion?.invoke()
         } else {

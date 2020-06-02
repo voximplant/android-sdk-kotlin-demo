@@ -126,6 +126,15 @@ class VoximplantCallManager(
             }
         }) ?: completion(noActiveCallError)
 
+    fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) =
+        managedCall?.startScreenSharing(intent, object : ICallCompletionHandler {
+            override fun onComplete() {
+                completion(null)
+            }
+            override fun onFailure(e: CallException) {
+                completion(callManagerException(e))
+            }
+        }) ?: completion(noActiveCallError)
 
     fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) =
         managedCall?.sendVideo(send, object: ICallCompletionHandler {
@@ -204,7 +213,7 @@ class VoximplantCallManager(
     }
 
     override fun onLocalVideoStreamAdded(call: ICall, videoStream: IVideoStream) {
-        Thread.sleep(1000)
+        if (videoStream.videoStreamType == VideoStreamType.SCREEN_SHARING) { return }
         videoStreamAdded?.invoke(true) { videoSink ->
             videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
         }
