@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.voximplant.demos.kotlin.video_call.stories.incoming_call.IncomingCallActivity
 import com.voximplant.demos.kotlin.video_call.utils.*
 import com.voximplant.sdk.Voximplant
@@ -13,10 +14,10 @@ import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import com.voximplant.sdk.client.IClientIncomingCallListener
 import com.voximplant.sdk.hardware.AudioDevice
-import org.webrtc.VideoSink
 import java.lang.Exception
 
-private class CallActionReceiver(private val onReceive: (CallActionReceiver) -> Unit) : BroadcastReceiver() {
+private class CallActionReceiver(private val onReceive: (CallActionReceiver) -> Unit) :
+    BroadcastReceiver() {
     override fun onReceive(
         context: Context,
         intent: Intent
@@ -27,14 +28,14 @@ private class CallActionReceiver(private val onReceive: (CallActionReceiver) -> 
     }
 }
 
-typealias VideoStreamAdded = (local: Boolean, completion: (VideoSink) -> Unit) -> Unit
-typealias VideoStreamRemoved = (local: Boolean) -> Unit
+typealias localStreamRendering = (videoStream: ILocalVideoStream, added: Boolean) -> Unit
+typealias remoteStreamRendering = (videoStream: IRemoteVideoStream, added: Boolean) -> Unit
 
 class VoximplantCallManager(
     private val client: IClient,
     private val appContext: Context,
     private val notificationHelper: NotificationHelper
-): IClientIncomingCallListener, ICallListener, IEndpointListener {
+) : IClientIncomingCallListener, ICallListener, IEndpointListener {
 
     private var managedCall: ICall? = null
     private val callActionsReceiver = CallActionReceiver {
@@ -50,10 +51,26 @@ class VoximplantCallManager(
         private set
     var latestCallUsername: String? = null
         private set
-    var videoStreamAdded: VideoStreamAdded? = null
-    var videoStreamRemoved: VideoStreamRemoved? = null
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
+
+    var muted: Boolean = false
+        private set
+    var onHold: Boolean = false
+        private set
+    var sharingScreen: Boolean = false
+        private set
+
+    var changeLocalStream: localStreamRendering? = null
+    var changeRemoteStream: remoteStreamRendering? = null
+    var localVideoStream: ILocalVideoStream? = null
+        private set
+    var remoteVideoStream: IRemoteVideoStream? = null
+        private set
+    val hasLocalVideoStream: Boolean
+        get() = localVideoStream != null
+    val hasRemoteVideoStream: Boolean
+        get() = remoteVideoStream != null
 
     init {
         client.setClientIncomingCallListener(this)
@@ -103,13 +120,19 @@ class VoximplantCallManager(
         }
 
     @Throws(CallManagerException::class)
-    fun answerCall() = executeOrThrow { managedCall?.answer(callSettings) ?: throw noActiveCallError }
+    fun answerCall() =
+        executeOrThrow { managedCall?.answer(callSettings) ?: throw noActiveCallError }
 
     @Throws(CallManagerException::class)
     fun declineCall() = executeOrThrow { declineCall(managedCall ?: throw  noActiveCallError) }
 
     @Throws(CallManagerException::class)
-    fun muteActiveCall(mute: Boolean) = executeOrThrow { managedCall?.sendAudio(!mute) ?: throw noActiveCallError }
+    fun muteActiveCall(mute: Boolean) = executeOrThrow {
+        managedCall?.sendAudio(!mute).also {
+            muted = mute
+        }
+            ?: throw noActiveCallError
+    }
 
     fun selectAudioDevice(name: String) =
         audioDeviceManager.audioDevices.first { it.name == name }?.let {
@@ -119,28 +142,35 @@ class VoximplantCallManager(
     fun holdActiveCall(hold: Boolean, completion: (CallManagerException?) -> Unit) =
         managedCall?.hold(hold, object : ICallCompletionHandler {
             override fun onComplete() {
+                onHold = !onHold
                 completion(null)
             }
+
             override fun onFailure(e: CallException) {
                 completion(callManagerException(e))
             }
         }) ?: completion(noActiveCallError)
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) =
         managedCall?.startScreenSharing(intent, object : ICallCompletionHandler {
             override fun onComplete() {
+                sharingScreen = true
                 completion(null)
             }
+
             override fun onFailure(e: CallException) {
                 completion(callManagerException(e))
             }
         }) ?: completion(noActiveCallError)
 
     fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) =
-        managedCall?.sendVideo(send, object: ICallCompletionHandler {
+        managedCall?.sendVideo(send, object : ICallCompletionHandler {
             override fun onComplete() {
+                sharingScreen = false
                 completion(null)
             }
+
             override fun onFailure(e: CallException) {
                 completion(callManagerException(e))
             }
@@ -212,29 +242,34 @@ class VoximplantCallManager(
         }
     }
 
-    override fun onLocalVideoStreamAdded(call: ICall, videoStream: IVideoStream) {
-        if (videoStream.videoStreamType == VideoStreamType.SCREEN_SHARING) { return }
-        videoStreamAdded?.invoke(true) { videoSink ->
-            videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
+    override fun onLocalVideoStreamAdded(call: ICall, videoStream: ILocalVideoStream) {
+        if (videoStream.videoStreamType == VideoStreamType.SCREEN_SHARING) {
+            return
         }
+        localVideoStream = videoStream
+        changeLocalStream?.invoke(videoStream, true)
     }
 
-    override fun onLocalVideoStreamRemoved(call: ICall?, videoStream: IVideoStream?) {
-        videoStreamRemoved?.invoke(true)
+    override fun onLocalVideoStreamRemoved(call: ICall, videoStream: ILocalVideoStream) {
+        localVideoStream = null
+        changeLocalStream?.invoke(videoStream, false)
     }
 
     override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) {
         endpoint.setEndpointListener(this)
     }
 
-    override fun onRemoteVideoStreamAdded(endpoint: IEndpoint, videoStream: IVideoStream) {
-        videoStreamAdded?.invoke(false) { videoSink ->
-            videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
-        }
+    override fun onRemoteVideoStreamAdded(endpoint: IEndpoint, videoStream: IRemoteVideoStream) {
+        remoteVideoStream = videoStream
+        changeRemoteStream?.invoke(videoStream, true)
     }
 
-    override fun onRemoteVideoStreamRemoved(endpoint: IEndpoint?, videoStream: IVideoStream?) {
-        videoStreamRemoved?.invoke(false)
+    override fun onRemoteVideoStreamRemoved(
+        endpoint: IEndpoint,
+        videoStream: IRemoteVideoStream
+    ) {
+        remoteVideoStream = null
+        changeRemoteStream?.invoke(videoStream, false)
     }
 
     private fun stopForegroundService() {

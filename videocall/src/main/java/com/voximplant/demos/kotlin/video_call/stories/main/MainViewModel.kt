@@ -7,9 +7,6 @@ import com.voximplant.demos.kotlin.video_call.services.AuthService
 import com.voximplant.demos.kotlin.video_call.services.AuthServiceListener
 import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
 import com.voximplant.demos.kotlin.video_call.utils.*
-import com.voximplant.sdk.Voximplant
-import com.voximplant.sdk.client.ClientState
-import com.voximplant.sdk.client.IClient
 
 class MainViewModel: BaseViewModel(), AuthServiceListener {
     private val authService: AuthService = Shared.authService
@@ -17,6 +14,7 @@ class MainViewModel: BaseViewModel(), AuthServiceListener {
 
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
+    val moveToLogin = MutableLiveData<Unit>()
 
     override fun onCreate() {
         super.onCreate()
@@ -33,7 +31,7 @@ class MainViewModel: BaseViewModel(), AuthServiceListener {
                 } else {
                     finish.postValue(Unit)
                 }
-            } ?: {
+            } ?: run {
                 try {
                     callManager.createCall(user ?: "")
                     moveToCall.postValue(Unit)
@@ -41,12 +39,12 @@ class MainViewModel: BaseViewModel(), AuthServiceListener {
                     Log.e(APP_TAG, e.message.toString())
                     postError(e.message.toString())
                 }
-            }()
+            }
         }
     }
 
     fun logout() {
         authService.logout()
-        finish.postValue(Unit)
+        moveToLogin.postValue(Unit)
     }
 }

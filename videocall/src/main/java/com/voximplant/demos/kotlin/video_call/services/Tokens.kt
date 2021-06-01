@@ -1,7 +1,6 @@
 package com.voximplant.demos.kotlin.video_call.services
 
 import android.content.Context
-import android.util.Log
 import com.voximplant.demos.kotlin.video_call.utils.*
 import com.voximplant.sdk.client.AuthParams
 

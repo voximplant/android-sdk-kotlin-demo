@@ -3,7 +3,6 @@ package com.voximplant.demos.kotlin.video_call.services
 import android.util.Log
 import com.voximplant.demos.kotlin.video_call.utils.APP_TAG
 import com.voximplant.demos.kotlin.video_call.utils.AuthError
-import com.voximplant.sdk.client.LoginError
 
 interface AuthServiceListener {
     fun onConnectionFailed(error: AuthError) {

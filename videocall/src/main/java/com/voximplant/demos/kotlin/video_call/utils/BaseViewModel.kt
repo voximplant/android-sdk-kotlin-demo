@@ -2,9 +2,6 @@ package com.voximplant.demos.kotlin.video_call.utils
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.voximplant.demos.kotlin.video_call.services.AuthServiceListener
-import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ViewModel() {
     val showProgress = MutableLiveData<Int>()

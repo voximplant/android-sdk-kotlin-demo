@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.voximplant.demos.kotlin.video_call.R
+import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 
 class NotificationHelper(private val notificationManager: NotificationManager) {
     init {
@@ -16,8 +17,12 @@ class NotificationHelper(private val notificationManager: NotificationManager) {
     }
 
     private fun makeIncomingCallChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { return }
-        if (notificationManager.getNotificationChannel(INCOMING_CALL_CHANNEL_ID) != null) { return }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        if (notificationManager.getNotificationChannel(INCOMING_CALL_CHANNEL_ID) != null) {
+            return
+        }
         NotificationChannel(
             INCOMING_CALL_CHANNEL_ID,
             INCOMING_CALL_CHANNEL_NAME,
@@ -28,8 +33,12 @@ class NotificationHelper(private val notificationManager: NotificationManager) {
     }
 
     private fun makeForegroundServiceChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) { return }
-        if (notificationManager.getNotificationChannel(FOREGROUND_SERVICE_CHANNEL_ID) != null) { return }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        if (notificationManager.getNotificationChannel(FOREGROUND_SERVICE_CHANNEL_ID) != null) {
+            return
+        }
         NotificationChannel(
             FOREGROUND_SERVICE_CHANNEL_ID,
             FOREGROUND_SERVICE_CHANNEL_NAME,
@@ -88,10 +97,19 @@ class NotificationHelper(private val notificationManager: NotificationManager) {
         context: Context?,
         text: String?
     ): Notification {
+        val intentCall = Intent(context, CallActivity::class.java).let { intent ->
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            intent.putExtra(IS_STARTED_CALL, true)
+        }
+
         return NotificationCompat.Builder(context!!, FOREGROUND_SERVICE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_vox_notification)
             .setContentTitle(APP_TAG)
             .setContentText(text)
+            .setFullScreenIntent(PendingIntent.getActivity(
+                context, 0,
+                intentCall, 0
+            ), true)
             .build()
     }
 

@@ -2,6 +2,8 @@ package com.voximplant.demos.kotlin.video_call.stories.call
 
 import android.animation.Animator
 import android.animation.AnimatorInflater
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
@@ -11,25 +13,27 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Observer
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
-import com.voximplant.demos.kotlin.video_call.utils.BaseActivity
-import com.voximplant.demos.kotlin.video_call.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.video_call.utils.IS_INCOMING_CALL
+import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
+import com.voximplant.demos.kotlin.video_call.utils.*
 import kotlinx.android.synthetic.main.activity_call.*
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
     private var screenSharingRequestCompletion: ((Intent?) -> Unit)? = null
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call)
 
         local_video_view.setZOrderMediaOverlay(true)
+
 
         val reducer = AnimatorInflater.loadAnimator(applicationContext, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(applicationContext, R.animator.regain_size)
@@ -83,7 +87,15 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
         }
 
         sharing_button.setOnClickListener {
-            model.shareScreen(::requestScreenCapture)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                model.shareScreen(::requestScreenCapture)
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.screen_sharing_min_api_warning),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
 
         video_button.setOnClickListener {
@@ -98,94 +110,92 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             model.changeCam()
         }
 
-        model.muted.observe(this, Observer { muted ->
+        model.muted.observe(this, { muted ->
             if (muted) {
-                card_mute.background = resources.getDrawable(R.drawable.red_call_option_back)
-                mute_button.setImageDrawable(resources.getDrawable(R.drawable.ic_micoff))
+                mute_button.setBackgroundResource(R.drawable.red_call_option_back)
+                mute_button_icon.setImageResource(R.drawable.ic_micoff)
             } else {
-                card_mute.background = resources.getDrawable(R.drawable.normal_call_option_back)
-                mute_button.setImageDrawable(resources.getDrawable(R.drawable.ic_micon))
+                mute_button.setBackgroundResource(R.drawable.normal_call_option_back)
+                mute_button_icon.setImageResource(R.drawable.ic_micon)
             }
         })
 
-        model.onHold.observe(this, Observer { onHold ->
+        model.onHold.observe(this, { onHold ->
             if (onHold) {
                 local_video_view.visibility = INVISIBLE
-                card_hold.background = resources.getDrawable(R.drawable.red_call_option_back)
-                hold_button.setImageDrawable(resources.getDrawable(R.drawable.ic_call_hold))
+                hold_button.setBackgroundResource(R.drawable.red_call_option_back)
+                hold_button_icon.setImageResource(R.drawable.ic_call_hold)
             } else {
                 local_video_view.visibility = VISIBLE
-                card_hold.background = resources.getDrawable(R.drawable.normal_call_option_back)
-                hold_button.setImageDrawable(resources.getDrawable(R.drawable.ic_call_hold))
+                hold_button.setBackgroundResource(R.drawable.normal_call_option_back)
+                hold_button_icon.setImageResource(R.drawable.ic_call_hold)
             }
         })
 
-        model.sharingScreen.observe(this, Observer { sharingScreen ->
+        model.sharingScreen.observe(this, { sharingScreen ->
             if (sharingScreen) {
-                card_sharing.background = resources.getDrawable(R.drawable.red_call_option_back)
+                sharing_button.setBackgroundResource(R.drawable.red_call_option_back)
             } else {
-                card_sharing.background = resources.getDrawable(R.drawable.normal_call_option_back  )
+                sharing_button.setBackgroundResource(R.drawable.normal_call_option_back)
             }
         })
 
-        model.sendingVideo.observe(this, Observer { sendingVideo ->
+        model.sendingVideo.observe(this, { sendingVideo ->
             if (sendingVideo) {
-                card_video.background = resources.getDrawable(R.drawable.normal_call_option_back)
-                video_button.setImageDrawable(resources.getDrawable(R.drawable.ic_camon))
+                video_button.setBackgroundResource(R.drawable.normal_call_option_back)
+                video_button_icon.setImageResource(R.drawable.ic_camon)
+                local_video_view.visibility = VISIBLE
             } else {
-                card_video.background = resources.getDrawable(R.drawable.red_call_option_back)
-                video_button.setImageDrawable(resources.getDrawable(R.drawable.ic_camoff))
+                video_button.setBackgroundResource(R.drawable.red_call_option_back)
+                video_button_icon.setImageResource(R.drawable.ic_camoff)
+                local_video_view.visibility = INVISIBLE
             }
         })
 
-        model.localVideoStreamAdded.observe(this, Observer { completion ->
+        model.receivingVideo.observe(this, { receivingVideo ->
+            remote_video_view.visibility = if (receivingVideo) VISIBLE else INVISIBLE
+        })
+
+        model.localVideoRenderer.observe(this, { completion ->
             completion(local_video_view)
-            local_video_view.visibility = VISIBLE
         })
 
-        model.localVideoStreamRemoved.observe(this, Observer {
-            local_video_view.visibility = INVISIBLE
-        })
-
-        model.remoteVideoStreamAdded.observe(this, Observer { completion ->
+        model.remoteVideoRenderer.observe(this, { completion ->
             completion(remote_video_view)
-            remote_video_view.visibility = VISIBLE
         })
 
-        model.remoteVideoStreamRemoved.observe(this, Observer {
-            remote_video_view.visibility = INVISIBLE
-        })
-
-        model.moveToCallFailed.observe(this, Observer { reason ->
+        model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
                 it.putExtra(FAIL_REASON, reason)
                 startActivity(it)
             }
         })
 
-        model.enableSharingButton.observe(this, Observer {
+        model.moveToMainActivity.observe(this, {
+            Intent(this, MainActivity::class.java).also {
+                startActivity(it)
+            }
+        })
+
+        model.enableSharingButton.observe(this, {
             sharing_button.isEnabled = it
         })
 
-        model.enableHoldButton.observe(this, Observer {
+        model.enableHoldButton.observe(this, {
             hold_button.isEnabled = it
         })
-        model.enableVideoButton.observe(this, Observer {
-            video_button.isEnabled = it
+
+        model.enableVideoButton.observe(this, {
+            video_button.isClickable = it
         })
 
-        model.onCreateWithCall(intent.getBooleanExtra(IS_INCOMING_CALL, true))
+        model.onCreateWithCall(
+            intent.getBooleanExtra(IS_INCOMING_CALL, true),
+            intent.getBooleanExtra(IS_STARTED_CALL, false)
+        )
     }
 
-    override fun onBackPressed() { }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == screenSharingRequestCode) {
-            screenSharingRequestCompletion?.invoke(data)
-            screenSharingRequestCompletion = null
-        }
-    }
+    override fun onBackPressed() {}
 
     private fun showAudioDeviceSelectionDialog(audioDevices: List<String>) {
         AlertDialog.Builder(this).setTitle(R.string.alert_select_audio_device)
@@ -201,18 +211,19 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
         animator.start()
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private var resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK)
+                screenSharingRequestCompletion?.invoke(result.data)
+            else
+                screenSharingRequestCompletion?.invoke(null)
+        }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun requestScreenCapture(completion: (Intent?) -> Unit) {
         val mediaProjectionManager =
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         screenSharingRequestCompletion = completion
-        startActivityForResult(
-            mediaProjectionManager.createScreenCaptureIntent(),
-            screenSharingRequestCode
-        )
-    }
-
-    private companion object {
-        const val screenSharingRequestCode = 1
+        resultLauncher.launch(mediaProjectionManager.createScreenCaptureIntent())
     }
 }

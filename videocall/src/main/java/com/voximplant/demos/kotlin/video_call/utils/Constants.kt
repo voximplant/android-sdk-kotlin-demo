@@ -3,6 +3,7 @@ package com.voximplant.demos.kotlin.video_call.utils
 const val APP_TAG = "Voximplant"
 
 const val IS_INCOMING_CALL = "is incoming"
+const val IS_STARTED_CALL = "is started"
 const val FAIL_REASON = "fail reason"
 
 const val ACTION_DECLINE_CALL = "action_decline_call"

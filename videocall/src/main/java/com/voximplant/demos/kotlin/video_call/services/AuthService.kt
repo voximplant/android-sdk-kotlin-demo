@@ -2,7 +2,9 @@ package com.voximplant.demos.kotlin.video_call.services
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.iid.*
+import com.google.firebase.messaging.FirebaseMessaging
+import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.demos.kotlin.video_call.utils.*
 import com.voximplant.sdk.client.*
 
@@ -15,13 +17,13 @@ class AuthService(
         get() = client.clientState
     var listener: AuthServiceListener? = null
     private var username: String?
-    get() = USERNAME.getStringFromPrefs(appContext)
-    set(newValue) =
-        if (newValue == null) {
-            USERNAME.removeKeyFromPrefs(appContext)
-        } else {
-            newValue.saveToPrefs(appContext, USERNAME)
-        }
+        get() = USERNAME.getStringFromPrefs(appContext)
+        set(newValue) =
+            if (newValue == null) {
+                USERNAME.removeKeyFromPrefs(appContext)
+            } else {
+                newValue.saveToPrefs(appContext, USERNAME)
+            }
     private var password: String? = null
     private var firebaseToken: String? = null
     var displayName: String? = null
@@ -33,11 +35,11 @@ class AuthService(
     init {
         client.setClientLoginListener(this)
         client.setClientSessionListener(this)
-        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener { task ->
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful || task.result == null) {
                 return@addOnCompleteListener
             }
-            firebaseToken = task.result?.token
+            firebaseToken = task.result
         }
     }
 
@@ -88,6 +90,7 @@ class AuthService(
             completion(null)
         }
     }
+
     private var reconnectCompletion: ((AuthError?) -> Unit)? = null
 
     fun logout() {
@@ -96,6 +99,7 @@ class AuthService(
             displayName = null
             tokens.removeTokens()
             client.disconnect()
+            MainActivity.OUTGOING_USERNAME.removeKeyFromPrefs(appContext)
         }
     }
 
@@ -139,15 +143,17 @@ class AuthService(
 
     @Synchronized
     override fun onLoginSuccessful(
-        displayName: String,
-        authParams: AuthParams
+        displayName: String?,
+        authParams: AuthParams?
     ) {
         enablePushNotifications(true)
-        this.displayName = displayName
-        tokens.updateTokens(authParams)
+        this.displayName = displayName ?: this.username?.split('@')?.first()
+        if (authParams != null)
+            tokens.updateTokens(authParams)
+        else Log.i(APP_TAG, "authParams not set")
         reconnectCompletion?.invoke(null)
         reconnectCompletion = null
-        listener?.onLoginSuccess(displayName)
+        listener?.onLoginSuccess(this.displayName.orEmpty())
     }
 
     @Synchronized

@@ -5,15 +5,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 
 abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) :
     AppCompatActivity() {
 
     protected val model: T
-        get() = ViewModelProvider(ViewModelStoreOwner { this.viewModelStore }).get(modelType)
+        get() = ViewModelProvider { this.viewModelStore }.get(modelType)
 
     private val rootViewGroup: ViewGroup
         get() = window.decorView.rootView as ViewGroup
@@ -23,23 +21,23 @@ abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        model.showProgress.observe(this, Observer { textID ->
+        model.showProgress.observe(this, { textID ->
             showProgressHUD(resources.getString(textID))
         })
 
-        model.hideProgress.observe(this, Observer {
+        model.hideProgress.observe(this, {
             hideProgressHUD()
         })
 
-        model.stringError.observe(this, Observer { text ->
+        model.stringError.observe(this, { text ->
             showError(text)
         })
 
-        model.intError.observe(this, Observer { textID ->
+        model.intError.observe(this, { textID ->
             showError(resources.getString(textID))
         })
 
-        model.finish.observe(this, Observer {
+        model.finish.observe(this, {
             finish()
         })
 
@@ -83,7 +81,7 @@ abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) 
                 errorHUDView = AlertDialog.Builder(this)
                     .setTitle("Something went wrong")
                     .setMessage(text)
-                    .setPositiveButton("Close") { _, _ -> errorHUDView = null }
+                    .setNegativeButton("Close") { _, _ -> errorHUDView = null }
                     .setCancelable(false)
                     .show()
             }

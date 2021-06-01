@@ -13,6 +13,7 @@ fun makeAuthError(loginError: LoginError): AuthError =
         LoginError.NETWORK_ISSUES -> AuthError.NetworkIssues
         LoginError.TOKEN_EXPIRED -> AuthError.TokenExpired
         LoginError.TIMEOUT -> AuthError.Timeout
+        LoginError.MAU_ACCESS_DENIED -> AuthError.MauAssessDenied
     }
 
 enum class AuthError {
@@ -23,6 +24,7 @@ enum class AuthError {
     TokenExpired,
     Timeout,
     NetworkIssues,
+    MauAssessDenied,
     InvalidState;
 
     val description: String
@@ -32,6 +34,7 @@ enum class AuthError {
             AccountFrozen -> "Login failed due to account is frozen. Please contact your admin"
             TokenExpired -> "Login failed due to token being expired. Please use password"
             Timeout -> "Login failed due to timeout. Please try again"
+            MauAssessDenied -> "Login failed due to MAU limit is reached"
             NetworkIssues -> "Login failed due to network issues. Please try again"
             else -> "Login failed due to internal error. Please try again"
         }

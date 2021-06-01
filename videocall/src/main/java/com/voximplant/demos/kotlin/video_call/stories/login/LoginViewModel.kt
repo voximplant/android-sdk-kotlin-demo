@@ -1,17 +1,12 @@
 package com.voximplant.demos.kotlin.video_call.stories.login
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.services.AuthService
 import com.voximplant.demos.kotlin.video_call.services.AuthServiceListener
-import com.voximplant.demos.kotlin.video_call.utils.APP_TAG
 import com.voximplant.demos.kotlin.video_call.utils.AuthError
 import com.voximplant.demos.kotlin.video_call.utils.BaseViewModel
 import com.voximplant.demos.kotlin.video_call.utils.Shared
-import com.voximplant.sdk.client.LoginError
-import kotlin.math.log
 
 private val String.appendingVoxDomain get() = "$this.voximplant.com"
 

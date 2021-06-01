@@ -2,6 +2,7 @@ package com.voximplant.demos.kotlin.video_call.stories.call_failed
 
 import android.animation.Animator
 import android.animation.AnimatorInflater
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
@@ -9,14 +10,15 @@ import android.view.View
 import androidx.lifecycle.Observer
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
+import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.demos.kotlin.video_call.utils.BaseActivity
 import com.voximplant.demos.kotlin.video_call.utils.FAIL_REASON
 import com.voximplant.demos.kotlin.video_call.utils.IS_INCOMING_CALL
-import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.android.synthetic.main.activity_call_failed.*
 
 class CallFailedActivity: BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call_failed)
@@ -47,13 +49,19 @@ class CallFailedActivity: BaseActivity<CallFailedViewModel>(CallFailedViewModel:
             model.callBack()
         }
 
-        model.displayName.observe(this, Observer {
+        model.displayName.observe(this, {
             caller_name_call_failed.text = it
         })
 
-        model.moveToCall.observe(this, Observer {
+        model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, false)
+                startActivity(it)
+            }
+        })
+
+        model.moveToMainActivity.observe(this, {
+            Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
         })

@@ -1,18 +1,17 @@
 package com.voximplant.demos.kotlin.video_call.stories.call
 
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
-import com.voximplant.demos.kotlin.video_call.utils.APP_TAG
-import com.voximplant.demos.kotlin.video_call.utils.BaseViewModel
-import com.voximplant.demos.kotlin.video_call.utils.CallManagerException
-import com.voximplant.demos.kotlin.video_call.utils.Shared
-import com.voximplant.sdk.Voximplant
+import com.voximplant.demos.kotlin.video_call.utils.*
+import com.voximplant.sdk.call.RenderScaleType
 import com.voximplant.sdk.hardware.VideoQuality
 import org.webrtc.VideoSink
 
-class CallViewModel: BaseViewModel() {
+class CallViewModel : BaseViewModel() {
     private val callManager: VoximplantCallManager = Shared.voximplantCallManager
 
     val onHold = MutableLiveData<Boolean>()
@@ -43,6 +42,13 @@ class CallViewModel: BaseViewModel() {
             sendingVideo.postValue(value)
         }
 
+    val receivingVideo = MutableLiveData<Boolean>()
+    private var _receivingVideo: Boolean = true
+        set(value) {
+            field = value
+            receivingVideo.postValue(value)
+        }
+
     val availableAudioDevices: List<String>
         get() = callManager.availableAudioDevices.map { device ->
             if (device.name == callManager.selectedAudioDevice.name) {
@@ -52,11 +58,11 @@ class CallViewModel: BaseViewModel() {
             }
         }
 
-    val localVideoStreamAdded = MutableLiveData<(VideoSink) -> Unit>()
-    val remoteVideoStreamAdded = MutableLiveData<(VideoSink) -> Unit>()
-    val localVideoStreamRemoved = MutableLiveData<Unit>()
-    val remoteVideoStreamRemoved = MutableLiveData<Unit>()
+    val localVideoRenderer = MutableLiveData<(VideoSink) -> Unit>()
+    val remoteVideoRenderer = MutableLiveData<(VideoSink) -> Unit>()
+
     val moveToCallFailed = MutableLiveData<String>()
+    val moveToMainActivity = MutableLiveData<Unit>()
     val enableVideoButton = MutableLiveData<Boolean>()
     val enableHoldButton = MutableLiveData<Boolean>()
     val enableSharingButton = MutableLiveData<Boolean>()
@@ -67,20 +73,23 @@ class CallViewModel: BaseViewModel() {
         enableVideoButton.postValue(false)
         enableHoldButton.postValue(false)
 
-        callManager.videoStreamAdded = { local, completion ->
-            if (local) {
-                localVideoStreamAdded.postValue(completion)
-            } else {
-                remoteVideoStreamAdded.postValue(completion)
+        callManager.changeLocalStream = { videoStream, added ->
+            localVideoRenderer.postValue { videoSink ->
+                if (added)
+                    videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
+                else
+                    videoStream.removeVideoRenderer(videoSink)
             }
         }
 
-        callManager.videoStreamRemoved = { local ->
-            if (local) {
-                localVideoStreamRemoved.postValue(Unit)
-            } else {
-                remoteVideoStreamRemoved.postValue(Unit)
+        callManager.changeRemoteStream = { videoStream, added ->
+            remoteVideoRenderer.postValue { videoSink ->
+                if (added)
+                    videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
+                else
+                    videoStream.removeVideoRenderer(videoSink)
             }
+            _receivingVideo = added
         }
 
         callManager.onCallConnect = {
@@ -89,27 +98,53 @@ class CallViewModel: BaseViewModel() {
         }
 
         callManager.onCallDisconnect = { failed, reason ->
-            finish.postValue(Unit)
             if (failed) {
                 moveToCallFailed.postValue(reason)
+            } else {
+                moveToMainActivity.postValue(Unit)
             }
         }
     }
 
-    fun onCreateWithCall(isIncoming: Boolean) {
-        if (isIncoming) {
-            try {
-                callManager.answerCall()
-            } catch (e: CallManagerException) {
-                Log.e(APP_TAG, e.message.toString())
-                finish.postValue(Unit)
-            }
+    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
+        if (isActive) {
+            // On return to call from notification
+            enableVideoButton.postValue(true)
+            enableHoldButton.postValue(true)
+            _muted = callManager.muted
+            _onHold = callManager.onHold
+            _sharingScreen = callManager.sharingScreen
+            _sendingVideo = callManager.hasLocalVideoStream
+            _receivingVideo = callManager.hasRemoteVideoStream
+            if (_sendingVideo)
+                localVideoRenderer.postValue { videoSink ->
+                    callManager.localVideoStream?.addVideoRenderer(
+                        videoSink,
+                        RenderScaleType.SCALE_FIT
+                    )
+                }
+            if (_receivingVideo)
+                remoteVideoRenderer.postValue { videoSink ->
+                    callManager.remoteVideoStream?.addVideoRenderer(
+                        videoSink,
+                        RenderScaleType.SCALE_FIT
+                    )
+                }
         } else {
-            try {
-                callManager.startCall()
-            } catch (e: CallManagerException) {
-                Log.e(APP_TAG, e.message.toString())
-                finish.postValue(Unit)
+            if (isIncoming) {
+                try {
+                    callManager.answerCall()
+                } catch (e: CallManagerException) {
+                    Log.e(APP_TAG, e.message.toString())
+                    finish.postValue(Unit)
+                }
+            } else {
+                try {
+                    callManager.startCall()
+                } catch (e: CallManagerException) {
+                    Log.e(APP_TAG, e.message.toString())
+                    finish.postValue(Unit)
+                }
             }
         }
     }
@@ -143,6 +178,7 @@ class CallViewModel: BaseViewModel() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(request: ((Intent?) -> Unit) -> Unit) {
         enableSharingButton.postValue(false)
         enableVideoButton.postValue(false)
@@ -152,6 +188,7 @@ class CallViewModel: BaseViewModel() {
         if (_sharingScreen) {
             request { intent ->
                 intent?.let {
+                    _sendingVideo = false
                     callManager.shareScreen(it) { e ->
                         e?.let { error ->
                             Log.e(APP_TAG, error.message.toString())
@@ -161,11 +198,11 @@ class CallViewModel: BaseViewModel() {
                         enableSharingButton.postValue(true)
                         enableVideoButton.postValue(true)
                     }
-                } ?: {
+                } ?: run {
                     _sharingScreen = false
                     enableSharingButton.postValue(true)
                     enableVideoButton.postValue(true)
-                }()
+                }
             }
 
         } else {
@@ -192,16 +229,20 @@ class CallViewModel: BaseViewModel() {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
                 _sendingVideo = !_sendingVideo
-            } ?: {
+            } ?: run {
                 _sharingScreen = false
-            }()
+            }
             enableSharingButton.postValue(true)
             enableVideoButton.postValue(true)
         }
     }
 
     fun changeCam() {
-        cameraType = if (cameraType == 1) { 0 } else { 1 }
+        cameraType = if (cameraType == 1) {
+            0
+        } else {
+            1
+        }
         Shared.cameraManager.setCamera(cameraType, videoQuality)
     }
 
@@ -210,7 +251,6 @@ class CallViewModel: BaseViewModel() {
             callManager.hangup()
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
-        } finally {
             finish.postValue(Unit)
         }
     }

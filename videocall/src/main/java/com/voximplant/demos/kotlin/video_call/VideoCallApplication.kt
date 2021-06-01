@@ -1,20 +1,18 @@
 package com.voximplant.demos.kotlin.video_call
 
-import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
+import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
 import com.voximplant.demos.kotlin.video_call.services.AuthService
 import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
 import com.voximplant.demos.kotlin.video_call.services.Tokens
-import com.voximplant.demos.kotlin.video_call.utils.ForegroundCheck
-import com.voximplant.demos.kotlin.video_call.utils.NotificationHelper
-import com.voximplant.demos.kotlin.video_call.utils.Shared
+import com.voximplant.demos.kotlin.video_call.utils.*
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.client.ClientConfig
 import java.util.concurrent.Executors
 
-class VideoCallApplication : Application() {
+class VideoCallApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
 
@@ -23,7 +21,9 @@ class VideoCallApplication : Application() {
         val client = Voximplant.getClientInstance(
             Executors.newSingleThreadExecutor(),
             applicationContext,
-            ClientConfig()
+            ClientConfig().also {
+                it.packageName = packageName
+            }
         )
 
         val notificationHelper = NotificationHelper(
@@ -31,11 +31,13 @@ class VideoCallApplication : Application() {
         ).also {
             Shared.notificationHelper = it
         }
+        Shared.fileLogger = FileLogger(this)
         Shared.authService = AuthService(client, Tokens(applicationContext), applicationContext)
         Shared.voximplantCallManager = VoximplantCallManager(client, applicationContext, notificationHelper)
         Shared.foregroundCheck = ForegroundCheck().also {
             registerActivityLifecycleCallbacks(it)
         }
-        Shared.cameraManager =Voximplant.getCameraManager(applicationContext)
+        Shared.cameraManager = Voximplant.getCameraManager(applicationContext)
+        Shared.shareHelper = ShareHelper.also { it.init(this) }
     }
 }

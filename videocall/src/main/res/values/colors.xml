@@ -6,12 +6,10 @@
     <color name="colorButton">#662EFF</color>
     <color name="colorRed">#F54B5E</color>
 
-    <color name="colorWhite">#FFFFFF</color>
     <color name="colorGray">#9e9e9e</color>
     <color name="colorBlur">#4D000000</color>
 
     <color name="statusBar">#392B5B</color>
-    <color name="colorFull">#FFFFFF</color>
     <color name="colorBackground">#FCFCFC</color>
     <color name="containerLight">#F2F2F7</color>
     <color name="container">#CCCCCC</color>

@@ -13,6 +13,8 @@ class IncomingCallViewModel: BaseViewModel() {
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
     val moveToCallFailed = MutableLiveData<String>()
+    val moveToMainActivity = MutableLiveData<Unit>()
+
 
     override fun onCreate() {
         super.onCreate()
@@ -28,7 +30,6 @@ class IncomingCallViewModel: BaseViewModel() {
     }
 
     fun answer() {
-        finish.postValue(Unit)
         moveToCall.postValue(Unit)
     }
 
@@ -38,6 +39,6 @@ class IncomingCallViewModel: BaseViewModel() {
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
         }
-        finish.postValue(Unit)
+        moveToMainActivity.postValue(Unit)
     }
 }

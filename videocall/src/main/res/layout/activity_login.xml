@@ -12,7 +12,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toTopOf="@+id/text_input_layout_password"
         app:layout_constraintEnd_toStartOf="@+id/vox_domain_label"
@@ -28,7 +27,7 @@
             android:inputType="textEmailAddress"
             android:maxLines="1"
             android:singleLine="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@android:color/white"
             android:textSize="16sp"
             tools:ignore="UnusedAttribute" />
 
@@ -40,7 +39,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:fontFamily="@font/roboto"
         android:text="@string/voximplant_com"
         app:layout_constraintBottom_toBottomOf="@+id/text_input_layout_email"
@@ -72,7 +70,7 @@
             android:inputType="textPassword"
             android:maxLines="1"
             android:singleLine="true"
-            android:textColor="@color/colorWhite"
+            android:textColor="@android:color/white"
             android:textSize="16sp"
             tools:ignore="UnusedAttribute" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -98,7 +96,7 @@
         android:fontFamily="@font/roboto"
         android:text="@string/action_sign_in"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="@color/colorWhite"
+        android:textColor="@android:color/white"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/text_input_layout_password"
@@ -112,7 +110,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:text="@string/welcome_label_text"
-        android:textColor="@color/colorWhite"
+        android:textColor="@android:color/white"
         android:textSize="23sp"
         app:layout_constraintBottom_toTopOf="@+id/text_input_layout_email"
         app:layout_constraintEnd_toEndOf="parent"
@@ -129,5 +127,18 @@
         app:srcCompat="@drawable/ic_voximplant"
         android:contentDescription="@string/logo" />
 
+    <ImageButton
+        android:id="@+id/shareLogLoginButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_share_40"
+        android:contentDescription="@string/sharing" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

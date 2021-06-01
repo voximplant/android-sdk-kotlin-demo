@@ -12,6 +12,7 @@ class CallFailedViewModel: BaseViewModel() {
     private val callManager: VoximplantCallManager = Shared.voximplantCallManager
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
+    val moveToMainActivity = MutableLiveData<Unit>()
 
     override fun onCreate() {
         super.onCreate()
@@ -19,17 +20,16 @@ class CallFailedViewModel: BaseViewModel() {
     }
 
     fun cancel() {
-        finish.postValue(Unit)
+        moveToMainActivity.postValue(Unit)
     }
 
     fun callBack() {
         try {
             callManager.createCall(callManager.latestCallUsername.orEmpty())
-            finish.postValue(Unit)
             moveToCall.postValue(Unit)
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
-            finish.postValue(Unit)
+            moveToMainActivity.postValue(Unit)
         }
     }
 }
