@@ -66,7 +66,7 @@ See the following files for code details:
 - [LoginPackage](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/stories/login)
 
 ### Make or receive calls
-<img src="../videocall/screenshots/call.png" width=400>
+<img src="../videocall/screenshots/call.png" width=600>
 
 Enter a Voximplant user name to the input field and press "Call" button to make a call.
 
