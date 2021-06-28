@@ -2,8 +2,6 @@ package com.voximplant.demos.kotlin.videocall_deepar.services
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.iid.*
-import com.google.firebase.messaging.FirebaseMessaging
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
 import com.voximplant.demos.kotlin.videocall_deepar.utils.*
 import com.voximplant.sdk.client.*
@@ -35,12 +33,12 @@ class AuthService(
     init {
         client.setClientLoginListener(this)
         client.setClientSessionListener(this)
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful || task.result == null) {
-                return@addOnCompleteListener
-            }
-            firebaseToken = task.result
-        }
+//        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+//            if (!task.isSuccessful || task.result == null) {
+//                return@addOnCompleteListener
+//            }
+//            firebaseToken = task.result
+//        }
     }
 
     fun login(username: String, password: String) {

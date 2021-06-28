@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
+
+// Uncomment this line to enable push notifications
+// google-services.json file is required
+//apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -41,7 +44,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
 
-    implementation 'com.voximplant:voximplant-sdk:2.24.1'
+    implementation 'com.voximplant:voximplant-sdk:2.25.0'
 
     implementation platform('com.google.firebase:firebase-bom:28.0.1')
     implementation 'com.google.firebase:firebase-messaging-ktx'
