@@ -4,11 +4,13 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
-import com.voximplant.demos.kotlin.video_call.services.AuthService
-import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
-import com.voximplant.demos.kotlin.video_call.services.Tokens
-import com.voximplant.demos.kotlin.video_call.utils.*
+import com.voximplant.demos.kotlin.services.AuthService
+import com.voximplant.demos.kotlin.services.VoximplantCallManager
+import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
+import com.voximplant.demos.kotlin.video_call.stories.incoming_call.IncomingCallActivity
 import com.voximplant.sdk.Voximplant
+import com.voximplant.sdk.call.VideoFlags
 import com.voximplant.sdk.client.ClientConfig
 import java.util.concurrent.Executors
 
@@ -26,18 +28,28 @@ class VideoCallApplication : MultiDexApplication() {
             }
         )
 
-        val notificationHelper = NotificationHelper(
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        ).also {
-            Shared.notificationHelper = it
-        }
+        Shared.notificationHelper =
+            NotificationHelper(
+                applicationContext,
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager,
+                getString(R.string.app_name),
+            )
         Shared.fileLogger = FileLogger(this)
-        Shared.authService = AuthService(client, Tokens(applicationContext), applicationContext)
-        Shared.voximplantCallManager = VoximplantCallManager(client, applicationContext, notificationHelper)
-        Shared.foregroundCheck = ForegroundCheck().also {
-            registerActivityLifecycleCallbacks(it)
-        }
+        Shared.authService = AuthService(client, applicationContext)
+        Shared.voximplantCallManager = VoximplantCallManager(
+            applicationContext,
+            client,
+            VideoFlags(true, true),
+            CallActivity::class.java,
+            IncomingCallActivity::class.java,
+        )
         Shared.cameraManager = Voximplant.getCameraManager(applicationContext)
-        Shared.shareHelper = ShareHelper.also { it.init(this) }
+        Shared.shareHelper = ShareHelper.also {
+            it.init(
+                this,
+                "com.voximplant.demos.kotlin.video_call.fileprovider",
+            )
+        }
+        Shared.getResource = GetResource(applicationContext)
     }
 }

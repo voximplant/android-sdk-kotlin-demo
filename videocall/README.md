@@ -33,7 +33,7 @@ See the following file for code details:
 - [NotificationHelper](src/main/java/com/voximplant/demos/kotlin/video_call/utils/NotificationHelper.kt)
 
 ## Getting started
-To get started, you'll need to [register](https://manage.voximplant.com/auth/sign_up) a free Voximplant developer account.
+To get started, you'll need to [register](https://voximplant.com) a free Voximplant developer account.
 
 You'll need the following:
 - Voximplant application
@@ -44,10 +44,10 @@ You'll need the following:
 ### Automatic
 We've implemented a special template to enable you to quickly use the demo – just 
 install [SDK tutorial](https://manage.voximplant.com/marketplace/sdk_tutorial) from our marketplace:
-![marketplace](screenshots/market.png)
+<img src="../screenshots/market.png" width=800>
 
 ### Manual
-You can set up it manually using our [Getting started guide](https://voximplant.com/docs/introduction) and tutorials
+You can set up it manually using our [quickstart guide](https://voximplant.com/docs/references/articles/quickstart) and tutorials
 
 #### VoxEngine scenario example:
   ```
@@ -72,7 +72,7 @@ You can set up it manually using our [Getting started guide](https://voximplant.
 ## Usage
 
 ### User login
-![login](screenshots/login.png)
+<img src="../screenshots/videocall_login.png" width=300>
 
 Log in using:
 * Voximplant user name in the format `user@app.account`
@@ -83,7 +83,7 @@ See the following files for code details:
 - [LoginPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/login)
 
 ### Make or receive calls
-![call](screenshots/call.png)
+<img src="../screenshots/videocall_managing_call.png" width=600>
 
 Enter a Voximplant user name to the input field and press "Call" button to make a call.
 
@@ -93,7 +93,7 @@ See the following files for code details:
 - [incomingCallPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/incoming_call)
 
 ### Call controls
-![inCall](screenshots/inCall.png)
+<img src="../screenshots/videocall_ongoing_call.png" width=800>
 
 Mute, hold, change an audio device or video sending during a call.
 
@@ -101,11 +101,11 @@ See the following files for code details:
 - [CallPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/call)
 
 ## Useful links
-1. [Getting started](https://voximplant.com/docs/introduction)
+1. [Quickstart](https://voximplant.com/docs/introduction)
 2. [Voximplant Android SDK reference](https://voximplant.com/docs/references/androidsdk)
-3. [Using Voximplant Android SDK](https://voximplant.com/docs/introduction/integration/adding_sdks/installing/android_sdk)
+3. [Using Voximplant Android SDK](https://voximplant.com/docs/howtos/sdks/installing/android_sdk)
 4. [HowTo's](https://voximplant.com/docs/howtos) 
-5. [Push Notifications Tutorial](https://voximplant.com/docs/introduction/integration/adding_sdks/push_notifications/android_sdk)
+5. [Push Notifications Tutorial](https://voximplant.com/docs/howtos/sdks/push_notifications/android_sdk)
 
 ## Have a question
 - contact us via `support@voximplant.com`

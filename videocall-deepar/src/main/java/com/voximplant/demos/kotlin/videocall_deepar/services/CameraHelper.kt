@@ -13,7 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.google.common.util.concurrent.ListenableFuture
-import com.voximplant.demos.kotlin.videocall_deepar.utils.APP_TAG
+import com.voximplant.demos.kotlin.utils.APP_TAG
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 

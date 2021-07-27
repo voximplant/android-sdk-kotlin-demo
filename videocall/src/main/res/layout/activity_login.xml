@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:gravity="center_horizontal"
     tools:context=".stories.login.LoginActivity">
 
@@ -121,11 +123,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
+        android:contentDescription="@string/logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_voximplant"
-        android:contentDescription="@string/logo" />
+        app:srcCompat="@drawable/ic_voximplant" />
 
     <ImageButton
         android:id="@+id/shareLogLoginButton"
@@ -133,12 +135,12 @@
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:padding="8dp"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/sharing"
+        android:padding="8dp"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_share_40"
-        android:contentDescription="@string/sharing" />
+        app:srcCompat="@drawable/ic_share_40" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

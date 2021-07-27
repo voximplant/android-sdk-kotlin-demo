@@ -1,16 +1,13 @@
 package com.voximplant.demos.kotlin.videocall_deepar.stories.login
 
 import androidx.lifecycle.MutableLiveData
+import com.voximplant.demos.kotlin.services.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
-import com.voximplant.demos.kotlin.videocall_deepar.services.AuthService
-import com.voximplant.demos.kotlin.videocall_deepar.services.AuthServiceListener
-import com.voximplant.demos.kotlin.videocall_deepar.utils.AuthError
-import com.voximplant.demos.kotlin.videocall_deepar.utils.BaseViewModel
-import com.voximplant.demos.kotlin.videocall_deepar.utils.Shared
+import com.voximplant.demos.kotlin.utils.*
 
 private val String.appendingVoxDomain get() = "$this.voximplant.com"
 
-class LoginViewModel: BaseViewModel(), AuthServiceListener {
+class LoginViewModel : BaseViewModel(), AuthServiceListener {
     private val authService: AuthService = Shared.authService
     val didLogin = MutableLiveData<Unit>()
     val invalidInputError = MutableLiveData<Pair<Boolean, Int>>()
@@ -23,8 +20,18 @@ class LoginViewModel: BaseViewModel(), AuthServiceListener {
 
     fun login(username: String?, password: String?) {
         when {
-            username.isNullOrEmpty() -> invalidInputError.postValue(Pair(true, R.string.empty_field_warning))
-            password.isNullOrEmpty() -> invalidInputError.postValue(Pair(false, R.string.empty_field_warning))
+            username.isNullOrEmpty() -> invalidInputError.postValue(
+                Pair(
+                    true,
+                    R.string.empty_field_warning
+                )
+            )
+            password.isNullOrEmpty() -> invalidInputError.postValue(
+                Pair(
+                    false,
+                    R.string.empty_field_warning
+                )
+            )
             else -> authService.login(username.appendingVoxDomain, password)
         }
     }
@@ -39,7 +46,7 @@ class LoginViewModel: BaseViewModel(), AuthServiceListener {
 
     override fun onResume() {
         super.onResume()
-        usernameFieldText.postValue("")
+        usernameFieldText.postValue(Shared.authService.username?.substringBefore(".voximplant.com"))
         passwordFieldText.postValue("")
     }
 
@@ -58,8 +65,18 @@ class LoginViewModel: BaseViewModel(), AuthServiceListener {
         super.onLoginFailed(error)
         hideProgress.postValue(Unit)
         when (error) {
-            AuthError.InvalidUsername -> invalidInputError.postValue(Pair(true, R.string.invalid_username_warning))
-            AuthError.InvalidPassword -> invalidInputError.postValue(Pair(false, R.string.invalid_password_warning))
+            AuthError.InvalidUsername -> invalidInputError.postValue(
+                Pair(
+                    true,
+                    R.string.invalid_username_warning
+                )
+            )
+            AuthError.InvalidPassword -> invalidInputError.postValue(
+                Pair(
+                    false,
+                    R.string.invalid_password_warning
+                )
+            )
             else -> postError(error)
         }
     }

@@ -5,15 +5,11 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
-import com.voximplant.demos.kotlin.video_call.utils.*
-import com.voximplant.sdk.call.RenderScaleType
+import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.Shared.cameraManager
 import com.voximplant.sdk.hardware.VideoQuality
-import org.webrtc.VideoSink
 
 class CallViewModel : BaseViewModel() {
-    private val callManager: VoximplantCallManager = Shared.voximplantCallManager
-
     val onHold = MutableLiveData<Boolean>()
     private var _onHold: Boolean = false
         set(value) {
@@ -42,24 +38,14 @@ class CallViewModel : BaseViewModel() {
             sendingVideo.postValue(value)
         }
 
-    val receivingVideo = MutableLiveData<Boolean>()
-    private var _receivingVideo: Boolean = true
-        set(value) {
-            field = value
-            receivingVideo.postValue(value)
-        }
-
     val availableAudioDevices: List<String>
-        get() = callManager.availableAudioDevices.map { device ->
-            if (device.name == callManager.selectedAudioDevice.name) {
+        get() = Shared.voximplantCallManager.availableAudioDevices.map { device ->
+            if (device.name == Shared.voximplantCallManager.selectedAudioDevice.value?.name) {
                 "${device.name} (Current)"
             } else {
                 device.name
             }
         }
-
-    val localVideoRenderer = MutableLiveData<(VideoSink) -> Unit>()
-    val remoteVideoRenderer = MutableLiveData<(VideoSink) -> Unit>()
 
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
@@ -73,37 +59,20 @@ class CallViewModel : BaseViewModel() {
         enableVideoButton.postValue(false)
         enableHoldButton.postValue(false)
 
-        callManager.changeLocalStream = { videoStream, added ->
-            localVideoRenderer.postValue { videoSink ->
-                if (added)
-                    videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
-                else
-                    videoStream.removeVideoRenderer(videoSink)
-            }
-        }
-
-        callManager.changeRemoteStream = { videoStream, added ->
-            remoteVideoRenderer.postValue { videoSink ->
-                if (added)
-                    videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT)
-                else
-                    videoStream.removeVideoRenderer(videoSink)
-            }
-            _receivingVideo = added
-        }
-
-        callManager.onCallConnect = {
+        Shared.voximplantCallManager.onCallConnect = {
             enableVideoButton.postValue(true)
             enableHoldButton.postValue(true)
         }
 
-        callManager.onCallDisconnect = { failed, reason ->
+        Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
             if (failed) {
                 moveToCallFailed.postValue(reason)
             } else {
                 moveToMainActivity.postValue(Unit)
             }
         }
+
+        Shared.voximplantCallManager.initVideoStreams()
     }
 
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
@@ -111,36 +80,21 @@ class CallViewModel : BaseViewModel() {
             // On return to call from notification
             enableVideoButton.postValue(true)
             enableHoldButton.postValue(true)
-            _muted = callManager.muted
-            _onHold = callManager.onHold
-            _sharingScreen = callManager.sharingScreen
-            _sendingVideo = callManager.hasLocalVideoStream
-            _receivingVideo = callManager.hasRemoteVideoStream
-            if (_sendingVideo)
-                localVideoRenderer.postValue { videoSink ->
-                    callManager.localVideoStream?.addVideoRenderer(
-                        videoSink,
-                        RenderScaleType.SCALE_FIT
-                    )
-                }
-            if (_receivingVideo)
-                remoteVideoRenderer.postValue { videoSink ->
-                    callManager.remoteVideoStream?.addVideoRenderer(
-                        videoSink,
-                        RenderScaleType.SCALE_FIT
-                    )
-                }
+            _muted = Shared.voximplantCallManager.muted
+            _onHold = Shared.voximplantCallManager.onHold
+            _sharingScreen = Shared.voximplantCallManager.sharingScreen
+            _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
         } else {
             if (isIncoming) {
                 try {
-                    callManager.answerCall()
+                    Shared.voximplantCallManager.answerCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
                 }
             } else {
                 try {
-                    callManager.startCall()
+                    Shared.voximplantCallManager.startCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
@@ -151,7 +105,7 @@ class CallViewModel : BaseViewModel() {
 
     fun mute() {
         try {
-            callManager.muteActiveCall(!_muted)
+            Shared.voximplantCallManager.muteActiveCall(!_muted)
             _muted = !_muted
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
@@ -162,7 +116,7 @@ class CallViewModel : BaseViewModel() {
     fun hold() {
         enableHoldButton.postValue(false)
         _onHold = !_onHold
-        callManager.holdActiveCall(_onHold) { error ->
+        Shared.voximplantCallManager.holdActiveCall(_onHold) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
@@ -174,7 +128,7 @@ class CallViewModel : BaseViewModel() {
 
     fun selectAudioDevice(device: String) {
         if (!device.contains("(Current)")) {
-            callManager.selectAudioDevice(device)
+            Shared.voximplantCallManager.selectAudioDevice(device)
         }
     }
 
@@ -189,7 +143,7 @@ class CallViewModel : BaseViewModel() {
             request { intent ->
                 intent?.let {
                     _sendingVideo = false
-                    callManager.shareScreen(it) { e ->
+                    Shared.voximplantCallManager.shareScreen(it) { e ->
                         e?.let { error ->
                             Log.e(APP_TAG, error.message.toString())
                             postError(error.message.toString())
@@ -206,7 +160,7 @@ class CallViewModel : BaseViewModel() {
             }
 
         } else {
-            callManager.sendVideo(_sendingVideo) { error ->
+            Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
                 error?.let {
                     Log.e(APP_TAG, it.message.toString())
                     postError(it.message.toString())
@@ -224,7 +178,7 @@ class CallViewModel : BaseViewModel() {
 
         _sendingVideo = !_sendingVideo
 
-        callManager.sendVideo(_sendingVideo) { error ->
+        Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
@@ -243,12 +197,12 @@ class CallViewModel : BaseViewModel() {
         } else {
             1
         }
-        Shared.cameraManager.setCamera(cameraType, videoQuality)
+        cameraManager.setCamera(cameraType, videoQuality)
     }
 
     fun hangup() {
         try {
-            callManager.hangup()
+            Shared.voximplantCallManager.hangup()
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             finish.postValue(Unit)

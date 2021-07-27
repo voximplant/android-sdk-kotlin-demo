@@ -1,16 +1,27 @@
 package com.voximplant.demos.kotlin.videocall_deepar
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.content.Context
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
-import com.voximplant.demos.kotlin.videocall_deepar.services.*
-import com.voximplant.demos.kotlin.videocall_deepar.utils.*
+import com.voximplant.demos.kotlin.services.AuthService
+import com.voximplant.demos.kotlin.services.VoximplantCallManager
+import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.videocall_deepar.services.CameraHelper
+import com.voximplant.demos.kotlin.videocall_deepar.services.DeepARHelper
+import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
+import com.voximplant.demos.kotlin.videocall_deepar.stories.incoming_call.IncomingCallActivity
 import com.voximplant.sdk.Voximplant
+import com.voximplant.sdk.call.VideoFlags
 import com.voximplant.sdk.client.ClientConfig
 import org.webrtc.EglBase
 import java.util.concurrent.Executors
 
+@SuppressLint("StaticFieldLeak")
+lateinit var deepARHelper: DeepARHelper
+
+@SuppressLint("StaticFieldLeak")
+lateinit var cameraHelper: CameraHelper
 
 class VideoCallApplication : MultiDexApplication() {
     override fun onCreate() {
@@ -19,12 +30,9 @@ class VideoCallApplication : MultiDexApplication() {
         // Firebase
         FirebaseApp.initializeApp(applicationContext)
 
-        // DeepARHelper
-        Shared.deepARHelper = DeepARHelper(applicationContext)
+        deepARHelper = DeepARHelper(applicationContext)
         Shared.eglBase = EglBase.create()
-
-        // CameraHelper
-        Shared.cameraHelper = CameraHelper(applicationContext)
+        cameraHelper = CameraHelper(applicationContext)
 
         // Voximplant
         val client = Voximplant.getClientInstance(
@@ -35,21 +43,33 @@ class VideoCallApplication : MultiDexApplication() {
                 it.eglBase = Shared.eglBase
             },
         )
-        Shared.authService = AuthService(client, Tokens(applicationContext), applicationContext)
-        val notificationHelper =
-            NotificationHelper(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).also {
+
+        Shared.authService = AuthService(client, applicationContext)
+        Shared.notificationHelper =
+            NotificationHelper(
+                applicationContext,
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager,
+                getString(R.string.app_name),
+            ).also {
                 Shared.notificationHelper = it
             }
         Shared.voximplantCallManager =
-            VoximplantCallManager(client, applicationContext, notificationHelper)
-
-        // Foreground
-        Shared.foregroundCheck = ForegroundCheck().also {
-            registerActivityLifecycleCallbacks(it)
-        }
+            VoximplantCallManager(
+                applicationContext,
+                client,
+                VideoFlags(true, true),
+                CallActivity::class.java,
+                IncomingCallActivity::class.java,
+            )
 
         // Logging
         Shared.fileLogger = FileLogger(this)
-        Shared.shareHelper = ShareHelper.also { it.init(this) }
+        Shared.shareHelper = ShareHelper.also {
+            it.init(
+                this,
+                "com.voximplant.demos.kotlin.videocall_deepar.fileprovider"
+            )
+        }
+        Shared.getResource = GetResource(applicationContext)
     }
 }

@@ -6,8 +6,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
@@ -21,9 +21,9 @@
         tools:ignore="AllowBackup">
         <activity
             android:name=".stories.login.LoginActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:screenOrientation="nosensor"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -31,9 +31,9 @@
         </activity>
         <activity
             android:name=".stories.main.MainActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:screenOrientation="nosensor"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="com.voximplant.demos.kotlin.video_call" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -41,35 +41,37 @@
         </activity>
         <activity
             android:name=".stories.call.CallActivity"
-            android:screenOrientation="nosensor"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"/>
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:screenOrientation="nosensor" />
         <activity
             android:name=".stories.incoming_call.IncomingCallActivity"
-            android:screenOrientation="nosensor"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"/>
+            android:screenOrientation="nosensor"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
         <activity
             android:name=".stories.call_failed.CallFailedActivity"
-            android:screenOrientation="nosensor"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"/>
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:screenOrientation="nosensor" />
 
-        <service android:name=".services.CallService"
-            android:foregroundServiceType="mediaProjection"/>
         <service
-            android:name=".services.FirebasePushService"
+            android:name="com.voximplant.demos.kotlin.services.CallService"
+            android:foregroundServiceType="camera|microphone|mediaProjection" />
+        <service
+            android:name="com.voximplant.demos.kotlin.services.FirebasePushService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.voximplant.demos.kotlin.video_call.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths"/>
+                android:resource="@xml/filepaths" />
         </provider>
     </application>
 

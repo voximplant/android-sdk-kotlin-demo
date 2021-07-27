@@ -14,15 +14,11 @@ import android.view.View
 import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
-import com.voximplant.demos.kotlin.video_call.utils.BaseActivity
-import com.voximplant.demos.kotlin.video_call.utils.CALL_ANSWERED
-import com.voximplant.demos.kotlin.video_call.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.video_call.utils.IS_INCOMING_CALL
-import com.voximplant.demos.kotlin.video_call.utils.Shared.notificationHelper
 import com.voximplant.sdk.Voximplant
 import kotlinx.android.synthetic.main.activity_incoming_call.*
 
@@ -40,8 +36,7 @@ class IncomingCallActivity :
             setTurnScreenOn(true)
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
-        }
-        else {
+        } else {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
@@ -101,9 +96,9 @@ class IncomingCallActivity :
         })
 
         val intent = intent
-        val result = intent.getBooleanExtra(CALL_ANSWERED, false)
+        val result = intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)
         if (result) {
-            notificationHelper.cancelNotification()
+            Shared.notificationHelper.cancelIncomingCallNotification()
             permissionsRequestCompletion = { model.answer() }
             requestPermissions()
         }

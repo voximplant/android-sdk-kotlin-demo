@@ -8,13 +8,13 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
+import com.voximplant.demos.kotlin.utils.BaseActivity
 import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.BaseActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.Shared
+import com.voximplant.demos.kotlin.utils.Shared
 import kotlinx.android.synthetic.main.activity_login.*
 
-class LoginActivity: BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
+class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +22,8 @@ class LoginActivity: BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
         setContentView(R.layout.activity_login)
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser =
+            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
         loginButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
@@ -49,8 +50,7 @@ class LoginActivity: BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
                 when (it.first) {
                     true -> usernameView
                     false -> passwordView
-                }
-                , resources.getString(it.second)
+                }, resources.getString(it.second)
             )
         })
 

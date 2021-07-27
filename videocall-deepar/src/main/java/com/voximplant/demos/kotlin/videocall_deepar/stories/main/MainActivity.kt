@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.login.LoginActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.*
+import com.voximplant.demos.kotlin.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {

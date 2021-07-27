@@ -2,21 +2,19 @@ package com.voximplant.demos.kotlin.video_call.stories.call_failed
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.video_call.services.VoximplantCallManager
-import com.voximplant.demos.kotlin.video_call.utils.APP_TAG
-import com.voximplant.demos.kotlin.video_call.utils.BaseViewModel
-import com.voximplant.demos.kotlin.video_call.utils.CallManagerException
-import com.voximplant.demos.kotlin.video_call.utils.Shared
+import com.voximplant.demos.kotlin.utils.*
 
-class CallFailedViewModel: BaseViewModel() {
-    private val callManager: VoximplantCallManager = Shared.voximplantCallManager
+class CallFailedViewModel : BaseViewModel() {
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
     override fun onCreate() {
         super.onCreate()
-        displayName.postValue(callManager.latestCallDisplayName ?: callManager.latestCallUsername.orEmpty())
+        displayName.postValue(
+            Shared.voximplantCallManager.latestCallerDisplayName
+                ?: Shared.voximplantCallManager.latestCallerUsername.orEmpty()
+        )
     }
 
     fun cancel() {
@@ -25,7 +23,7 @@ class CallFailedViewModel: BaseViewModel() {
 
     fun callBack() {
         try {
-            callManager.createCall(callManager.latestCallUsername.orEmpty())
+            Shared.voximplantCallManager.createCall(Shared.voximplantCallManager.latestCallerUsername.orEmpty())
             moveToCall.postValue(Unit)
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())

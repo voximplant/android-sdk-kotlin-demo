@@ -7,16 +7,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import androidx.lifecycle.Observer
 import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.BaseActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.videocall_deepar.utils.IS_INCOMING_CALL
+import com.voximplant.demos.kotlin.utils.*
 import kotlinx.android.synthetic.main.activity_call_failed.*
 
-class CallFailedActivity: BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
+class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +64,7 @@ class CallFailedActivity: BaseActivity<CallFailedViewModel>(CallFailedViewModel:
         })
     }
 
-    override fun onBackPressed() { }
+    override fun onBackPressed() {}
 
     private fun animate(view: View, animator: Animator) {
         animator.setTarget(view)

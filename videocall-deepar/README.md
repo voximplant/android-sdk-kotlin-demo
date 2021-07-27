@@ -24,7 +24,7 @@ You'll need the following:
 ### Automatic
 We've implemented a special template to enable you to quickly use the demo – just 
 install [SDK tutorial](https://manage.voximplant.com/marketplace/sdk_tutorial) from our marketplace:
-![marketplace](../videocall/screenshots/market.png)
+<img src="../screenshots/market.png" width=800>
 
 ### Manual
 You can set up it manually using our [quickstart guide](https://voximplant.com/docs/references/articles/quickstart) and tutorials
@@ -55,7 +55,7 @@ This demo app adds aviators face mask to the local video. You can download addit
 ## Usage
 
 ### User login
-<img src="screenshots/login.png" width=400>
+<img src="../screenshots/videocall_deepar_login.png" width=300>
 
 Log in using:
 * Voximplant user name in the format `user@app.account`
@@ -66,7 +66,7 @@ See the following files for code details:
 - [LoginPackage](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/stories/login)
 
 ### Make or receive calls
-<img src="../videocall/screenshots/call.png" width=600>
+<img src="../screenshots/videocall_managing_call.png" width=600>
 
 Enter a Voximplant user name to the input field and press "Call" button to make a call.
 
@@ -76,13 +76,13 @@ See the following files for code details:
 - [incomingCallPackage](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/stories/incoming_call)
 
 ### Call screen and DeepAR
-<img src="screenshots/scheme.png" width=500>
+<img src="../screenshots/videocall_deepar_scheme.png" width=600>
 
 Local video is captured using [CameraX API](https://developer.android.com/training/camerax).
 
 The application process each frame using `ImageAnalysis.Analyzer API`, then transforms to `YUV_420_888` format and passes it to DeepAR SDK.
 
-DeepAR applies a mask/effect and renders the frame (using on-screen rendering mode) to a SurfaceTexture. This SurfaceTexture is created using Voximplant [SurfaceTextureHelper](https://voximplant.com/docs/references/androidsdk/hardware/icustomvideosource#setsurfacetexturehelper) API that holds common OpenGL ES resources and allows the SDK to take the final frames to encode and send. SurfaceTextureHelper must be created with shared `ClientConfig.eglBase` context.
+DeepAR applies a mask/effect and renders the frame (using on-screen rendering mode) to a to a SurfaceTexture. This SurfaceTexture is created using Voximplant [SurfaceTextureHelper](https://voximplant.com/docs/references/androidsdk/hardware/icustomvideosource#setsurfacetexturehelper) API that holds common OpenGL ES resources and allows the SDK to take the final frames to encode and send. SurfaceTextureHelper must be created with shared `ClientConfig.eglBase` context.
 
 SurfaceTexture, as the source of video frames, is connected to the call using `ICustomVideoSource.setSurfaceTextureHelper` API.
 
@@ -90,11 +90,16 @@ See the following files for code details:
 - [DeepARHelper](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/services/DeepARHelper.kt)
 - [CameraHelper](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/services/CameraHelper.kt)
 
-<img src="screenshots/inCall.png" width=400>
+<img src="../screenshots/videocall_deepar_ongoing_call.png" width=300>
 
 ## Useful links
 1. [Quickstart](https://voximplant.com/docs/introduction)
 2. [Voximplant Android SDK reference](https://voximplant.com/docs/references/androidsdk)
 3. [DeepAR SDK](https://www.deepar.ai/)
-4. [HowTo's](https://voximplant.com/blog/howto) 
-5. [Push Notifications Tutorial](https://voximplant.com/docs/references/androidsdk/push-notifications-for-android)
+4. [HowTo's](https://voximplant.com/docs/howtos) 
+5. [Push Notifications Tutorial](https://voximplant.com/docs/howtos/sdks/push_notifications/android_sdk)
+
+## Have a question
+- contact us via `support@voximplant.com`
+- create an issue
+- join our developer [community](https://discord.gg/sfCbT5u)

@@ -9,13 +9,13 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
-import androidx.lifecycle.Observer
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.login.LoginActivity
-import com.voximplant.demos.kotlin.video_call.utils.*
 import com.voximplant.sdk.Voximplant
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -32,7 +32,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         val increaser =
             AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        call_to.setText(OUTGOING_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
+        call_to.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
 
         start_call_button.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
@@ -49,7 +49,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
 
         start_call_button.setOnClickListener {
-            call_to.text.toString().saveToPrefs(applicationContext, OUTGOING_USERNAME)
+            call_to.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
             permissionsRequestCompletion = {
                 model.call(call_to.text.toString())
             }
@@ -71,6 +71,10 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             Intent(this, LoginActivity::class.java).also {
                 startActivity(it)
             }
+        })
+
+        model.invalidInputError.observe(this, {
+            showError(call_to, resources.getString(it))
         })
     }
 
@@ -122,12 +126,13 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
     }
 
+    private fun showError(textView: EditText, text: String) {
+        textView.error = text
+        textView.requestFocus()
+    }
+
     private fun animate(view: View, animator: Animator) {
         animator.setTarget(view)
         animator.start()
-    }
-
-    companion object {
-        internal const val OUTGOING_USERNAME = "outgoing_username"
     }
 }

@@ -7,15 +7,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import androidx.appcompat.app.AlertDialog
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
+import com.voximplant.demos.kotlin.videocall_deepar.cameraHelper
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import com.voximplant.demos.kotlin.videocall_deepar.utils.*
 import kotlinx.android.synthetic.main.activity_call.*
-
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
@@ -70,8 +68,16 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
         }
 
         local_video_view.setOnClickListener {
-            Shared.cameraHelper.switchCamera()
+            cameraHelper.switchCamera()
         }
+
+        Shared.voximplantCallManager.showLocalVideoView.observe(this, {
+            local_video_view.visibility = if (it) View.VISIBLE else View.INVISIBLE
+        })
+
+        Shared.voximplantCallManager.showRemoteVideoView.observe(this, {
+            remote_video_view.visibility = if (it) View.VISIBLE else View.INVISIBLE
+        })
 
         model.muted.observe(this, { muted ->
             if (muted) {
@@ -87,23 +93,17 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             if (sendingVideo) {
                 video_button.setBackgroundResource(R.drawable.normal_call_option_back)
                 video_button_icon.setImageResource(R.drawable.ic_camon)
-                local_video_view.visibility = VISIBLE
             } else {
                 video_button.setBackgroundResource(R.drawable.red_call_option_back)
                 video_button_icon.setImageResource(R.drawable.ic_camoff)
-                local_video_view.visibility = INVISIBLE
             }
         })
 
-        model.receivingVideo.observe(this, { receivingVideo ->
-            remote_video_view.visibility = if (receivingVideo) VISIBLE else INVISIBLE
-        })
-
-        model.localVideoRenderer.observe(this, { completion ->
+        Shared.voximplantCallManager.localVideoRenderer.observe(this, { completion ->
             completion(local_video_view)
         })
 
-        model.remoteVideoRenderer.observe(this, { completion ->
+        Shared.voximplantCallManager.remoteVideoRenderer.observe(this, { completion ->
             completion(remote_video_view)
         })
 
@@ -126,7 +126,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
         model.onCreateWithCall(
             intent.getBooleanExtra(IS_INCOMING_CALL, true),
-            intent.getBooleanExtra(IS_STARTED_CALL, false)
+            intent.getBooleanExtra(IS_ONGOING_CALL, false)
         )
 
     }
