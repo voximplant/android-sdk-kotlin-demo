@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ */
+
+plugins {
+    id 'com.android.application'
+//    id 'com.google.gms.google-services'
+//    id 'com.google.firebase.crashlytics'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        applicationId "com.voximplant.demos.kotlin.audio_call"
+        minSdkVersion 26
+        targetSdkVersion 30
+        multiDexEnabled true
+        versionCode 1
+        versionName "1.2.4-dev"
+        vectorDrawables.useSupportLibrary = true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation "androidx.core:core-ktx:$core_ctx_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayout_version"
+    implementation "androidx.vectordrawable:vectordrawable:$vectordrawable_version"
+
+    implementation "com.voximplant:voximplant-sdk:$voximplant_sdk_version"
+
+    implementation platform("com.google.firebase:firebase-bom:$firebase_bom_version")
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+
+    implementation "com.google.android.material:material:$material_version"
+    implementation "androidx.preference:preference-ktx:$preferences_ktx_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_viewmodel_ktx_version"
+    implementation "androidx.activity:activity-ktx:$activity_ktx_version"
+
+    implementation "androidx.multidex:multidex:$multidex_version"
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
+
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$juint_ext_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresson_core"
+}

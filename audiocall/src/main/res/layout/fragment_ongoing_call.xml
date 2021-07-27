@@ -1,0 +1,292 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="model"
+            type="com.voximplant.demos.kotlin.audio_call.stories.call.OngoingCallViewModel" />
+
+        <variable
+            name="callDuration"
+            type="String" />
+
+        <variable
+            name="muteValue"
+            type="String" />
+
+        <variable
+            name="holdValue"
+            type="String" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        tools:context=".stories.call.OngoingCallFragment">
+
+        <TextView
+            android:id="@+id/callerNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="#00FFFFFF"
+            android:fontFamily="@font/roboto"
+            android:gravity="center"
+            android:lines="1"
+            android:minLines="1"
+            android:text="@{model.displayName, default=displayName}"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            app:autoSizeMaxTextSize="40sp"
+            app:autoSizeMinTextSize="20sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="0dp"
+            tools:layout_conversion_absoluteWidth="0dp" />
+
+        <TextView
+            android:id="@+id/callStatusLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto"
+            android:text="@{model.callStatus, default=callStatus}"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/callerNameTextView" />
+
+        <TextView
+            android:id="@+id/callDurationLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto"
+            android:text="@{callDuration, default=callDuration}"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/callStatusLabel" />
+
+        <include
+            android:id="@+id/key_pad_view"
+            layout="@layout/key_pad_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/hangupButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/callDurationLabel" />
+
+        <LinearLayout
+            android:id="@+id/mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/keypad"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/key_pad_view"
+            app:layout_constraintTop_toTopOf="@+id/keypad">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/muteButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/muteButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/mute_button"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_micon"
+                    app:tint="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/muteLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@{muteValue, default=Mute}"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/keypad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/hold"
+            app:layout_constraintEnd_toEndOf="@+id/hold"
+            app:layout_constraintStart_toStartOf="@+id/hold">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/keypadButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/keypadButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/keypad"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_dialpad_black_40dp"
+                    app:tint="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/keypadLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/keypad"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="@+id/key_pad_view"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/keypad"
+            app:layout_constraintTop_toTopOf="@+id/keypad">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/audioButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/audioButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/audio"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_audio"
+                    app:tint="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/audioLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/audio"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/hold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="44dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/hangupButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/holdButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/holdButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hold"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_call_hold"
+                    app:tint="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/holdLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@{holdValue, default=Hold}"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/hangupButton"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="25dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/hangupButtonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/hangup"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_call_end_black_45dp"
+                app:tint="@color/colorRed" />
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

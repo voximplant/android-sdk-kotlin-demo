@@ -1,1 +1,1 @@
-include ':videocall', ':videocall-deepar', ':shared', ':deepar'
+include ':videocall', ':videocall-deepar', ':audiocall', ':shared', ':deepar'

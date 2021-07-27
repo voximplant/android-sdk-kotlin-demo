@@ -1,0 +1,372 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="model"
+            type="com.voximplant.demos.kotlin.audio_call.stories.call.OngoingCallViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/keypad_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        tools:context=".stories.call.OngoingCallFragment">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_1_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("1")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/keypad_1_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_1"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_2_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("2")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toStartOf="@+id/keypad_3_button"
+            app:layout_constraintStart_toEndOf="@+id/keypad_1_button"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/keypad_2_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_2"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_3_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("3")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/keypad_3_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_3"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_4_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("4")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_1_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_1_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_1_button">
+
+            <TextView
+                android:id="@+id/keypad_4_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_4"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_5_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("5")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_2_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_2_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_2_button">
+
+            <TextView
+                android:id="@+id/keypad_5_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_5"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_6_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("6")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_3_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_3_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_3_button">
+
+            <TextView
+                android:id="@+id/keypad_6_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_6"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_7_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("7")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_4_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_4_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_4_button">
+
+            <TextView
+                android:id="@+id/keypad_7_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_7"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_8_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("8")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_5_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_5_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_5_button">
+
+            <TextView
+                android:id="@+id/keypad_8_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_8"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_9_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("9")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_6_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_6_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_6_button">
+
+            <TextView
+                android:id="@+id/keypad_9_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_9"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_asterisk_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("*")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_7_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_7_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_7_button">
+
+            <TextView
+                android:id="@+id/keypad_asterisk_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/asterisk"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_0_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("0")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_8_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_8_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_8_button">
+
+            <TextView
+                android:id="@+id/keypad_0_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/_0"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_sign_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.sendDTMF("#")}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_9_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_9_button"
+            app:layout_constraintTop_toBottomOf="@+id/keypad_9_button">
+
+            <TextView
+                android:id="@+id/keypad_sign_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/number_sign"
+                android:textSize="30sp"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/keypad_hide_button"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick='@{() -> model.onHideKeypadPressed()}'
+            app:cardBackgroundColor="@color/call_option_default_back"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/keypad_sign_button"
+            app:layout_constraintStart_toStartOf="@+id/keypad_sign_button"
+            app:layout_constraintTop_toBottomOf="@id/keypad_sign_button">
+
+            <TextView
+                android:id="@+id/keypad_hide_buttonIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/mute_button"
+                android:gravity="center"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:text="@string/hide"
+                app:tint="@android:color/white" />
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="model"
+            type="com.voximplant.demos.kotlin.audio_call.stories.call.CallFailedViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary">
+
+        <TextView
+            android:id="@+id/callerUserNameCallFailed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/roboto"
+            android:text="@{model.displayName, default=displayName}"
+            android:textColor="@android:color/white"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="0dp"
+            tools:layout_conversion_absoluteWidth="0dp" />
+
+        <TextView
+            android:id="@+id/call_failed_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/call_failed"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/callerUserNameCallFailed" />
+
+        <LinearLayout
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginEnd="40dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/callBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.85">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cancelButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:onClick="@{() -> model.cancel()}"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/cancelButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hangup"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_clear_black_45dp"
+                    app:tint="@color/colorRed" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/cancelLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/cancel"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/callBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginStart="40dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cancel"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.85">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/callBackButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:onClick="@{() -> model.callBack()}"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/callBackButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/call_back"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_call_end_black_45dp"
+                    app:tint="@color/colorButton" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/callBackLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/call_back"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

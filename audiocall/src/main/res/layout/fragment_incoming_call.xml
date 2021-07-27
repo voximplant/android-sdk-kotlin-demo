@@ -1,0 +1,158 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="model"
+            type="com.voximplant.demos.kotlin.audio_call.stories.call.IncomingCallViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        android:gravity="center_horizontal"
+        tools:context=".stories.call.IncomingCallFragment">
+
+        <ImageView
+            android:id="@+id/imageViewLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@string/app_name"
+            android:cropToPadding="false"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.2"
+            app:srcCompat="@drawable/ic_voximplant" />
+
+        <TextView
+            android:id="@+id/callerDisplayName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/roboto"
+            android:gravity="center_horizontal"
+            android:text="@{model.displayName, default=callerDisplayName}"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="35sp"
+            app:layout_constraintBottom_toTopOf="@+id/incoming_call_text_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/incoming_call_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/incoming_call"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewLogo"
+            app:layout_constraintVertical_bias="0.2" />
+
+        <LinearLayout
+            android:id="@+id/answer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginEnd="40dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/decline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.85">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/answerButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/answerButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hangup"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_phone_black_40dp"
+                    app:tint="@color/colorButton" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/answerLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/answer"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/decline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginStart="40dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/answer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.85">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/declineButton"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/call_option_default_back"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/declineButtonIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hangup"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_call_end_black_45dp"
+                    app:tint="@color/colorRed" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/declineLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lines="1"
+                android:text="@string/decline"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
