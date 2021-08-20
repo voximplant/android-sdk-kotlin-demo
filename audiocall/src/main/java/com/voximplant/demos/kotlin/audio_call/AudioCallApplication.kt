@@ -33,7 +33,7 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
 
-//        FirebaseApp.initializeApp(applicationContext)
+        FirebaseApp.initializeApp(applicationContext)
 
         val client = Voximplant.getClientInstance(
             Executors.newSingleThreadExecutor(),

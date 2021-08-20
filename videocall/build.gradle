@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 // Uncomment this line to enable push notifications
 // google-services.json file is required
 //apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -15,7 +16,7 @@ android {
         targetSdkVersion 30
         multiDexEnabled true
         versionCode 1
-        versionName "1.1"
+        versionName "1.1.1"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,10 +51,12 @@ dependencies {
     implementation platform("com.google.firebase:firebase-bom:$firebase_bom_version")
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     implementation "com.google.android.material:material:$material_version"
     implementation "androidx.preference:preference-ktx:$preferences_ktx_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_viewmodel_ktx_version"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_ktx_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_ktx_version"
     implementation "androidx.activity:activity-ktx:$activity_ktx_version"
 
     implementation "androidx.multidex:multidex:$multidex_version"

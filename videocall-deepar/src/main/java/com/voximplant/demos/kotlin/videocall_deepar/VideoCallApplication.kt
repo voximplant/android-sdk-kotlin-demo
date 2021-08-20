@@ -2,6 +2,11 @@ package com.voximplant.demos.kotlin.videocall_deepar
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
 import com.voximplant.demos.kotlin.services.AuthService
@@ -23,12 +28,12 @@ lateinit var deepARHelper: DeepARHelper
 @SuppressLint("StaticFieldLeak")
 lateinit var cameraHelper: CameraHelper
 
-class VideoCallApplication : MultiDexApplication() {
+class VideoCallApplication : MultiDexApplication(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
 
         // Firebase
-        FirebaseApp.initializeApp(applicationContext)
+        //FirebaseApp.initializeApp(applicationContext)
 
         deepARHelper = DeepARHelper(applicationContext)
         Shared.eglBase = EglBase.create()
@@ -71,5 +76,19 @@ class VideoCallApplication : MultiDexApplication() {
             )
         }
         Shared.getResource = GetResource(applicationContext)
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onAppBackgrounded() {
+        Shared.appInForeground = false
+        Log.d(APP_TAG, "VideoCallApplication::onAppBackgrounded")
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onAppForegrounded() {
+        Shared.appInForeground = true
+        Log.d(APP_TAG, "VideoCallApplication::onAppForegrounded")
     }
 }
