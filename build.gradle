@@ -16,10 +16,11 @@ buildscript {
         constraintLayout_version = '2.0.4'
         vectordrawable_version = '1.1.0'
         preferences_ktx_version = '1.1.1'
-        lifecycle_viewmodel_ktx_version = '2.3.1'
+        lifecycle_ktx_version = '2.3.1'
         activity_ktx_version = '1.2.3'
         cameraX_version = '1.1.0-alpha05'
         multidex_version = '2.0.1'
+        navigation_ktx_version = '2.3.5'
 
         junit_version = '4.13.2'
         juint_ext_version = '1.1.2'

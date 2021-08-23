@@ -1,7 +1,11 @@
 package com.voximplant.demos.kotlin.video_call
 
 import android.app.NotificationManager
-import android.content.Context
+import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
 import com.voximplant.demos.kotlin.services.AuthService
@@ -14,7 +18,7 @@ import com.voximplant.sdk.call.VideoFlags
 import com.voximplant.sdk.client.ClientConfig
 import java.util.concurrent.Executors
 
-class VideoCallApplication : MultiDexApplication() {
+class VideoCallApplication : MultiDexApplication(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
 
@@ -51,5 +55,19 @@ class VideoCallApplication : MultiDexApplication() {
             )
         }
         Shared.getResource = GetResource(applicationContext)
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onAppBackgrounded() {
+        Shared.appInForeground = false
+        Log.d(APP_TAG, "VideoCallApplication::onAppBackgrounded")
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onAppForegrounded() {
+        Shared.appInForeground = true
+        Log.d(APP_TAG, "VideoCallApplication::onAppForegrounded")
     }
 }

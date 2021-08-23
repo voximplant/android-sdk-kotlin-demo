@@ -13,6 +13,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.*
@@ -363,10 +364,18 @@ class VoximplantCallManager(
     }
 
     private fun presentIncomingCallUI() {
+        showIncomingCallNotification()
+        if (Shared.appInForeground) {
+            showIncomingCallActivity()
+        }
+    }
+
+    private fun showIncomingCallNotification() {
         Intent(appContext, incomingCallActivity).let { intent ->
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
 
-            val filter = IntentFilter(ACTION_DECLINE_INCOMING_CALL).apply {
+            val filter = IntentFilter().apply {
+                addAction(ACTION_ANSWER_INCOMING_CALL)
                 addAction(ACTION_DECLINE_INCOMING_CALL)
             }
             appContext.registerReceiver(callBroadcastReceiver, filter)
@@ -377,12 +386,22 @@ class VoximplantCallManager(
             )
         }
     }
+
+    fun showIncomingCallActivity(answer: Boolean = false) {
+        Intent(appContext, incomingCallActivity).also {
+            it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            it.putExtra(IS_INCOMING_CALL, true)
+            it.putExtra(ACTION_ANSWER_INCOMING_CALL, answer)
+            ContextCompat.startActivity(appContext, it, null)
+        }
+    }
 }
 
 class CallBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            ACTION_ANSWER_INCOMING_CALL -> Shared.voximplantCallManager.answerCall()
+            ACTION_ANSWER_INCOMING_CALL ->
+                Shared.voximplantCallManager.showIncomingCallActivity(answer = true)
             ACTION_DECLINE_INCOMING_CALL -> Shared.voximplantCallManager.declineCall()
             ACTION_HANGUP_ONGOING_CALL -> Shared.voximplantCallManager.hangup()
         }

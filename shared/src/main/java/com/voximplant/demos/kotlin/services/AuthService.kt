@@ -40,12 +40,22 @@ class AuthService(
     init {
         client.setClientLoginListener(this)
         client.setClientSessionListener(this)
-//        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-//            if (!task.isSuccessful || task.result == null) {
-//                return@addOnCompleteListener
-//            }
-//            firebaseToken = task.result
-//        }
+        try {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful || task.result == null) {
+                    return@addOnCompleteListener
+                }
+                firebaseToken = task.result
+            }
+        } catch (exception: java.lang.IllegalStateException) {
+            Log.e(
+                APP_TAG,
+                "AuthService::init: FCM token is not received. Push notifications are disabled.\n" +
+                        "Uncomment `plugin com.google.gms.google-services` line in app-level `build.gradle` " +
+                        "and add `google-services.json` file into the app-level directory to enable it.",
+                exception
+            )
+        }
     }
 
     fun login(username: String, password: String) {
