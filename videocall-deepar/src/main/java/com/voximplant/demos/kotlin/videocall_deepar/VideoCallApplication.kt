@@ -33,7 +33,7 @@ class VideoCallApplication : MultiDexApplication(), LifecycleObserver {
         super.onCreate()
 
         // Firebase
-        //FirebaseApp.initializeApp(applicationContext)
+        FirebaseApp.initializeApp(applicationContext)
 
         deepARHelper = DeepARHelper(applicationContext)
         Shared.eglBase = EglBase.create()
