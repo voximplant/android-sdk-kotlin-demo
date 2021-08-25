@@ -35,7 +35,7 @@ For a self-managed `ConnectionService`, set `PhoneAccount.CAPABILITY_SELF_MANAGE
 ### Android Telecom Connection
 A `Connection` represents a phone call or connection to a remote endpoint that carries voice and/or video traffic.
 
-According to that, it is required to create a new Android Telecom Connection for each Voximplant call (`ICall`). This way the Voximplant `ICall` interface manages a VoIP call and Telecom Connection registers this call in the telecom subsystem.
+By that definition, creating a new Android Telecom Connection for each Voximplant call (`ICall`) is required. This way the Voximplant `ICall` interface manages a VoIP call and Telecom Connection registers this call in the telecom subsystem.
 
 Every self-managed `Connection` must be specified with the following parameters:
 ```Kotlin
@@ -46,7 +46,7 @@ audioModeIsVoip = true
 You can also use additional features such as putting a call on hold or muting with `connectionCapabilities`. Find the full list of features on the [Android Developers](https://developer.android.com/reference/android/telecom/Connection) site.
 
 ### Make an outgoing call
-To create an outgoing call, check that a `PhoneAccount` is registered and then call the `TelecomManager.placeCall()` method.
+To create an outgoing call, check that a `PhoneAccount` is registered and then use the `TelecomManager.placeCall()` method.
 
 A self-managed `ConnectionService` must contain `EXTRA_PHONE_ACCOUNT_HANDLE` in the Bundle extra to specify the `PhoneAccountHandle` associated with it.
 
@@ -59,11 +59,11 @@ It is important to call `Connection.setActive()` once the outgoing call is conne
 ### Receive an incoming call
 When the app receives an incoming call via Voximplant SDK (`IClientIncomingCallListener.onIncomingCall()`), it is necessary to check the `PhoneAccount` registration in the system. To register a new incoming call, use the `TelecomManager.addNewinsomingCall()` method.
 
-The telecom subsystem connects to the app's `ConnectionService` and requests a new `Connection` instance for the incoming call by means of the `ConnectionService.onCreateIncomingConnection()` API. Upon receiving this event, the application needs to create a `Connection`.
+The telecom subsystem binds to the app's `ConnectionService` and requests a new `Connection` instance for the incoming call using the `ConnectionService.onCreateIncomingConnection()` API. Upon receiving this event, the application needs to create a `Connection`.
 
-For a self-managed connection service, the `Connection` will trigger the `Connection.onShowIncomingCallUi()` event to let the application know when to display the incoming call UI. It is recommended to show a notification with full-screen intent.
+For a self-managed connection service, the `Connection` will trigger the `Connection.onShowIncomingCallUi()` event to let the application know when to display the incoming call UI. Showing a notification with full-screen intent is recommended.
 
-The user may accept and reject the incoming call from the incoming call notification or from wearable devices:
+The user may accept and reject the incoming call from the incoming call notification or wearable devices:
 - If the user answers or rejects the call from the notification, it should be handled by the application via PendingIntent.
 - If the user answers or rejects the call from a wearable device, the `Connection` will inform you about this action by triggering the `Connection.onAnswer()` or `Connection.onReject()` event.
 
@@ -108,14 +108,14 @@ Either a user or a remote party can end an ongoing call.
 
 If the user ends the call, the application should call `ICall.hangup()` API, so the Voximplant Android SDK triggers the `ICallListener.onCallDisconnected()` event. 
 
-If the remote party ends the call, the Voximplant Android SDK informs the application about it by triggering the `ICallListener.onCallDisconnected()` event.
+If the remote party ends the call, the Voximplant Android SDK informs the application by triggering the `ICallListener.onCallDisconnected()` event.
 
 After receiving the `ICallListener.onCallDisconnected()` event you need to:
 1. Change the `Connection` status to disconnected via `Connection.setDisconnected(DisconnectCause)`
 2. Destroy the `Connection` via `Connection.destroy()` API to destroy the Connection object.
 
-`DisconnectCause` describes the cause of a disconnected call. It always includes a code describing the generic cause of the disconnect. Optionally, it may include a label and/or description to be displayed to the user. The `ConnectionService` provides localized versions of the label and description. It also may contain a disconnect reason to be put to logs, not to display to the user.
+`DisconnectCause` describes the cause of a disconnected call. It always includes a code describing the generic cause of the disconnect. Optionally, it may include a label and/or description to be displayed to the user. The `ConnectionService` provides localized versions of the label and description. It may also contain a disconnect reason used for the logs, and not intended for the user.
 
-See `DisconnectCause` on the [Android Developers](https://developer.android.com/reference/android/telecom/DisconnectCause) site.
+See `DisconnectCause` on the [Android Developers](https://developer.android.com/reference/android/telecom/DisconnectCause) site for more information.
 
 <img src="../screenshots/schemes/connection_scheme_disconnect_cause.png">
