@@ -1,6 +1,8 @@
 # ConnectionService
 This article provides a step-by-step tutorial to integrate a self-managed `ConnectionService` to a VoIP Android application based on Voximplant Android SDK.
 
+A self-managed `ConnectionService` resolves the situation of multiple calls from various applications that also use the ConnectionService API, such as switching between calls on hold or answering an incoming call when you're already on a call. It also allows answering or declining calls on wearable devices.
+
 ## Manifest declarations and permissions
 To integrate a self-managed `ConnectionService`, declare the `MANAGE_OWN_CALLS` permission in the AndroidManifest.xml file.
 ```XML
@@ -57,7 +59,7 @@ It is important to call `Connection.setActive()` once the outgoing call is conne
 <img src="../screenshots/schemes/connection_scheme_outgoing_call.png">
 
 ### Receive an incoming call
-When the app receives an incoming call via Voximplant SDK (`IClientIncomingCallListener.onIncomingCall()`), it is necessary to check the `PhoneAccount` registration in the system. To register a new incoming call, use the `TelecomManager.addNewinsomingCall()` method.
+When the app receives an incoming call via the Voximplant SDK (`IClientIncomingCallListener.onIncomingCall()`), it is necessary to check the `PhoneAccount` registration in the system. To register a new incoming call, use the `TelecomManager.addNewinsomingCall()` method.
 
 The telecom subsystem binds to the app's `ConnectionService` and requests a new `Connection` instance for the incoming call using the `ConnectionService.onCreateIncomingConnection()` API. Upon receiving this event, the application needs to create a `Connection`.
 
