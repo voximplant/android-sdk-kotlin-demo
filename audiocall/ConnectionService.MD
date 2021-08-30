@@ -1,5 +1,5 @@
 # ConnectionService
-This article provides a step-by-step tutorial to integrate a self-managed `ConnectionService` to a VoIP Android application based on Voximplant Android SDK.
+This article provides a step-by-step tutorial to integrate a self-managed `ConnectionService` into a VoIP Android application based on the Voximplant Android SDK.
 
 A self-managed `ConnectionService` resolves the situation of multiple calls from various applications that also use the ConnectionService API, such as switching between calls on hold or answering an incoming call when you're already on a call. It also allows answering or declining calls on wearable devices.
 
