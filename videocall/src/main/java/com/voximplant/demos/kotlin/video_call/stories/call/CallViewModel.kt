@@ -5,7 +5,10 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.APP_TAG
+import com.voximplant.demos.kotlin.utils.BaseViewModel
+import com.voximplant.demos.kotlin.utils.CallManagerException
+import com.voximplant.demos.kotlin.utils.Shared
 import com.voximplant.demos.kotlin.utils.Shared.cameraManager
 import com.voximplant.sdk.hardware.VideoQuality
 
@@ -49,19 +52,18 @@ class CallViewModel : BaseViewModel() {
 
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
-    val enableVideoButton = MutableLiveData<Boolean>()
-    val enableHoldButton = MutableLiveData<Boolean>()
-    val enableSharingButton = MutableLiveData<Boolean>()
+
+    val enableHoldButton = MutableLiveData(false)
+    val enableVideoButton = MutableLiveData(false)
+    val enableSharingButton = MutableLiveData(false)
 
     override fun onCreate() {
         super.onCreate()
 
-        enableVideoButton.postValue(false)
-        enableHoldButton.postValue(false)
-
         Shared.voximplantCallManager.onCallConnect = {
-            enableVideoButton.postValue(true)
             enableHoldButton.postValue(true)
+            enableVideoButton.postValue(true)
+            enableSharingButton.postValue(true)
         }
 
         Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
@@ -78,12 +80,16 @@ class CallViewModel : BaseViewModel() {
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
-            enableVideoButton.postValue(true)
-            enableHoldButton.postValue(true)
             _muted = Shared.voximplantCallManager.muted
             _onHold = Shared.voximplantCallManager.onHold
             _sharingScreen = Shared.voximplantCallManager.sharingScreen
             _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
+
+            enableHoldButton.postValue(true)
+            if (!_onHold) {
+                enableVideoButton.postValue(true)
+                enableSharingButton.postValue(true)
+            }
         } else {
             if (isIncoming) {
                 try {
@@ -115,14 +121,21 @@ class CallViewModel : BaseViewModel() {
 
     fun hold() {
         enableHoldButton.postValue(false)
-        _onHold = !_onHold
-        Shared.voximplantCallManager.holdActiveCall(_onHold) { error ->
+        enableVideoButton.postValue(false)
+        enableSharingButton.postValue(false)
+
+        Shared.voximplantCallManager.holdActiveCall(!_onHold) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
+            } ?: run {
                 _onHold = !_onHold
             }
             enableHoldButton.postValue(true)
+            if (!_onHold) {
+                enableVideoButton.postValue(true)
+                enableSharingButton.postValue(true)
+            }
         }
     }
 
@@ -134,60 +147,62 @@ class CallViewModel : BaseViewModel() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(request: ((Intent?) -> Unit) -> Unit) {
-        enableSharingButton.postValue(false)
+        enableHoldButton.postValue(false)
         enableVideoButton.postValue(false)
+        enableSharingButton.postValue(false)
 
-        _sharingScreen = !_sharingScreen
-
-        if (_sharingScreen) {
+        if (!_sharingScreen) {
             request { intent ->
                 intent?.let {
-                    _sendingVideo = false
                     Shared.voximplantCallManager.shareScreen(it) { e ->
                         e?.let { error ->
                             Log.e(APP_TAG, error.message.toString())
                             postError(error.message.toString())
+                        } ?: run {
                             _sharingScreen = !_sharingScreen
+                            _sendingVideo = false
                         }
-                        enableSharingButton.postValue(true)
+                        enableHoldButton.postValue(true)
                         enableVideoButton.postValue(true)
+                        enableSharingButton.postValue(true)
                     }
                 } ?: run {
-                    _sharingScreen = false
-                    enableSharingButton.postValue(true)
+                    enableHoldButton.postValue(true)
                     enableVideoButton.postValue(true)
+                    enableSharingButton.postValue(true)
                 }
             }
-
         } else {
             Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
                 error?.let {
                     Log.e(APP_TAG, it.message.toString())
                     postError(it.message.toString())
+                } ?: run {
                     _sharingScreen = !_sharingScreen
                 }
-                enableSharingButton.postValue(true)
+                enableHoldButton.postValue(true)
                 enableVideoButton.postValue(true)
+                enableSharingButton.postValue(true)
             }
         }
     }
 
     fun sendVideo() {
-        enableSharingButton.postValue(false)
+        enableHoldButton.postValue(false)
         enableVideoButton.postValue(false)
+        enableSharingButton.postValue(false)
 
-        _sendingVideo = !_sendingVideo
-
-        Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
+        Shared.voximplantCallManager.sendVideo(!_sendingVideo) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
-                _sendingVideo = !_sendingVideo
             } ?: run {
+                _sendingVideo = !_sendingVideo
                 _sharingScreen = false
             }
-            enableSharingButton.postValue(true)
+            enableHoldButton.postValue(true)
             enableVideoButton.postValue(true)
+            enableSharingButton.postValue(true)
         }
     }
 

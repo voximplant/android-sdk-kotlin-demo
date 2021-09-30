@@ -20,7 +20,7 @@ android {
         targetSdkVersion 30
         multiDexEnabled true
         versionCode 1
-        versionName "1.1.1"
+        versionName "1.1.2"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,5 +75,5 @@ dependencies {
 
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$juint_ext_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresson_core"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
 }
