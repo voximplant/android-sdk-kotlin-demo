@@ -42,12 +42,11 @@ class CallViewModel : BaseViewModel() {
 
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
-    val enableVideoButton = MutableLiveData<Boolean>()
+
+    val enableVideoButton = MutableLiveData(false)
 
     override fun onCreate() {
         super.onCreate()
-
-        enableVideoButton.postValue(false)
 
         Shared.voximplantCallManager.onCallConnect = {
             enableVideoButton.postValue(true)
@@ -56,6 +55,7 @@ class CallViewModel : BaseViewModel() {
         Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
             deepARHelper.stopDeepAR()
             cameraHelper.stopCamera()
+            Shared.voximplantCallManager.releaseCustomVideoSource()
             if (failed) {
                 moveToCallFailed.postValue(reason)
             } else {
@@ -80,6 +80,8 @@ class CallViewModel : BaseViewModel() {
             enableVideoButton.postValue(true)
             _muted = Shared.voximplantCallManager.muted
             _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
+
+            enableVideoButton.postValue(true)
         } else {
             deepARHelper.startDeepAR()
             cameraHelper.startCamera(cameraPreset, lensReset = true)
@@ -150,22 +152,19 @@ class CallViewModel : BaseViewModel() {
     fun sendVideo() {
         enableVideoButton.postValue(false)
 
-        _sendingVideo = !_sendingVideo
-
-        if (_sendingVideo) {
+        if (!_sendingVideo) {
             deepARHelper.startDeepAR()
             cameraHelper.startCamera(cameraPreset)
-            attachCustomSource(cameraPreset)
         } else {
             deepARHelper.stopDeepAR()
             cameraHelper.stopCamera()
-            Shared.voximplantCallManager.releaseCustomVideoSource()
         }
 
-        Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
+        Shared.voximplantCallManager.sendVideo(!_sendingVideo) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
+            } ?: run {
                 _sendingVideo = !_sendingVideo
             }
             enableVideoButton.postValue(true)
