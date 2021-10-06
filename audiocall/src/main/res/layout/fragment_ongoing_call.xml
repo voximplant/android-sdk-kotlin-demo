@@ -206,7 +206,7 @@
                     android:contentDescription="@string/audio"
                     android:padding="8dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/ic_audio"
+                    app:srcCompat="@drawable/ic_audio_disabled"
                     app:tint="@android:color/white" />
             </androidx.cardview.widget.CardView>
 

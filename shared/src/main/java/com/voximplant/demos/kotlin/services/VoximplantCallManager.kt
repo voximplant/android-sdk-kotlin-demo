@@ -22,6 +22,7 @@ import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import com.voximplant.sdk.client.IClientIncomingCallListener
 import com.voximplant.sdk.hardware.AudioDevice
+import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
 import com.voximplant.sdk.hardware.ICustomVideoSource
 import org.webrtc.RendererCommon.RendererEvents
 import org.webrtc.VideoSink
@@ -47,7 +48,7 @@ class VoximplantCallManager(
     private val videoFlags: VideoFlags,
     private val callActivity: Class<*>,
     private val incomingCallActivity: Class<*>,
-) : IClientIncomingCallListener, ICallListener, IEndpointListener {
+) : IClientIncomingCallListener, ICallListener, IEndpointListener, IAudioDeviceEventsListener {
 
     var managedCall: ICall? = null
     val callBroadcastReceiver: BroadcastReceiver = CallBroadcastReceiver()
@@ -93,6 +94,8 @@ class VoximplantCallManager(
 
     init {
         client.setClientIncomingCallListener(this)
+
+        audioDeviceManager.addAudioDeviceEventsListener(this)
     }
 
     fun releaseCustomVideoSource() {
@@ -173,11 +176,9 @@ class VoximplantCallManager(
         }) ?: completion(noActiveCallError)
     }
 
-    fun selectAudioDevice(name: String) =
-        audioDeviceManager.audioDevices.first { it.name == name }?.let {
-            audioDeviceManager.selectAudioDevice(it)
-            _selectedAudioDevice.postValue(it)
-        }
+    fun selectAudioDevice(id: Int) {
+        audioDeviceManager.selectAudioDevice(audioDeviceManager.audioDevices[id])
+    }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) =
@@ -344,6 +345,12 @@ class VoximplantCallManager(
         changeRemoteStream?.invoke(videoStream, false)
     }
 
+    override fun onAudioDeviceChanged(currentAudioDevice: AudioDevice?) {
+        _selectedAudioDevice.postValue(currentAudioDevice)
+    }
+
+    override fun onAudioDeviceListChanged(newDeviceList: MutableList<AudioDevice>?) {}
+
     private fun stopForegroundService() {
         Intent(appContext, CallService::class.java).let {
             it.action = ACTION_FOREGROUND_SERVICE_STOP
@@ -395,6 +402,7 @@ class VoximplantCallManager(
             ContextCompat.startActivity(appContext, it, null)
         }
     }
+
 }
 
 class CallBroadcastReceiver : BroadcastReceiver() {
