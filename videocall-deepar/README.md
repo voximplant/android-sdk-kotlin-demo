@@ -5,6 +5,7 @@ The application supports video calls between this Android app and other apps tha
 Based on MVVM architectural pattern.
 
 Please follow [Installing](#installing) section to correct setup application.
+> Compatibility: DeepAR version `3.2.0`
 
 ## Features
 The application is able to:
@@ -51,6 +52,7 @@ VoxEngine.addEventListener(AppEvents.CallAlerting, (e) => {
 4. Select **videocall-deepar** and build the project using Android Studio.
 
 This demo app adds aviators face mask to the local video. You can download additional assets from [DeepAR downloads](https://developer.deepar.ai/downloads), place them into `android-sdk-kotlin-demo/videocall-deepar/src/main/assets/` folder and apply them in the [DeepARHelper](src/main/java/com/voximplant/demos/kotlin/videocall_deepar/services/DeepARHelper.kt) class.
+> Compatibility: DeepAR version `3.2.0`
 
 ## Usage
 
