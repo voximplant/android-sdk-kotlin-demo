@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.video_call.stories.call
 
 import android.animation.Animator
@@ -21,6 +25,7 @@ import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
+import com.voximplant.sdk.hardware.AudioDevice
 import kotlinx.android.synthetic.main.activity_call.*
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
@@ -117,6 +122,17 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             remote_video_view.visibility = if (it) VISIBLE else INVISIBLE
         })
 
+        model.activeDevice.observe(this, { audioDevice ->
+            when (audioDevice) {
+                AudioDevice.EARPIECE -> audio_button_icon.setImageResource(R.drawable.ic_audio_internal)
+                AudioDevice.SPEAKER -> audio_button_icon.setImageResource(R.drawable.ic_audio_external)
+                AudioDevice.WIRED_HEADSET -> audio_button_icon.setImageResource(R.drawable.ic_audio_headphones)
+                AudioDevice.BLUETOOTH -> audio_button_icon.setImageResource(R.drawable.ic_bluetooth)
+                AudioDevice.NONE -> audio_button_icon.setImageResource(R.drawable.ic_audio_disabled)
+                null -> audio_button_icon.setImageResource(R.drawable.ic_audio_disabled)
+            }
+        })
+
         model.muted.observe(this, { muted ->
             if (muted) {
                 mute_button.setBackgroundResource(R.drawable.red_call_option_back)
@@ -200,7 +216,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
     private fun showAudioDeviceSelectionDialog(audioDevices: List<String>) {
         AlertDialog.Builder(this).setTitle(R.string.alert_select_audio_device)
             .setItems(audioDevices.toTypedArray()) { _, which ->
-                model.selectAudioDevice(audioDevices[which])
+                model.selectAudioDevice(which)
             }
             .create()
             .show()

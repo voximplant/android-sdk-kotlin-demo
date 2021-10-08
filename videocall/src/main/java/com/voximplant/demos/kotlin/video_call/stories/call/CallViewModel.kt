@@ -1,15 +1,21 @@
+/*
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.video_call.stories.call
 
 import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.BaseViewModel
 import com.voximplant.demos.kotlin.utils.CallManagerException
 import com.voximplant.demos.kotlin.utils.Shared
 import com.voximplant.demos.kotlin.utils.Shared.cameraManager
+import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.VideoQuality
 
 class CallViewModel : BaseViewModel() {
@@ -53,6 +59,8 @@ class CallViewModel : BaseViewModel() {
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
+    val activeDevice: LiveData<AudioDevice>
+        get() = Shared.voximplantCallManager.selectedAudioDevice
     val enableHoldButton = MutableLiveData(false)
     val enableVideoButton = MutableLiveData(false)
     val enableSharingButton = MutableLiveData(false)
@@ -139,10 +147,8 @@ class CallViewModel : BaseViewModel() {
         }
     }
 
-    fun selectAudioDevice(device: String) {
-        if (!device.contains("(Current)")) {
-            Shared.voximplantCallManager.selectAudioDevice(device)
-        }
+    fun selectAudioDevice(id: Int) {
+        Shared.voximplantCallManager.selectAudioDevice(id)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

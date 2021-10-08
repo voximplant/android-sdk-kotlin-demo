@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.videocall_deepar.stories.call
 
 import ai.deepar.ar.CameraResolutionPreset
@@ -5,11 +9,13 @@ import android.os.Build
 import android.util.Log
 import android.util.Size
 import android.view.Surface
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.cameraHelper
 import com.voximplant.demos.kotlin.videocall_deepar.deepARHelper
 import com.voximplant.sdk.Voximplant
+import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.ICustomVideoSourceListener
 import org.webrtc.SurfaceTextureHelper
 
@@ -43,6 +49,8 @@ class CallViewModel : BaseViewModel() {
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
+    val activeDevice: LiveData<AudioDevice>
+        get() = Shared.voximplantCallManager.selectedAudioDevice
     val enableVideoButton = MutableLiveData(false)
 
     override fun onCreate() {
@@ -143,10 +151,8 @@ class CallViewModel : BaseViewModel() {
         }
     }
 
-    fun selectAudioDevice(device: String) {
-        if (!device.contains("(Current)")) {
-            Shared.voximplantCallManager.selectAudioDevice(device)
-        }
+    fun selectAudioDevice(id: Int) {
+        Shared.voximplantCallManager.selectAudioDevice(id)
     }
 
     fun sendVideo() {

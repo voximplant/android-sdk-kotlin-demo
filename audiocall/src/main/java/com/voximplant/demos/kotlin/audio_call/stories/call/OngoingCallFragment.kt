@@ -70,12 +70,12 @@ class OngoingCallFragment : Fragment() {
 
         viewModel.activeDevice.observe(viewLifecycleOwner, { audioDevice ->
             when (audioDevice) {
-                AudioDevice.EARPIECE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_hearing_black_40dp)
-                AudioDevice.SPEAKER -> binding.audioButtonIcon.setImageResource(R.drawable.ic_volume_up_black_35dp)
-                AudioDevice.WIRED_HEADSET -> binding.audioButtonIcon.setImageResource(R.drawable.ic_headset_black_35dp)
-                AudioDevice.BLUETOOTH -> binding.audioButtonIcon.setImageResource(R.drawable.ic_bluetooth_audio_black_35dp)
-                null -> binding.audioButtonIcon.setImageResource(R.drawable.ic_volume_up_black_35dp)
-                else -> binding.audioButtonIcon.setImageResource(R.drawable.ic_volume_up_black_35dp)
+                AudioDevice.EARPIECE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_internal)
+                AudioDevice.SPEAKER -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_external)
+                AudioDevice.WIRED_HEADSET -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_headphones)
+                AudioDevice.BLUETOOTH -> binding.audioButtonIcon.setImageResource(R.drawable.ic_bluetooth)
+                AudioDevice.NONE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
+                null -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
             }
         })
 
