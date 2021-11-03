@@ -40,8 +40,13 @@ class AudioCallManager(
     val callerDisplayName
         get() = managedCall?.endpoints?.get(0)?.userDisplayName
     var managedCallConnection: CallConnection? = null
-    private var callTimer: Timer = Timer("callTimer")
-    val callDuration = MutableLiveData(0L)
+    private val _callState = MutableLiveData(CallState.NONE)
+    val callState: LiveData<CallState>
+        get() = _callState
+    private var _callTimer: Timer = Timer("callTimer")
+    private val _callDuration = MutableLiveData(0L)
+    val callDuration: LiveData<Long>
+        get() = _callDuration
     val callBroadcastReceiver: BroadcastReceiver = AudioCallBroadcastReceiver()
     private val callSettings: CallSettings
         get() = CallSettings().apply { videoFlags = VideoFlags(false, false) }
@@ -59,7 +64,6 @@ class AudioCallManager(
     // Call events
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
-    private var callState: CallState? = null
 
     init {
         client.setClientIncomingCallListener(this)
@@ -82,7 +86,7 @@ class AudioCallManager(
             }
             return
         }
-        callState = CallState.NEW
+        setCallState(CallState.INCOMING)
         call.also {
             it.addCallListener(this)
             managedCall = it
@@ -94,14 +98,10 @@ class AudioCallManager(
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
         managedCallConnection?.setActive()
-        callState = CallState.CONNECTED
+        setCallState(CallState.CONNECTED)
         onCallConnect?.invoke()
         Shared.notificationHelper.cancelIncomingCallNotification()
-        callTimer = Timer("callTimer").apply {
-            scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
-                callDuration.postValue(call?.callDuration)
-            }
-        }
+        call?.let { startCallTimer(it) }
         latestCallerDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         startForegroundCallService()
     }
@@ -117,22 +117,22 @@ class AudioCallManager(
             answeredElsewhere -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ANSWERED_ELSEWHERE))
             }
-            callState == CallState.DISCONNECTING -> {
+            _callState.value == CallState.HANG_UP -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
             }
-            callState == CallState.CONNECTED -> {
+            _callState.value == CallState.CONNECTED -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.REMOTE))
             }
-            callState == CallState.NEW -> {
+            _callState.value == CallState.INCOMING -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.MISSED))
             }
             else -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.OTHER))
             }
         }
-        callState = CallState.DISCONNECTED
+        setCallState(CallState.DISCONNECTED)
         managedCallConnection?.destroy()
-        onCallDisconnect?.invoke(false, appContext.getString(R.string.disconnected))
+        onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
     }
 
     override fun onCallFailed(
@@ -148,13 +148,27 @@ class AudioCallManager(
             603 -> managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.REJECTED))
             else -> managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ERROR))
         }
-        callState = CallState.DISCONNECTED
+        setCallState(CallState.FAILED)
         managedCallConnection?.destroy()
         onCallDisconnect?.invoke(true, description)
     }
 
     override fun onCallRinging(call: ICall?, headers: Map<String, String>?) {
+        Log.d(APP_TAG, "AudioCallManager::onCallRinging")
+        setCallState(CallState.RINGING)
         managedCallConnection?.setDialing()
+    }
+
+    override fun onCallReconnecting(call: ICall?) {
+        Log.d(APP_TAG, "AudioCallManager::onCallReconnecting")
+        setCallState(CallState.RECONNECTING)
+        _callTimer.cancel()
+    }
+
+    override fun onCallReconnected(call: ICall?) {
+        Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
+        setCallState(CallState.CONNECTED)
+        call?.let { startCallTimer(it) }
     }
 
     override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) =
@@ -167,7 +181,7 @@ class AudioCallManager(
             if (callExists) {
                 throw alreadyManagingCallError
             }
-            callState = CallState.NEW
+            setCallState(CallState.OUTGOING)
             managedCall = client.call(user, callSettings)?.also {
                 latestCallerUsername = user
                 telecomManager.addOutgoingCall(user)
@@ -179,16 +193,16 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun startOutgoingCall() =
         executeOrThrow {
-            callDuration.postValue(0)
-            callState = CallState.CONNECTING
+            _callDuration.postValue(0)
+            setCallState(CallState.CONNECTING)
             managedCall?.start() ?: throw noActiveCallError
         }
 
     @Throws(CallManagerException::class)
     fun answerIncomingCall() =
         executeOrThrow {
-            callDuration.postValue(0)
-            callState = CallState.CONNECTING
+            _callDuration.postValue(0)
+            setCallState(CallState.CONNECTING)
             managedCall?.answer(callSettings)
                 ?: throw noActiveCallError
         }
@@ -197,7 +211,7 @@ class AudioCallManager(
     fun declineIncomingCall() =
         executeOrThrow {
             Shared.notificationHelper.cancelIncomingCallNotification()
-            callState = CallState.DISCONNECTING
+            setCallState(CallState.DECLINE)
             managedCall?.reject(RejectMode.DECLINE, null)
                 ?: throw noActiveCallError
         }
@@ -235,7 +249,8 @@ class AudioCallManager(
     fun hangupOngoingCall() =
         executeOrThrow {
             managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
-            callState = CallState.DISCONNECTING
+            setCallState(CallState.HANG_UP)
+            _callTimer.cancel()
             managedCall?.hangup(null)
                 ?: throw noActiveCallError
         }
@@ -267,9 +282,24 @@ class AudioCallManager(
         managedCall?.removeCallListener(this)
         managedCall?.endpoints?.firstOrNull()?.setEndpointListener(null)
         managedCall = null
-        callTimer.purge()
-        callTimer.cancel()
+        _callTimer.cancel()
+        _callTimer.purge()
         _onHold.postValue(false)
+    }
+
+    private fun startCallTimer(call: ICall) {
+        _callTimer = Timer("callTimer").apply {
+            scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
+                _callDuration.postValue(call.callDuration)
+            }
+        }
+    }
+
+    private fun setCallState(newState: CallState) {
+        if (_callState.value != newState) {
+            Log.d(APP_TAG, "AudioCallManager::setCallState: CallState ${_callState.value} changed to $newState")
+            _callState.postValue(newState)
+        }
     }
 
     /// Service

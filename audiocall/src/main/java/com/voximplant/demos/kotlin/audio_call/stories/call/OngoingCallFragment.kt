@@ -27,8 +27,6 @@ import com.voximplant.demos.kotlin.utils.IS_INCOMING_CALL
 import com.voximplant.demos.kotlin.utils.IS_ONGOING_CALL
 import com.voximplant.demos.kotlin.utils.IS_OUTGOING_CALL
 import com.voximplant.sdk.hardware.AudioDevice
-import java.text.SimpleDateFormat
-import java.util.*
 
 class OngoingCallFragment : Fragment() {
     private lateinit var binding: FragmentOngoingCallBinding
@@ -55,13 +53,6 @@ class OngoingCallFragment : Fragment() {
 
         val reducer = AnimatorInflater.loadAnimator(context, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(context, R.animator.regain_size)
-
-        audioCallManager.callDuration.observe(viewLifecycleOwner, {
-            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val formattedCallDuration: String = dateFormat.format(Date(it))
-            binding.setCallDuration(formattedCallDuration)
-        })
 
         viewModel.onHideKeypadPressed.observe(viewLifecycleOwner, {
             shouldClearTextView = true

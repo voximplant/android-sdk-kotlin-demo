@@ -5,16 +5,19 @@
 package com.voximplant.demos.kotlin.audio_call.stories.call
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.CallManagerException
-import com.voximplant.demos.kotlin.utils.R
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
 import com.voximplant.sdk.hardware.IAudioDeviceManager
+import java.text.SimpleDateFormat
+import java.util.*
 
 class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
@@ -38,17 +41,28 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     val moveToCallFailed = MutableLiveData<String>()
     val finishActivity = MutableLiveData<Unit>()
 
+    private val _callStatus = MediatorLiveData<String?>()
+    val callStatus: LiveData<String?>
+        get() = _callStatus
     val enableButtons = MutableLiveData(false)
     val displayName = MutableLiveData<String>()
-    val callStatus = MutableLiveData(R.string.connecting)
     val charDTMF = MutableLiveData<String>()
     val onHideKeypadPressed = MutableLiveData<Unit>()
     val activeDevice = MutableLiveData(audioDeviceManager.activeDevice)
 
     init {
+        _callStatus.addSource(audioCallManager.callState) { callState ->
+            _callStatus.postValue(callState.toString())
+        }
+        _callStatus.addSource(audioCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
+
         audioCallManager.onCallConnect = {
             displayName.postValue(audioCallManager.callerDisplayName)
-            callStatus.postValue(R.string.call_in_progress)
             enableButtons.postValue(true)
         }
 
@@ -74,7 +88,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             _muted = audioCallManager.muted
 
             displayName.postValue(audioCallManager.callerDisplayName)
-            callStatus.postValue(R.string.call_in_progress)
             enableButtons.postValue(true)
         } else {
             if (isOutgoing) {
@@ -120,7 +133,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         charDTMF.postValue(DTMF)
         audioCallManager.sendDTMF(DTMF)
     }
-
 
     fun hangup() {
         try {

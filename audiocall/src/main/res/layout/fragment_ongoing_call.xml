@@ -8,10 +8,6 @@
             type="com.voximplant.demos.kotlin.audio_call.stories.call.OngoingCallViewModel" />
 
         <variable
-            name="callDuration"
-            type="String" />
-
-        <variable
             name="muteValue"
             type="String" />
 
@@ -67,21 +63,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/callerNameTextView" />
 
-        <TextView
-            android:id="@+id/callDurationLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="8dp"
-            android:fontFamily="@font/roboto"
-            android:text="@{callDuration, default=callDuration}"
-            android:textAlignment="center"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/callStatusLabel" />
-
         <include
             android:id="@+id/key_pad_view"
             layout="@layout/key_pad_view"
@@ -91,7 +72,7 @@
             app:layout_constraintBottom_toTopOf="@+id/hangupButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/callDurationLabel" />
+            app:layout_constraintTop_toBottomOf="@+id/callStatusLabel" />
 
         <LinearLayout
             android:id="@+id/mute"
