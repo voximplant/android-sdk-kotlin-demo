@@ -127,7 +127,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     }
 
     fun hold() {
-        audioCallManager.onHold.value?.let { isOnHold ->
+        onHold.value?.let { isOnHold ->
             audioCallManager.holdOngoingCall(!isOnHold)
         }
     }

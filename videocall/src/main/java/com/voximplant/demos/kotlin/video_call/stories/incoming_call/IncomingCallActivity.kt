@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -72,6 +73,7 @@ class IncomingCallActivity :
         }
 
         model.moveToCall.observe(this, {
+            Log.d(APP_TAG, "IncomingCallActivity::")
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
                 startActivity(it)
@@ -81,12 +83,6 @@ class IncomingCallActivity :
         model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
                 it.putExtra(FAIL_REASON, reason)
-                startActivity(it)
-            }
-        })
-
-        model.moveToMainActivity.observe(this, {
-            Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
         })
@@ -102,6 +98,8 @@ class IncomingCallActivity :
             permissionsRequestCompletion = { model.answer() }
             requestPermissions()
         }
+
+        model.viewCreated()
     }
 
     override fun onBackPressed() {}

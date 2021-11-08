@@ -10,6 +10,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.cameraHelper
@@ -20,15 +21,13 @@ import com.voximplant.sdk.hardware.ICustomVideoSourceListener
 import org.webrtc.SurfaceTextureHelper
 
 class CallViewModel : BaseViewModel() {
+    private val _callStatus = MediatorLiveData<String?>()
+    val callStatus: LiveData<String?>
+        get() = _callStatus
+    val muted
+        get() = Shared.voximplantCallManager.muted
 
     private val cameraPreset = CameraResolutionPreset.P640x480
-
-    val muted = MutableLiveData<Boolean>()
-    private var _muted: Boolean = false
-        set(value) {
-            field = value
-            muted.postValue(value)
-        }
 
     val sendingVideo = MutableLiveData<Boolean>()
     private var _sendingVideo: Boolean = true
@@ -85,8 +84,6 @@ class CallViewModel : BaseViewModel() {
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
-            enableVideoButton.postValue(true)
-            _muted = Shared.voximplantCallManager.muted
             _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
 
             enableVideoButton.postValue(true)
@@ -143,8 +140,7 @@ class CallViewModel : BaseViewModel() {
 
     fun mute() {
         try {
-            Shared.voximplantCallManager.muteActiveCall(!_muted)
-            _muted = !_muted
+            muted.value?.let { Shared.voximplantCallManager.muteActiveCall(!it) }
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             postError(e.message.toString())
