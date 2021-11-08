@@ -5,13 +5,11 @@
 package com.voximplant.demos.kotlin.audio_call.stories.call
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.CallManagerException
+import com.voximplant.demos.kotlin.utils.CallState
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
@@ -21,6 +19,19 @@ import java.util.*
 
 class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
+    private val _callStatus = MediatorLiveData<String?>()
+    val callStatus: LiveData<String?>
+        get() = _callStatus
+    val muted
+        get() = audioCallManager.muted
+    val onHold
+        get() = audioCallManager.onHold
+    private val _enableButtons = MutableLiveData(false)
+    val enableButtons: LiveData<Boolean>
+        get() = _enableButtons
+    val displayName = MutableLiveData<String>()
+    val charDTMF = MutableLiveData<String>()
+    val onHideKeypadPressed = MutableLiveData<Unit>()
     private var audioDeviceManager: IAudioDeviceManager = Voximplant.getAudioDeviceManager()
     val availableAudioDevices: List<String>
         get() = audioDeviceManager.audioDevices.map { audioDevice ->
@@ -30,30 +41,16 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 audioDevice.name
             }
         }
-
-    val muted = MutableLiveData(false)
-    private var _muted: Boolean = false
-        set(value) {
-            field = value
-            muted.postValue(value)
-        }
+    val activeDevice = MutableLiveData(audioDeviceManager.activeDevice)
 
     val moveToCallFailed = MutableLiveData<String>()
     val finishActivity = MutableLiveData<Unit>()
-
-    private val _callStatus = MediatorLiveData<String?>()
-    val callStatus: LiveData<String?>
-        get() = _callStatus
-    val enableButtons = MutableLiveData(false)
-    val displayName = MutableLiveData<String>()
-    val charDTMF = MutableLiveData<String>()
-    val onHideKeypadPressed = MutableLiveData<Unit>()
-    val activeDevice = MutableLiveData(audioDeviceManager.activeDevice)
 
     init {
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
         }
+
         _callStatus.addSource(audioCallManager.callDuration) { value ->
             val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
             dateFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -63,7 +60,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
         audioCallManager.onCallConnect = {
             displayName.postValue(audioCallManager.callerDisplayName)
-            enableButtons.postValue(true)
+            _enableButtons.postValue(true)
         }
 
         audioCallManager.onCallDisconnect = { failed, reason ->
@@ -72,6 +69,18 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 moveToCallFailed.postValue(reason)
             } else {
                 finishActivity.postValue(Unit)
+            }
+        }
+
+        audioCallManager.callState.observeForever { callState ->
+            when (callState) {
+                CallState.CONNECTED, CallState.ON_HOLD -> {
+                    _enableButtons.postValue(true)
+                }
+                else -> {
+                    _enableButtons.postValue(false)
+                    onHideKeypadPressed.postValue(Unit)
+                }
             }
         }
 
@@ -85,10 +94,9 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     ) {
         if (isOngoing || isIncoming) {
             // On return to call from notification
-            _muted = audioCallManager.muted
 
             displayName.postValue(audioCallManager.callerDisplayName)
-            enableButtons.postValue(true)
+            _enableButtons.postValue(true)
         } else {
             if (isOutgoing) {
                 try {
@@ -112,8 +120,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
     fun mute() {
         try {
-            audioCallManager.muteOngoingCall(!_muted)
-            _muted = !_muted
+            muted.value?.let { audioCallManager.muteOngoingCall(!it) }
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, "OngoingCallViewModel::mute ${e.message}")
         }

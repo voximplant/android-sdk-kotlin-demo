@@ -2,9 +2,8 @@
  * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
  */
 
-package com.voximplant.demos.kotlin.audio_call.utils
+package com.voximplant.demos.kotlin.utils
 
-import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.utils.Shared.getResource
 
 /*
@@ -22,6 +21,7 @@ import com.voximplant.demos.kotlin.utils.Shared.getResource
 * Failed -> onCallFailed()
 * Disconnected -> onCallDisconnected(), onCallFailed()
 * Reconnecting -> onCallReconnecting()
+* On hold -> ICall.hold()
 *
 * */
 enum class CallState(private val resourceId: Int) {
@@ -35,7 +35,8 @@ enum class CallState(private val resourceId: Int) {
     HANG_UP(R.string.call_state_hang_up),
     FAILED(R.string.call_state_failed),
     DISCONNECTED(R.string.call_state_disconnected),
-    RECONNECTING(R.string.call_state_reconnecting);
+    RECONNECTING(R.string.call_state_reconnecting),
+    ON_HOLD(R.string.call_state_on_hold);
 
     override fun toString(): String {
         return getResource.getString(resourceId)

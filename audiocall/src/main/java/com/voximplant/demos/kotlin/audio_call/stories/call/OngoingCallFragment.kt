@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.voximplant.demos.kotlin.audio_call.R
-import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentOngoingCallBinding
 import com.voximplant.demos.kotlin.utils.FAIL_REASON
 import com.voximplant.demos.kotlin.utils.IS_INCOMING_CALL
@@ -160,7 +159,7 @@ class OngoingCallFragment : Fragment() {
             }
         })
 
-        audioCallManager.onHold.observe(viewLifecycleOwner, { onHold ->
+        viewModel.onHold.observe(viewLifecycleOwner, { onHold ->
             binding.holdButton.isEnabled = true
             if (onHold) {
                 binding.holdButton.setCardBackgroundColor(
@@ -219,10 +218,6 @@ class OngoingCallFragment : Fragment() {
     }
 
     private fun showKeypad(show: Boolean) {
-        binding.muteButton.isEnabled = !show
-        binding.keypadButton.isEnabled = !show
-        binding.audioButton.isEnabled = !show
-        binding.holdButton.isEnabled = !show
         binding.muteButton.visibility = if (show) View.INVISIBLE else View.VISIBLE
         binding.keypadButton.visibility = if (show) View.INVISIBLE else View.VISIBLE
         binding.audioButton.visibility = if (show) View.INVISIBLE else View.VISIBLE

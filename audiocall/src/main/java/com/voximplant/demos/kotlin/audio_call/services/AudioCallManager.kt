@@ -16,10 +16,9 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
-import com.voximplant.demos.kotlin.audio_call.telecomManager
 import com.voximplant.demos.kotlin.audio_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.audio_call.stories.main.MainActivity
-import com.voximplant.demos.kotlin.audio_call.utils.CallState
+import com.voximplant.demos.kotlin.audio_call.telecomManager
 import com.voximplant.demos.kotlin.services.CallService
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.call.*
@@ -56,10 +55,12 @@ class AudioCallManager(
         private set
     var latestCallerUsername: String? = null
         private set
-    var muted: Boolean = false
-        private set
+    private val _muted = MutableLiveData(false)
+    val muted: LiveData<Boolean>
+        get() = _muted
     private val _onHold = MutableLiveData(false)
-    val onHold: LiveData<Boolean> = _onHold
+    val onHold: LiveData<Boolean>
+        get() = _onHold
 
     // Call events
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
@@ -167,8 +168,12 @@ class AudioCallManager(
 
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
-        setCallState(CallState.CONNECTED)
-        call?.let { startCallTimer(it) }
+        if (_onHold.value == false) {
+            setCallState(CallState.CONNECTED)
+            call?.let { startCallTimer(it) }
+        } else {
+            setCallState(CallState.ON_HOLD)
+        }
     }
 
     override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) =
@@ -219,7 +224,7 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun muteOngoingCall(mute: Boolean) =
         executeOrThrow {
-            managedCall?.sendAudio(!mute).also { muted = mute }
+            managedCall?.sendAudio(!mute).also { _muted.postValue(mute) }
                 ?: throw noActiveCallError
         }
 
@@ -230,14 +235,14 @@ class AudioCallManager(
                 override fun onComplete() {
                     _onHold.postValue(hold)
                     if (hold) {
+                        setCallState(CallState.ON_HOLD)
                         managedCallConnection?.setOnHold()
+                        _callTimer.cancel()
                     } else {
+                        setCallState(CallState.CONNECTED)
                         managedCallConnection?.setActive()
+                        managedCall?.let { startCallTimer(it) }
                     }
-                    Shared.notificationHelper.updateOngoingNotification(
-                        hold,
-                        latestCallerUsername,
-                    )
                 }
 
                 override fun onFailure(e: CallException) {}
@@ -284,6 +289,7 @@ class AudioCallManager(
         managedCall = null
         _callTimer.cancel()
         _callTimer.purge()
+        _muted.postValue(false)
         _onHold.postValue(false)
     }
 
@@ -299,6 +305,11 @@ class AudioCallManager(
         if (_callState.value != newState) {
             Log.d(APP_TAG, "AudioCallManager::setCallState: CallState ${_callState.value} changed to $newState")
             _callState.postValue(newState)
+
+            // Update notification
+            if (newState in arrayOf(CallState.CONNECTED, CallState.ON_HOLD, CallState.RECONNECTING)) {
+                Shared.notificationHelper.updateOngoingNotification(latestCallerUsername, newState)
+            }
         }
     }
 

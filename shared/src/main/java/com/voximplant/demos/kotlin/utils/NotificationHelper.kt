@@ -149,10 +149,7 @@ class NotificationHelper(
         notificationManager.notify(
             incomingCallNotificationId,
             incomingCallNotification.build().also { it.flags += Notification.FLAG_INSISTENT })
-        Log.d(
-            APP_TAG,
-            "NotificationHelper::showIncomingCallNotification id: $incomingCallNotificationId"
-        )
+        Log.d(APP_TAG, "NotificationHelper::showIncomingCallNotification id: $incomingCallNotificationId")
     }
 
     fun createOngoingCallNotification(
@@ -203,13 +200,10 @@ class NotificationHelper(
                     hangupCallPendingIntent
                 )
             }
-        Log.d(
-            APP_TAG,
-            "NotificationHelper::showOngoingCallNotification id: $ongoingCallNotificationId"
-        )
+        Log.d(APP_TAG, "NotificationHelper::showOngoingCallNotification id: $ongoingCallNotificationId")
     }
 
-    fun updateOngoingNotification(isOnHold: Boolean, userName: String?) {
+    fun updateOngoingNotification(userName: String?, callState: CallState) {
         val hangupCallPendingIntent =
             PendingIntent.getBroadcast(
                 context,
@@ -217,51 +211,53 @@ class NotificationHelper(
                 Intent().setAction(ACTION_HANGUP_ONGOING_CALL),
                 0
             )
-        ongoingCallNotification.apply {
-            clearActions()
-            addAction(
-                R.drawable.ic_baseline_call_end_24,
-                context.getString(R.string.hangup),
-                hangupCallPendingIntent
-            )
-            if (isOnHold) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    color = context.getColor(R.color.colorRed)
-                    setColorized(true)
-                        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+        if (ongoingCallNotificationId != INVALID_NOTIFICATION_ID) {
+            ongoingCallNotification.apply {
+                clearActions()
+                addAction(
+                    R.drawable.ic_baseline_call_end_24,
+                    context.getString(R.string.hangup),
+                    hangupCallPendingIntent
+                )
+                when (callState) {
+                    CallState.ON_HOLD -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            color = context.getColor(R.color.colorRed)
+                            setColorized(true).setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                        }
+                        setContentText("$userName - $callState")
+                    }
+                    CallState.RECONNECTING -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            color = context.getColor(R.color.colorPrimary)
+                            setColorized(false)
+                        }
+                        setContentText("$userName - $callState")
+                    }
+                    else -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            color = context.getColor(R.color.colorPrimary)
+                            setColorized(false)
+                        }
+                        setContentText("$userName - ${context.getString(R.string.call_in_progress)}")
+                    }
                 }
-                setContentText("$userName - ${context.getString(R.string.call_on_hold)}")
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    color = context.getColor(R.color.colorPrimary)
-                    setColorized(false)
-                }
-                setContentText("$userName - ${context.getString(R.string.call_in_progress)}")
             }
-        }
 
-        notificationManager.notify(ongoingCallNotificationId, ongoingCallNotification.build())
-        Log.d(
-            APP_TAG,
-            "NotificationHelper::updateOngoingNotification id: $ongoingCallNotificationId"
-        )
+            notificationManager.notify(ongoingCallNotificationId, ongoingCallNotification.build())
+            Log.d(APP_TAG, "NotificationHelper::updateOngoingNotification id: $ongoingCallNotificationId")
+        }
     }
 
     fun cancelIncomingCallNotification() {
         notificationManager.cancel(incomingCallNotificationId)
-        Log.d(
-            APP_TAG,
-            "NotificationHelper::cancelIncomingCallNotification id: $incomingCallNotificationId"
-        )
+        Log.d(APP_TAG, "NotificationHelper::cancelIncomingCallNotification id: $incomingCallNotificationId")
     }
 
     fun cancelOngoingCallNotification() {
         notificationManager.cancel(ongoingCallNotificationId)
         ongoingCallNotificationId = INVALID_NOTIFICATION_ID
-        Log.d(
-            APP_TAG,
-            "NotificationHelper::cancelOngoingCallNotification id: $ongoingCallNotificationId"
-        )
+        Log.d(APP_TAG, "NotificationHelper::cancelOngoingCallNotification id: $ongoingCallNotificationId")
     }
 
     companion object {

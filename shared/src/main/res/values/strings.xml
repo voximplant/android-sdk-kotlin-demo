@@ -58,8 +58,8 @@
     <string name="call_state_disconnecting">Disconnecting…</string>
     <string name="call_state_disconnected">Disconnected</string>
     <string name="call_state_reconnecting">Reconnecting…</string>
+    <string name="call_state_on_hold">On hold</string>
     <string name="call_in_progress">Call in progress</string>
-    <string name="call_on_hold">Call on hold</string>
 
     <string name="error_failed_to_reconnect_and_check_connectivity">Failed to reconnect, check the connection and try again</string>
     <string name="something_went_wrong">Something went wrong</string>
