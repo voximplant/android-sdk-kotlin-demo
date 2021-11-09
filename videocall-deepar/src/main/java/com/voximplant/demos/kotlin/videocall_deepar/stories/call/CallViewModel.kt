@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CallViewModel : BaseViewModel() {
+    private val _callState = MutableLiveData<CallState>()
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
@@ -64,17 +65,8 @@ class CallViewModel : BaseViewModel() {
 
     init {
         _callStatus.addSource(Shared.voximplantCallManager.callState) { callState ->
+            _callState.postValue(callState)
             _callStatus.postValue(callState.toString())
-        }
-
-        _callStatus.addSource(Shared.voximplantCallManager.callDuration) { value ->
-            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val formattedCallDuration: String = dateFormat.format(Date(value))
-            _callStatus.postValue(formattedCallDuration)
-        }
-
-        Shared.voximplantCallManager.callState.observeForever { callState ->
             when (callState) {
                 CallState.CONNECTED, CallState.ON_HOLD -> {
                     enableVideoButton.postValue(true)
@@ -83,6 +75,12 @@ class CallViewModel : BaseViewModel() {
                     enableVideoButton.postValue(false)
                 }
             }
+        }
+        _callStatus.addSource(Shared.voximplantCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
         }
 
         Shared.voximplantCallManager.onCallConnect = {
