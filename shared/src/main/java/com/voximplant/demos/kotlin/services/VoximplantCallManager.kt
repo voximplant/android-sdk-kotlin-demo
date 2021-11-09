@@ -58,6 +58,8 @@ class VoximplantCallManager(
     private val _callState = MutableLiveData(CallState.NONE)
     val callState: LiveData<CallState>
         get() = _callState
+    val callerDisplayName
+        get() = managedCall?.endpoints?.get(0)?.userDisplayName
     private var _callTimer: Timer = Timer("callTimer")
     private val _callDuration = MutableLiveData(0L)
     val callDuration: LiveData<Long>
@@ -96,6 +98,8 @@ class VoximplantCallManager(
     var showLocalVideoView = MutableLiveData(false)
         private set
     var showRemoteVideoView = MutableLiveData(false)
+        private set
+    var remoteVideoIsPortrait = MutableLiveData<Boolean>()
         private set
 
     val localVideoRenderer = MutableLiveData<(VideoSink) -> Unit>()
@@ -472,6 +476,17 @@ class VoximplantCallManager(
                     showLocalVideoView.postValue(true)
                 } else {
                     showRemoteVideoView.postValue(true)
+                }
+            }
+
+            override fun onFrameResolutionChanged(videoWidth: Int, videoHeight: Int, rotation: Int) {
+                Log.d(APP_TAG, "VoximplantCallManager::addRenderer: $videoWidth $videoHeight $rotation")
+                if (!isLocal) {
+                    if (rotation == 90 || rotation == 270) {
+                        remoteVideoIsPortrait.postValue(true)
+                    } else {
+                        remoteVideoIsPortrait.postValue(false)
+                    }
                 }
             }
         })

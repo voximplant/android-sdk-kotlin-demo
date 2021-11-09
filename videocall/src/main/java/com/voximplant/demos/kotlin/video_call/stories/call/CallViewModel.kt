@@ -14,15 +14,19 @@ import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.BaseViewModel
 import com.voximplant.demos.kotlin.utils.CallManagerException
+import com.voximplant.demos.kotlin.utils.CallState
 import com.voximplant.demos.kotlin.utils.Shared.cameraManager
 import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.VideoQuality
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CallViewModel : BaseViewModel() {
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
+    val displayName = MutableLiveData<String>()
     val muted
         get() = voximplantCallManager.muted
     val onHold
@@ -51,6 +55,13 @@ class CallViewModel : BaseViewModel() {
             }
         }
 
+    val showLocalVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showLocalVideoView
+    val showRemoteVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showRemoteVideoView
+    val remoteVideoIsPortrait: LiveData<Boolean>
+        get() = voximplantCallManager.remoteVideoIsPortrait
+
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
@@ -60,10 +71,35 @@ class CallViewModel : BaseViewModel() {
     val enableVideoButton = MutableLiveData(false)
     val enableSharingButton = MutableLiveData(false)
 
-    override fun onCreate() {
-        super.onCreate()
+    init {
+        _callStatus.addSource(voximplantCallManager.callState) { callState ->
+            _callStatus.postValue(callState.toString())
+        }
+
+        _callStatus.addSource(voximplantCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
+
+        voximplantCallManager.callState.observeForever { callState ->
+            when (callState) {
+                CallState.CONNECTED, CallState.ON_HOLD -> {
+                    enableHoldButton.postValue(true)
+                    enableVideoButton.postValue(true)
+                    enableSharingButton.postValue(true)
+                }
+                else -> {
+                    enableHoldButton.postValue(false)
+                    enableVideoButton.postValue(false)
+                    enableSharingButton.postValue(false)
+                }
+            }
+        }
 
         voximplantCallManager.onCallConnect = {
+            displayName.postValue(voximplantCallManager.callerDisplayName)
             enableHoldButton.postValue(true)
             enableVideoButton.postValue(true)
             enableSharingButton.postValue(true)
@@ -83,6 +119,8 @@ class CallViewModel : BaseViewModel() {
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive || isIncoming) {
             // On return to call from notification
+            displayName.postValue(voximplantCallManager.callerDisplayName)
+
             _sharingScreen = voximplantCallManager.sharingScreen
             _sendingVideo = voximplantCallManager.hasLocalVideoStream
 

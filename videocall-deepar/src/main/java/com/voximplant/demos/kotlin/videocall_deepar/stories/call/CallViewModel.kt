@@ -19,11 +19,14 @@ import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.ICustomVideoSourceListener
 import org.webrtc.SurfaceTextureHelper
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CallViewModel : BaseViewModel() {
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
+    val displayName = MutableLiveData<String>()
     val muted
         get() = Shared.voximplantCallManager.muted
 
@@ -45,6 +48,13 @@ class CallViewModel : BaseViewModel() {
             }
         }
 
+    val showLocalVideoView: LiveData<Boolean>
+        get() = Shared.voximplantCallManager.showLocalVideoView
+    val showRemoteVideoView: LiveData<Boolean>
+        get() = Shared.voximplantCallManager.showRemoteVideoView
+    val remoteVideoIsPortrait: LiveData<Boolean>
+        get() = Shared.voximplantCallManager.remoteVideoIsPortrait
+
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
@@ -52,10 +62,31 @@ class CallViewModel : BaseViewModel() {
         get() = Shared.voximplantCallManager.selectedAudioDevice
     val enableVideoButton = MutableLiveData(false)
 
-    override fun onCreate() {
-        super.onCreate()
+    init {
+        _callStatus.addSource(Shared.voximplantCallManager.callState) { callState ->
+            _callStatus.postValue(callState.toString())
+        }
+
+        _callStatus.addSource(Shared.voximplantCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
+
+        Shared.voximplantCallManager.callState.observeForever { callState ->
+            when (callState) {
+                CallState.CONNECTED, CallState.ON_HOLD -> {
+                    enableVideoButton.postValue(true)
+                }
+                else -> {
+                    enableVideoButton.postValue(false)
+                }
+            }
+        }
 
         Shared.voximplantCallManager.onCallConnect = {
+            displayName.postValue(Shared.voximplantCallManager.callerDisplayName)
             enableVideoButton.postValue(true)
         }
 
@@ -84,6 +115,8 @@ class CallViewModel : BaseViewModel() {
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
+            displayName.postValue(Shared.voximplantCallManager.callerDisplayName)
+
             _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
 
             enableVideoButton.postValue(true)
