@@ -19,6 +19,7 @@ import java.util.*
 
 class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
+    private val _callState = MutableLiveData<CallState>()
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
@@ -49,6 +50,16 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     init {
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
+            _callState.postValue(callState)
+            when (callState) {
+                CallState.CONNECTED, CallState.ON_HOLD -> {
+                    _enableButtons.postValue(true)
+                }
+                else -> {
+                    _enableButtons.postValue(false)
+                    onHideKeypadPressed.postValue(Unit)
+                }
+            }
         }
 
         _callStatus.addSource(audioCallManager.callDuration) { value ->
@@ -69,18 +80,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 moveToCallFailed.postValue(reason)
             } else {
                 finishActivity.postValue(Unit)
-            }
-        }
-
-        audioCallManager.callState.observeForever { callState ->
-            when (callState) {
-                CallState.CONNECTED, CallState.ON_HOLD -> {
-                    _enableButtons.postValue(true)
-                }
-                else -> {
-                    _enableButtons.postValue(false)
-                    onHideKeypadPressed.postValue(Unit)
-                }
             }
         }
 
