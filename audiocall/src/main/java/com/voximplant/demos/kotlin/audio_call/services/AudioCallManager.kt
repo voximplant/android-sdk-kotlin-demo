@@ -65,9 +65,10 @@ class AudioCallManager(
     val onHold: LiveData<Boolean>
         get() = _onHold
 
-    private var callProgressToneFile: IAudioFile? = null
-    private var callConnectedToneFile: IAudioFile? = null
-    private var callFailedToneFile: IAudioFile? = null
+    private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
+    private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
+    private var callConnectedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
+    private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
 
     // Call events
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
@@ -172,20 +173,22 @@ class AudioCallManager(
         Log.d(APP_TAG, "AudioCallManager::onCallRinging")
         setCallState(CallState.RINGING)
         managedCallConnection?.setDialing()
+        playProgressTone()
     }
 
     override fun onCallReconnecting(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnecting")
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
-        playProgressTone()
+        stopProgressTone()
+        playReconnectingTone()
     }
 
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
         setCallState(CallState.CONNECTED)
         call?.let { startCallTimer(it) }
-        stopProgressTone()
+        stopReconnectingTone()
         playConnectedTone()
     }
 
@@ -213,7 +216,6 @@ class AudioCallManager(
         executeOrThrow {
             _callDuration.postValue(0)
             setCallState(CallState.CONNECTING)
-            playProgressTone()
             managedCall?.start() ?: throw noActiveCallError
         }
 
@@ -307,6 +309,7 @@ class AudioCallManager(
         _muted.postValue(false)
         _onHold.postValue(false)
         stopProgressTone()
+        stopReconnectingTone()
     }
 
     private fun startCallTimer(call: ICall) {
@@ -400,22 +403,26 @@ class AudioCallManager(
     }
 
     private fun playProgressTone() {
-        callProgressToneFile = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
         callProgressToneFile?.play(true)
     }
 
     private fun stopProgressTone() {
         callProgressToneFile?.stop(false)
-        callProgressToneFile?.release()
+    }
+
+    private fun playReconnectingTone() {
+        callReconnectingToneFile?.play(true)
+    }
+
+    private fun stopReconnectingTone() {
+        callReconnectingToneFile?.stop(false)
     }
 
     private fun playConnectedTone() {
-        callConnectedToneFile = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
         callConnectedToneFile?.play(false)
     }
 
     private fun playFailedTone() {
-        callFailedToneFile = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
         callFailedToneFile?.play(false)
     }
 
