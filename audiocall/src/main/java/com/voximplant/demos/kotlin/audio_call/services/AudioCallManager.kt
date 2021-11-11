@@ -131,7 +131,7 @@ class AudioCallManager(
             answeredElsewhere -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ANSWERED_ELSEWHERE))
             }
-            _callState.value == CallState.HANG_UP -> {
+            _callState.value == CallState.DISCONNECTING -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
             }
             _callState.value == CallState.CONNECTED -> {
@@ -183,12 +183,8 @@ class AudioCallManager(
 
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
-        if (_onHold.value == false) {
-            setCallState(CallState.CONNECTED)
-            call?.let { startCallTimer(it) }
-        } else {
-            setCallState(CallState.ON_HOLD)
-        }
+        setCallState(CallState.CONNECTED)
+        call?.let { startCallTimer(it) }
         stopProgressTone()
         playConnectedTone()
     }
@@ -234,7 +230,7 @@ class AudioCallManager(
     fun declineIncomingCall() =
         executeOrThrow {
             Shared.notificationHelper.cancelIncomingCallNotification()
-            setCallState(CallState.DECLINE)
+            setCallState(CallState.DISCONNECTING)
             managedCall?.reject(RejectMode.DECLINE, null)
                 ?: throw noActiveCallError
         }
@@ -253,13 +249,14 @@ class AudioCallManager(
                 override fun onComplete() {
                     _onHold.postValue(hold)
                     if (hold) {
-                        setCallState(CallState.ON_HOLD)
                         managedCallConnection?.setOnHold()
                         _callTimer.cancel()
                     } else {
-                        setCallState(CallState.CONNECTED)
                         managedCallConnection?.setActive()
                         managedCall?.let { startCallTimer(it) }
+                    }
+                    _callState.value?.let {
+                        Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
                     }
                 }
 
@@ -272,7 +269,7 @@ class AudioCallManager(
     fun hangupOngoingCall() =
         executeOrThrow {
             managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
-            setCallState(CallState.HANG_UP)
+            setCallState(CallState.DISCONNECTING)
             _callTimer.cancel()
             managedCall?.hangup(null)
                 ?: throw noActiveCallError
@@ -326,8 +323,10 @@ class AudioCallManager(
             _callState.postValue(newState)
 
             // Update notification
-            if (newState in arrayOf(CallState.CONNECTED, CallState.ON_HOLD, CallState.RECONNECTING)) {
-                Shared.notificationHelper.updateOngoingNotification(latestCallerUsername, newState)
+            if (newState in arrayOf(CallState.CONNECTED, CallState.RECONNECTING)) {
+                _onHold.value?.let {
+                    Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
+                }
             }
         }
     }
