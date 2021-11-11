@@ -39,6 +39,7 @@ class AudioCallManager(
     private var managedCall: ICall? = null
     val callExists: Boolean
         get() = managedCall != null
+    private var callConnected = false
     val callerDisplayName
         get() = managedCall?.endpoints?.get(0)?.userDisplayName
     var managedCallConnection: CallConnection? = null
@@ -106,6 +107,7 @@ class AudioCallManager(
     }
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
+        callConnected = true
         managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
         onCallConnect?.invoke()
@@ -186,10 +188,15 @@ class AudioCallManager(
 
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
-        setCallState(CallState.CONNECTED)
-        call?.let { startCallTimer(it) }
         stopReconnectingTone()
-        playConnectedTone()
+        if (callConnected) {
+            setCallState(CallState.CONNECTED)
+            call?.let { startCallTimer(it) }
+            playConnectedTone()
+        } else {
+            setCallState(CallState.RINGING)
+            playProgressTone()
+        }
     }
 
     override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) =
@@ -298,6 +305,7 @@ class AudioCallManager(
     }
 
     private fun removeCall() {
+        callConnected = false
         stopForegroundService()
         Shared.notificationHelper.cancelIncomingCallNotification()
         Shared.notificationHelper.cancelOngoingCallNotification()
