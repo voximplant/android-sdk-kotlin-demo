@@ -39,13 +39,13 @@ class AudioCallManager(
     private var managedCall: ICall? = null
     val callExists: Boolean
         get() = managedCall != null
-    private var callConnected = false
     val callerDisplayName
         get() = managedCall?.endpoints?.get(0)?.userDisplayName
     var managedCallConnection: CallConnection? = null
     private val _callState = MutableLiveData(CallState.NONE)
     val callState: LiveData<CallState>
         get() = _callState
+    private val _previousCallState = MutableLiveData(CallState.NONE)
     private var _callTimer: Timer = Timer("callTimer")
     private val _callDuration = MutableLiveData(0L)
     val callDuration: LiveData<Long>
@@ -107,7 +107,6 @@ class AudioCallManager(
     }
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
-        callConnected = true
         managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
         onCallConnect?.invoke()
@@ -189,13 +188,22 @@ class AudioCallManager(
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "AudioCallManager::onCallReconnected")
         stopReconnectingTone()
-        if (callConnected) {
-            setCallState(CallState.CONNECTED)
-            call?.let { startCallTimer(it) }
-            playConnectedTone()
-        } else {
-            setCallState(CallState.RINGING)
-            playProgressTone()
+        when (_previousCallState.value) {
+            CallState.CONNECTING -> {
+                setCallState(CallState.CONNECTING)
+            }
+            CallState.RINGING -> {
+                setCallState(CallState.RINGING)
+                playProgressTone()
+            }
+            CallState.CONNECTED -> {
+                setCallState(CallState.CONNECTED)
+                call?.let { startCallTimer(it) }
+                playConnectedTone()
+            }
+            else -> {
+                _previousCallState.value?.let { setCallState(it) }
+            }
         }
     }
 
@@ -305,7 +313,6 @@ class AudioCallManager(
     }
 
     private fun removeCall() {
-        callConnected = false
         stopForegroundService()
         Shared.notificationHelper.cancelIncomingCallNotification()
         Shared.notificationHelper.cancelOngoingCallNotification()
@@ -331,6 +338,7 @@ class AudioCallManager(
     private fun setCallState(newState: CallState) {
         if (_callState.value != newState) {
             Log.d(APP_TAG, "AudioCallManager::setCallState: CallState ${_callState.value} changed to $newState")
+            _previousCallState.postValue(_callState.value)
             _callState.postValue(newState)
 
             // Update notification
