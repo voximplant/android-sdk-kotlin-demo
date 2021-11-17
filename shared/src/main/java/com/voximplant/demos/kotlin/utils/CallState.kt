@@ -15,10 +15,8 @@ import com.voximplant.demos.kotlin.utils.Shared.getResource
 * Connecting -> ICall.answer(), ICall.start(), onCallReconnected()
 * Ringing -> onCallRinging()
 * Connected -> onCallConnected()
-* Disconnecting -> ICall.hangup()
-* Decline -> ICall.reject()
-* Hang up -> ICall.hangup()
 * Failed -> onCallFailed()
+* Disconnecting -> ICall.hangup(), ICall.reject()
 * Disconnected -> onCallDisconnected(), onCallFailed()
 * Reconnecting -> onCallReconnecting()
 * On hold -> ICall.hold()
@@ -31,12 +29,10 @@ enum class CallState(private val resourceId: Int) {
     CONNECTING(R.string.call_state_connecting),
     RINGING(R.string.call_state_ringing),
     CONNECTED(R.string.call_state_connected),
-    DECLINE(R.string.call_state_decline),
-    HANG_UP(R.string.call_state_hang_up),
     FAILED(R.string.call_state_failed),
+    DISCONNECTING(R.string.call_state_disconnecting),
     DISCONNECTED(R.string.call_state_disconnected),
-    RECONNECTING(R.string.call_state_reconnecting),
-    ON_HOLD(R.string.call_state_on_hold);
+    RECONNECTING(R.string.call_state_reconnecting);
 
     override fun toString(): String {
         return getResource.getString(resourceId)

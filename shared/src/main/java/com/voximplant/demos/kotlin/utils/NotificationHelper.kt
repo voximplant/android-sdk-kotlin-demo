@@ -203,7 +203,7 @@ class NotificationHelper(
         Log.d(APP_TAG, "NotificationHelper::showOngoingCallNotification id: $ongoingCallNotificationId")
     }
 
-    fun updateOngoingNotification(userName: String?, callState: CallState) {
+    fun updateOngoingNotification(userName: String?, callState: CallState, isOnHold: Boolean) {
         val hangupCallPendingIntent =
             PendingIntent.getBroadcast(
                 context,
@@ -219,20 +219,20 @@ class NotificationHelper(
                     context.getString(R.string.hangup),
                     hangupCallPendingIntent
                 )
-                when (callState) {
-                    CallState.ON_HOLD -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            color = context.getColor(R.color.colorRed)
-                            setColorized(true).setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                        }
-                        setContentText("$userName - $callState")
-                    }
-                    CallState.RECONNECTING -> {
+                when {
+                    callState == CallState.RECONNECTING -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             color = context.getColor(R.color.colorPrimary)
                             setColorized(false)
                         }
                         setContentText("$userName - $callState")
+                    }
+                    isOnHold -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            color = context.getColor(R.color.colorRed)
+                            setColorized(true).setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                        }
+                        setContentText("$userName - ${context.getString(R.string.call_state_on_hold)}")
                     }
                     else -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

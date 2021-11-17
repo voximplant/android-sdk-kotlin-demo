@@ -5,11 +5,16 @@
 package com.voximplant.demos.kotlin.audio_call.stories.call
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.CallManagerException
 import com.voximplant.demos.kotlin.utils.CallState
+import com.voximplant.demos.kotlin.utils.Shared.getResource
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
@@ -19,13 +24,15 @@ import java.util.*
 
 class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
+    private val _callState = MutableLiveData<CallState>()
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
     val muted
         get() = audioCallManager.muted
+    private val _onHold = MutableLiveData<Boolean>()
     val onHold
-        get() = audioCallManager.onHold
+        get() = _onHold
     private val _enableButtons = MutableLiveData(false)
     val enableButtons: LiveData<Boolean>
         get() = _enableButtons
@@ -49,6 +56,13 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     init {
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
+            _callState.postValue(callState)
+            if (callState == CallState.CONNECTED) {
+                _enableButtons.postValue(true)
+            } else {
+                _enableButtons.postValue(false)
+                onHideKeypadPressed.postValue(Unit)
+            }
         }
 
         _callStatus.addSource(audioCallManager.callDuration) { value ->
@@ -58,31 +72,29 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             _callStatus.postValue(formattedCallDuration)
         }
 
-        audioCallManager.onCallConnect = {
-            displayName.postValue(audioCallManager.callerDisplayName)
-            _enableButtons.postValue(true)
-        }
-
-        audioCallManager.onCallDisconnect = { failed, reason ->
-            audioDeviceManager.removeAudioDeviceEventsListener(this)
-            if (failed) {
-                moveToCallFailed.postValue(reason)
-            } else {
-                finishActivity.postValue(Unit)
+        _callStatus.addSource(audioCallManager.onHold) { onHold ->
+            _onHold.postValue(onHold)
+            if (onHold) {
+                _callStatus.postValue(getResource.getString(R.string.call_state_on_hold))
+                onHideKeypadPressed.postValue(Unit)
             }
         }
 
-        audioCallManager.callState.observeForever { callState ->
-            when (callState) {
-                CallState.CONNECTED, CallState.ON_HOLD -> {
-                    _enableButtons.postValue(true)
-                }
-                else -> {
-                    _enableButtons.postValue(false)
-                    onHideKeypadPressed.postValue(Unit)
+        audioCallManager.onCallConnect =
+            {
+                displayName.postValue(audioCallManager.callerDisplayName)
+                _enableButtons.postValue(true)
+            }
+
+        audioCallManager.onCallDisconnect =
+            { failed, reason ->
+                audioDeviceManager.removeAudioDeviceEventsListener(this)
+                if (failed) {
+                    moveToCallFailed.postValue(reason)
+                } else {
+                    finishActivity.postValue(Unit)
                 }
             }
-        }
 
         audioDeviceManager.addAudioDeviceEventsListener(this)
     }
@@ -153,6 +165,9 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     override fun onCleared() {
         super.onCleared()
         audioDeviceManager.removeAudioDeviceEventsListener(this)
+        _callStatus.removeSource(audioCallManager.callState)
+        _callStatus.removeSource(audioCallManager.callDuration)
+        _callStatus.removeSource(audioCallManager.onHold)
     }
 
     override fun onAudioDeviceChanged(currentAudioDevice: AudioDevice?) {
