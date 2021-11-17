@@ -58,6 +58,7 @@ class VoximplantCallManager(
     private val _callState = MutableLiveData(CallState.NONE)
     val callState: LiveData<CallState>
         get() = _callState
+    private val _previousCallState = MutableLiveData(CallState.NONE)
     val callerDisplayName
         get() = managedCall?.endpoints?.get(0)?.userDisplayName
     private var _callTimer: Timer = Timer("callTimer")
@@ -86,9 +87,10 @@ class VoximplantCallManager(
     val onHold: LiveData<Boolean>
         get() = _onHold
 
-    private var callProgressToneFile: IAudioFile? = null
-    private var callConnectedToneFile: IAudioFile? = null
-    private var callFailedToneFile: IAudioFile? = null
+    private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
+    private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
+    private var callConnectedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
+    private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
 
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
@@ -153,25 +155,37 @@ class VoximplantCallManager(
     override fun onCallRinging(call: ICall?, headers: Map<String, String>?) {
         Log.d(APP_TAG, "VoximplantCallManager::onCallRinging")
         setCallState(CallState.RINGING)
+        playProgressTone()
     }
 
     override fun onCallReconnecting(call: ICall?) {
         Log.d(APP_TAG, "VoximplantCallManager::onCallReconnecting")
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
-        playProgressTone()
+        stopProgressTone()
+        playReconnectingTone()
     }
 
     override fun onCallReconnected(call: ICall?) {
         Log.d(APP_TAG, "VoximplantCallManager::onCallReconnected")
-        if (_onHold.value == false) {
-            setCallState(CallState.CONNECTED)
-            call?.let { startCallTimer(it) }
-        } else {
-            setCallState(CallState.ON_HOLD)
+        stopReconnectingTone()
+        when (_previousCallState.value) {
+            CallState.CONNECTING -> {
+                setCallState(CallState.CONNECTING)
+            }
+            CallState.RINGING -> {
+                setCallState(CallState.RINGING)
+                playProgressTone()
+            }
+            CallState.CONNECTED -> {
+                setCallState(CallState.CONNECTED)
+                call?.let { startCallTimer(it) }
+                playConnectedTone()
+            }
+            else -> {
+                _previousCallState.value?.let { setCallState(it) }
+            }
         }
-        stopProgressTone()
-        playConnectedTone()
     }
 
     override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) =
@@ -197,7 +211,6 @@ class VoximplantCallManager(
         executeOrThrow {
             _callDuration.postValue(0)
             setCallState(CallState.CONNECTING)
-            playProgressTone()
             managedCall?.start()
                 ?: throw noActiveCallError
         }
@@ -215,7 +228,7 @@ class VoximplantCallManager(
     fun declineCall() =
         executeOrThrow {
             Shared.notificationHelper.cancelIncomingCallNotification()
-            setCallState(CallState.DECLINE)
+            setCallState(CallState.DISCONNECTING)
             managedCall?.reject(RejectMode.DECLINE, null)
                 ?: throw  noActiveCallError
         }
@@ -235,11 +248,12 @@ class VoximplantCallManager(
                     if (hasLocalVideoStream) showLocalVideoView.postValue(!hold)
                     if (hasRemoteVideoStream) showRemoteVideoView.postValue(!hold)
                     if (hold) {
-                        setCallState(CallState.ON_HOLD)
                         _callTimer.cancel()
                     } else {
-                        setCallState(CallState.CONNECTED)
                         managedCall?.let { startCallTimer(it) }
+                    }
+                    _callState.value?.let {
+                        Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
                     }
                 }
 
@@ -280,7 +294,7 @@ class VoximplantCallManager(
     @Throws(CallManagerException::class)
     fun hangup() =
         executeOrThrow {
-            setCallState(CallState.HANG_UP)
+            setCallState(CallState.DISCONNECTING)
             _callTimer.cancel()
             managedCall?.hangup(null)
                 ?: throw noActiveCallError
@@ -311,6 +325,7 @@ class VoximplantCallManager(
         _muted.postValue(false)
         _onHold.postValue(false)
         stopProgressTone()
+        stopReconnectingTone()
     }
 
     private fun startCallTimer(call: ICall) {
@@ -324,11 +339,14 @@ class VoximplantCallManager(
     private fun setCallState(newState: CallState) {
         if (_callState.value != newState) {
             Log.d(APP_TAG, "AudioCallManager::setCallState: CallState ${_callState.value} changed to $newState")
+            _previousCallState.postValue(_callState.value)
             _callState.postValue(newState)
 
             // Update notification
-            if (newState in arrayOf(CallState.CONNECTED, CallState.ON_HOLD, CallState.RECONNECTING)) {
-                Shared.notificationHelper.updateOngoingNotification(latestCallerUsername, newState)
+            if (newState in arrayOf(CallState.CONNECTED, CallState.RECONNECTING)) {
+                _onHold.value?.let {
+                    Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
+                }
             }
         }
     }
@@ -389,8 +407,8 @@ class VoximplantCallManager(
         answeredElsewhere: Boolean,
     ) {
         Log.i(APP_TAG, "VoximplantCallManager::onCallDisconnected answeredElsewhere: $answeredElsewhere")
-        setCallState(CallState.DISCONNECTED)
         removeCall()
+        setCallState(CallState.DISCONNECTED)
         showLocalVideoView.postValue(false)
         showRemoteVideoView.postValue(false)
         onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
@@ -526,22 +544,26 @@ class VoximplantCallManager(
     }
 
     private fun playProgressTone() {
-        callProgressToneFile = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
         callProgressToneFile?.play(true)
     }
 
     private fun stopProgressTone() {
         callProgressToneFile?.stop(false)
-        callProgressToneFile?.release()
+    }
+
+    private fun playReconnectingTone() {
+        callReconnectingToneFile?.play(true)
+    }
+
+    private fun stopReconnectingTone() {
+        callReconnectingToneFile?.stop(false)
     }
 
     private fun playConnectedTone() {
-        callConnectedToneFile = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
         callConnectedToneFile?.play(false)
     }
 
     private fun playFailedTone() {
-        callFailedToneFile = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
         callFailedToneFile?.play(false)
     }
 

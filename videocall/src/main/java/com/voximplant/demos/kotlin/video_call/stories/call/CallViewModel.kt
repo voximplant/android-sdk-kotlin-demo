@@ -11,10 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.utils.APP_TAG
-import com.voximplant.demos.kotlin.utils.BaseViewModel
-import com.voximplant.demos.kotlin.utils.CallManagerException
-import com.voximplant.demos.kotlin.utils.CallState
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.cameraManager
 import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.sdk.hardware.AudioDevice
@@ -30,8 +27,9 @@ class CallViewModel : BaseViewModel() {
     val displayName = MutableLiveData<String>()
     val muted
         get() = voximplantCallManager.muted
+    private val _onHold = MutableLiveData<Boolean>()
     val onHold
-        get() = voximplantCallManager.onHold
+        get() = _onHold
 
     val sharingScreen = MutableLiveData<Boolean>()
     private var _sharingScreen: Boolean = false
@@ -76,17 +74,14 @@ class CallViewModel : BaseViewModel() {
         _callStatus.addSource(voximplantCallManager.callState) { callState ->
             _callState.postValue(callState)
             _callStatus.postValue(callState.toString())
-            when (callState) {
-                CallState.CONNECTED, CallState.ON_HOLD -> {
-                    enableHoldButton.postValue(true)
-                    enableVideoButton.postValue(true)
-                    enableSharingButton.postValue(true)
-                }
-                else -> {
-                    enableHoldButton.postValue(false)
-                    enableVideoButton.postValue(false)
-                    enableSharingButton.postValue(false)
-                }
+            if (callState == CallState.CONNECTED) {
+                enableHoldButton.postValue(true)
+                enableVideoButton.postValue(true)
+                enableSharingButton.postValue(true)
+            } else {
+                enableHoldButton.postValue(false)
+                enableVideoButton.postValue(false)
+                enableSharingButton.postValue(false)
             }
         }
 
@@ -95,6 +90,13 @@ class CallViewModel : BaseViewModel() {
             dateFormat.timeZone = TimeZone.getTimeZone("UTC")
             val formattedCallDuration: String = dateFormat.format(Date(value))
             _callStatus.postValue(formattedCallDuration)
+        }
+
+        _callStatus.addSource(voximplantCallManager.onHold) { onHold ->
+            _onHold.postValue(onHold)
+            if (onHold) {
+                _callStatus.postValue(Shared.getResource.getString(R.string.call_state_on_hold))
+            }
         }
 
         voximplantCallManager.onCallConnect = {
@@ -230,6 +232,13 @@ class CallViewModel : BaseViewModel() {
             Log.e(APP_TAG, e.message.toString())
             finish.postValue(Unit)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _callStatus.removeSource(voximplantCallManager.callState)
+        _callStatus.removeSource(voximplantCallManager.callDuration)
+        _callStatus.removeSource(voximplantCallManager.onHold)
     }
 
     companion object {
