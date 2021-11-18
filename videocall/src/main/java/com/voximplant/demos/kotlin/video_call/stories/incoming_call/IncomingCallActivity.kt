@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -19,7 +18,6 @@ import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
-import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.sdk.Voximplant
 import kotlinx.android.synthetic.main.activity_incoming_call.*
 
@@ -73,7 +71,6 @@ class IncomingCallActivity :
         }
 
         model.moveToCall.observe(this, {
-            Log.d(APP_TAG, "IncomingCallActivity::")
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
                 startActivity(it)
