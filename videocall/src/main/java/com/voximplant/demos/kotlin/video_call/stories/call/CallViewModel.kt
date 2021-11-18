@@ -146,7 +146,7 @@ class CallViewModel : BaseViewModel() {
     }
 
     fun hold() {
-        onHold.value?.let { isOnHold ->
+        voximplantCallManager.onHold.value?.let { isOnHold ->
             voximplantCallManager.holdActiveCall(!isOnHold)
         }
     }
