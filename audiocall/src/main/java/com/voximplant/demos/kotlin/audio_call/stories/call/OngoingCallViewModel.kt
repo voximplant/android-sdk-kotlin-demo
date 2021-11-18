@@ -75,7 +75,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         _callStatus.addSource(audioCallManager.onHold) { onHold ->
             _onHold.postValue(onHold)
             if (onHold) {
-                _callStatus.postValue(getResource.getString(R.string.call_state_on_hold))
+                _callStatus.postValue(getResource.getString(R.string.call_on_hold))
                 onHideKeypadPressed.postValue(Unit)
             }
         }

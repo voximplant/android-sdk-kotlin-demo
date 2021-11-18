@@ -95,7 +95,7 @@ class CallViewModel : BaseViewModel() {
         _callStatus.addSource(voximplantCallManager.onHold) { onHold ->
             _onHold.postValue(onHold)
             if (onHold) {
-                _callStatus.postValue(Shared.getResource.getString(R.string.call_state_on_hold))
+                _callStatus.postValue(Shared.getResource.getString(R.string.call_on_hold))
             }
         }
 
