@@ -8,7 +8,7 @@ buildscript {
         firebase_crashlytics_version = '2.7.1'
         firebase_bom_version = '28.0.1'
 
-        voximplant_sdk_version = '2.29.0-rc8'
+        voximplant_sdk_version = '2.29.0'
 
         material_version = '1.4.0'
         appcompat_version = '1.3.1'
@@ -30,9 +30,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/groups/staging"
-        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"
@@ -48,9 +45,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/groups/staging"
-        }
     }
 }
 
