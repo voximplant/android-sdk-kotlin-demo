@@ -118,7 +118,7 @@ class CallViewModel : BaseViewModel() {
     }
 
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
-        if (isActive || isIncoming) {
+        if (isActive) {
             // On return to call from notification
             displayName.postValue(voximplantCallManager.callerDisplayName)
 
@@ -127,11 +127,20 @@ class CallViewModel : BaseViewModel() {
 
             enableHoldButton.postValue(true)
         } else {
-            try {
-                voximplantCallManager.startCall()
-            } catch (e: CallManagerException) {
-                Log.e(APP_TAG, e.message.toString())
-                finish.postValue(Unit)
+            if (isIncoming) {
+                try {
+                    voximplantCallManager.answerCall()
+                } catch (e: CallManagerException) {
+                    Log.e(APP_TAG, e.message.toString())
+                    finish.postValue(Unit)
+                }
+            } else {
+                try {
+                    voximplantCallManager.startCall()
+                } catch (e: CallManagerException) {
+                    Log.e(APP_TAG, e.message.toString())
+                    finish.postValue(Unit)
+                }
             }
         }
     }

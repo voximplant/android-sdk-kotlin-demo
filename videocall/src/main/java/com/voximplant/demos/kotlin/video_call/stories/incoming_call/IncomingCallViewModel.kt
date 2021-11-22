@@ -12,10 +12,6 @@ class IncomingCallViewModel : BaseViewModel() {
     val moveToCallFailed = MutableLiveData<String>()
 
     init {
-        voximplantCallManager.onCallConnect = {
-            moveToCall.postValue(Unit)
-        }
-
         voximplantCallManager.onCallDisconnect = { failed, reason ->
             finish.postValue(Unit)
             if (failed) {
@@ -38,7 +34,9 @@ class IncomingCallViewModel : BaseViewModel() {
         }
     }
 
-    fun answer() = voximplantCallManager.answerCall()
+    fun answer() {
+        moveToCall.postValue(Unit)
+    }
 
     fun decline() {
         try {

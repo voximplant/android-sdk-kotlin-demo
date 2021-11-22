@@ -163,7 +163,9 @@ class VoximplantCallManager(
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
         stopProgressTone()
-        playReconnectingTone()
+        if (_previousCallState.value in arrayOf(CallState.RINGING, CallState.CONNECTED)) {
+            playReconnectingTone()
+        }
     }
 
     override fun onCallReconnected(call: ICall?) {
