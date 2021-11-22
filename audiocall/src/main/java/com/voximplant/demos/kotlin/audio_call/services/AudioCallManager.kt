@@ -21,6 +21,7 @@ import com.voximplant.demos.kotlin.audio_call.stories.main.MainActivity
 import com.voximplant.demos.kotlin.audio_call.telecomManager
 import com.voximplant.demos.kotlin.services.CallService
 import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.Shared.notificationHelper
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
@@ -110,7 +111,6 @@ class AudioCallManager(
         managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
         onCallConnect?.invoke()
-        Shared.notificationHelper.cancelIncomingCallNotification()
         call?.let { startCallTimer(it) }
         playConnectedTone()
         latestCallerDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
@@ -182,7 +182,9 @@ class AudioCallManager(
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
         stopProgressTone()
-        playReconnectingTone()
+        if (_previousCallState.value in arrayOf(CallState.RINGING, CallState.CONNECTED)) {
+            playReconnectingTone()
+        }
     }
 
     override fun onCallReconnected(call: ICall?) {
@@ -200,6 +202,9 @@ class AudioCallManager(
                 setCallState(CallState.CONNECTED)
                 call?.let { startCallTimer(it) }
                 playConnectedTone()
+            }
+            CallState.INCOMING -> {
+                setCallState(CallState.RECONNECTING)
             }
             else -> {
                 _previousCallState.value?.let { setCallState(it) }
@@ -237,8 +242,13 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun answerIncomingCall() =
         executeOrThrow {
+            notificationHelper.cancelIncomingCallNotification()
             _callDuration.postValue(0)
-            setCallState(CallState.CONNECTING)
+            if (callState.value == CallState.RECONNECTING) {
+                playReconnectingTone()
+            } else {
+                setCallState(CallState.CONNECTING)
+            }
             managedCall?.answer(callSettings)
                 ?: throw noActiveCallError
         }
@@ -246,7 +256,7 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun declineIncomingCall() =
         executeOrThrow {
-            Shared.notificationHelper.cancelIncomingCallNotification()
+            notificationHelper.cancelIncomingCallNotification()
             setCallState(CallState.DISCONNECTING)
             managedCall?.reject(RejectMode.DECLINE, null)
                 ?: throw noActiveCallError
@@ -273,7 +283,7 @@ class AudioCallManager(
                         managedCall?.let { startCallTimer(it) }
                     }
                     _callState.value?.let {
-                        Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
+                        notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
                     }
                 }
 
@@ -314,8 +324,8 @@ class AudioCallManager(
 
     private fun removeCall() {
         stopForegroundService()
-        Shared.notificationHelper.cancelIncomingCallNotification()
-        Shared.notificationHelper.cancelOngoingCallNotification()
+        notificationHelper.cancelIncomingCallNotification()
+        notificationHelper.cancelOngoingCallNotification()
         managedCall?.removeCallListener(this)
         managedCall?.endpoints?.firstOrNull()?.setEndpointListener(null)
         managedCall = null
@@ -344,7 +354,7 @@ class AudioCallManager(
             // Update notification
             if (newState in arrayOf(CallState.CONNECTED, CallState.RECONNECTING)) {
                 _onHold.value?.let {
-                    Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
+                    notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
                 }
             }
         }
@@ -358,7 +368,7 @@ class AudioCallManager(
                 addAction(ACTION_HANGUP_ONGOING_CALL)
             }
             appContext.registerReceiver(callBroadcastReceiver, filter)
-            Shared.notificationHelper.createOngoingCallNotification(
+            notificationHelper.createOngoingCallNotification(
                 appContext,
                 latestCallerDisplayName ?: latestCallerUsername,
                 appContext.getString(R.string.call_in_progress),
@@ -401,7 +411,7 @@ class AudioCallManager(
                 addAction(ACTION_DECLINE_INCOMING_CALL)
             }
             appContext.registerReceiver(callBroadcastReceiver, filter)
-            Shared.notificationHelper.showIncomingCallNotification(
+            notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,
                 latestCallerDisplayName ?: appContext.getString(R.string.unknown_user),

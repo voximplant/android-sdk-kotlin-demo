@@ -54,6 +54,13 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     val finishActivity = MutableLiveData<Unit>()
 
     init {
+        _callStatus.addSource(audioCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
+
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
             _callState.postValue(callState)
@@ -63,13 +70,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 _enableButtons.postValue(false)
                 onHideKeypadPressed.postValue(Unit)
             }
-        }
-
-        _callStatus.addSource(audioCallManager.callDuration) { value ->
-            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val formattedCallDuration: String = dateFormat.format(Date(value))
-            _callStatus.postValue(formattedCallDuration)
         }
 
         _callStatus.addSource(audioCallManager.onHold) { onHold ->
