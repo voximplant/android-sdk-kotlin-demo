@@ -41,7 +41,10 @@ class IncomingCallViewModel : ViewModel() {
         }
     }
 
-    fun answer() = audioCallManager.answerIncomingCall()
+    fun answer() {
+        audioCallManager.answerIncomingCall()
+        moveToCall.postValue(Unit)
+    }
 
     fun decline() {
         try {

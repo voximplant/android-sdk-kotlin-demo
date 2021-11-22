@@ -182,7 +182,9 @@ class AudioCallManager(
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
         stopProgressTone()
-        playReconnectingTone()
+        if (_previousCallState.value in arrayOf(CallState.CONNECTING, CallState.CONNECTED)) {
+            playReconnectingTone()
+        }
     }
 
     override fun onCallReconnected(call: ICall?) {
@@ -200,6 +202,9 @@ class AudioCallManager(
                 setCallState(CallState.CONNECTED)
                 call?.let { startCallTimer(it) }
                 playConnectedTone()
+            }
+            CallState.INCOMING -> {
+                setCallState(CallState.RECONNECTING)
             }
             else -> {
                 _previousCallState.value?.let { setCallState(it) }
@@ -238,7 +243,11 @@ class AudioCallManager(
     fun answerIncomingCall() =
         executeOrThrow {
             _callDuration.postValue(0)
-            setCallState(CallState.CONNECTING)
+            if (callState.value == CallState.RECONNECTING) {
+                playReconnectingTone()
+            } else {
+                setCallState(CallState.CONNECTING)
+            }
             managedCall?.answer(callSettings)
                 ?: throw noActiveCallError
         }
