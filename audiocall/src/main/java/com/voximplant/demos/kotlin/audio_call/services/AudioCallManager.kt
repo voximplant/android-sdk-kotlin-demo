@@ -182,7 +182,7 @@ class AudioCallManager(
         setCallState(CallState.RECONNECTING)
         _callTimer.cancel()
         stopProgressTone()
-        if (_previousCallState.value in arrayOf(CallState.CONNECTING, CallState.CONNECTED)) {
+        if (_previousCallState.value in arrayOf(CallState.RINGING, CallState.CONNECTED)) {
             playReconnectingTone()
         }
     }
