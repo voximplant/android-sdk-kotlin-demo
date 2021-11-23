@@ -200,7 +200,9 @@ class AudioCallManager(
             }
             CallState.CONNECTED -> {
                 setCallState(CallState.CONNECTED)
-                call?.let { startCallTimer(it) }
+                if (_onHold.value == false) {
+                    call?.let { startCallTimer(it) }
+                }
                 playConnectedTone()
             }
             CallState.INCOMING -> {
