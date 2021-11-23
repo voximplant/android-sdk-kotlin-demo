@@ -36,6 +36,9 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     private val _enableButtons = MutableLiveData(false)
     val enableButtons: LiveData<Boolean>
         get() = _enableButtons
+    private val _enableKeypad = MutableLiveData(false)
+    val enableKeypad: LiveData<Boolean>
+        get() = _enableKeypad
     val displayName = MutableLiveData<String>()
     val charDTMF = MutableLiveData<String>()
     val onHideKeypadPressed = MutableLiveData<Unit>()
@@ -66,9 +69,12 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             _callState.postValue(callState)
             if (callState == CallState.CONNECTED) {
                 _enableButtons.postValue(true)
-                if (audioCallManager.onHold.value == true) {
-                    _callStatus.postValue(getResource.getString(R.string.call_on_hold))
-                    onHideKeypadPressed.postValue(Unit)
+                audioCallManager.onHold.value?.let {
+                    _enableKeypad.postValue(!it)
+                    if (it) {
+                        _callStatus.postValue(getResource.getString(R.string.call_on_hold))
+                        onHideKeypadPressed.postValue(Unit)
+                    }
                 }
             } else {
                 _enableButtons.postValue(false)
@@ -78,6 +84,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
         _callStatus.addSource(audioCallManager.onHold) { onHold ->
             _onHold.postValue(onHold)
+            _enableKeypad.postValue(!onHold)
             if (onHold) {
                 _callStatus.postValue(getResource.getString(R.string.call_on_hold))
                 onHideKeypadPressed.postValue(Unit)

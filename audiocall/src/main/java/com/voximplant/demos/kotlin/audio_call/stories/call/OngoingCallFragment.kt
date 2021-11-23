@@ -137,6 +137,12 @@ class OngoingCallFragment : Fragment() {
             binding.keypadButton.isEnabled = enabled
         })
 
+        viewModel.enableKeypad.observe(viewLifecycleOwner, { enabled ->
+            val alpha = if (enabled) 1.0 else 0.25
+            binding.keypadButton.alpha = alpha.toFloat()
+            binding.keypadButton.isEnabled = enabled
+        })
+
         viewModel.muted.observe(viewLifecycleOwner, { muted ->
             if (muted) {
                 binding.muteButton.setCardBackgroundColor(
