@@ -66,6 +66,10 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             _callState.postValue(callState)
             if (callState == CallState.CONNECTED) {
                 _enableButtons.postValue(true)
+                if (audioCallManager.onHold.value == true) {
+                    _callStatus.postValue(getResource.getString(R.string.call_state_on_hold))
+                    onHideKeypadPressed.postValue(Unit)
+                }
             } else {
                 _enableButtons.postValue(false)
                 onHideKeypadPressed.postValue(Unit)
