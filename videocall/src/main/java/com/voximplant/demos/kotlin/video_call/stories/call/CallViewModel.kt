@@ -76,9 +76,15 @@ class CallViewModel : BaseViewModel() {
             _callStatus.postValue(callState.toString())
             if (callState == CallState.CONNECTED) {
                 enableHoldButton.postValue(true)
-                if (voximplantCallManager.onHold.value == false) {
-                    enableVideoButton.postValue(true)
-                    enableSharingButton.postValue(true)
+                voximplantCallManager.onHold.value?.let {
+                    if (it) {
+                        _callStatus.postValue(Shared.getResource.getString(R.string.call_on_hold))
+                        enableVideoButton.postValue(false)
+                        enableSharingButton.postValue(false)
+                    } else {
+                        enableVideoButton.postValue(true)
+                        enableSharingButton.postValue(true)
+                    }
                 }
             } else {
                 enableHoldButton.postValue(false)
