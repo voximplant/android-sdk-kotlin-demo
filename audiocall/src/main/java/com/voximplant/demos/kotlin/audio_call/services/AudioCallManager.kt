@@ -75,6 +75,7 @@ class AudioCallManager(
     // Call events
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
+    var onCallAnswer: (() -> Unit)? = null
 
     init {
         client.setClientIncomingCallListener(this)
@@ -244,13 +245,19 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun answerIncomingCall() =
         executeOrThrow {
+            if (_callState.value == CallState.CONNECTING) {
+                return@executeOrThrow
+            }
             notificationHelper.cancelIncomingCallNotification()
             _callDuration.postValue(0)
             if (callState.value == CallState.RECONNECTING) {
+                //  setActive() is required here to notify wearable devices that the incoming call has been answered.
+                managedCallConnection?.setActive()
                 playReconnectingTone()
             } else {
                 setCallState(CallState.CONNECTING)
             }
+            onCallAnswer?.invoke()
             managedCall?.answer(callSettings)
                 ?: throw noActiveCallError
         }
