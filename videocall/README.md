@@ -105,7 +105,19 @@ See the following files for code details:
 - [incomingCallPackage](src/main/java/com/voximplant/demos/kotlin/video_call/stories/incoming_call)
 
 ### Call controls
-<img src="../screenshots/videocall_ongoing_call.png" width=800>
+<table>
+  <tr>
+    <td>Main</td>
+    <td>Ongoing call</td>
+    <td>Incoming call</td>
+    <td>Failed call</td>
+  </tr>
+  <tr>
+    <td><img src="../screenshots/videocall_ongoing_call.png" width=400></td>
+    <td><img src="../screenshots/videocall_screen_sharing.png" width=400></td>
+    <td><img src="../screenshots/videocall_audio_settings.png" width=400></td>
+  </tr>
+</table>
 
 Mute, hold, change an audio device or video sending during a call.
 
