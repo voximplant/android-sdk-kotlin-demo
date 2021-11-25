@@ -10,25 +10,30 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.Shared.eglBase
+import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.demos.kotlin.videocall_deepar.cameraHelper
 import com.voximplant.demos.kotlin.videocall_deepar.deepARHelper
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.ICustomVideoSourceListener
 import org.webrtc.SurfaceTextureHelper
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CallViewModel : BaseViewModel() {
+    private val _callState = MutableLiveData<CallState>()
+    private val _callStatus = MediatorLiveData<String?>()
+    val callStatus: LiveData<String?>
+        get() = _callStatus
+    val displayName = MutableLiveData<String>()
+    val muted
+        get() = voximplantCallManager.muted
 
     private val cameraPreset = CameraResolutionPreset.P640x480
-
-    val muted = MutableLiveData<Boolean>()
-    private var _muted: Boolean = false
-        set(value) {
-            field = value
-            muted.postValue(value)
-        }
 
     val sendingVideo = MutableLiveData<Boolean>()
     private var _sendingVideo: Boolean = true
@@ -38,32 +43,54 @@ class CallViewModel : BaseViewModel() {
         }
 
     val availableAudioDevices: List<String>
-        get() = Shared.voximplantCallManager.availableAudioDevices.map { device ->
-            if (device.name == Shared.voximplantCallManager.selectedAudioDevice.value?.name) {
+        get() = voximplantCallManager.availableAudioDevices.map { device ->
+            if (device.name == voximplantCallManager.selectedAudioDevice.value?.name) {
                 "${device.name} (Current)"
             } else {
                 device.name
             }
         }
 
+    val showLocalVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showLocalVideoView
+    val showRemoteVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showRemoteVideoView
+    val remoteVideoIsPortrait: LiveData<Boolean>
+        get() = voximplantCallManager.remoteVideoIsPortrait
+
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
     val activeDevice: LiveData<AudioDevice>
-        get() = Shared.voximplantCallManager.selectedAudioDevice
+        get() = voximplantCallManager.selectedAudioDevice
     val enableVideoButton = MutableLiveData(false)
 
-    override fun onCreate() {
-        super.onCreate()
+    init {
+        _callStatus.addSource(voximplantCallManager.callState) { callState ->
+            _callState.postValue(callState)
+            _callStatus.postValue(callState.toString())
+            if (callState == CallState.CONNECTED) {
+                enableVideoButton.postValue(true)
+            } else {
+                enableVideoButton.postValue(false)
+            }
+        }
+        _callStatus.addSource(voximplantCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
 
-        Shared.voximplantCallManager.onCallConnect = {
+        voximplantCallManager.onCallConnect = {
+            displayName.postValue(voximplantCallManager.callerDisplayName)
             enableVideoButton.postValue(true)
         }
 
-        Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
+        voximplantCallManager.onCallDisconnect = { failed, reason ->
             deepARHelper.stopDeepAR()
             cameraHelper.stopCamera()
-            Shared.voximplantCallManager.releaseCustomVideoSource()
+            voximplantCallManager.releaseCustomVideoSource()
             if (failed) {
                 moveToCallFailed.postValue(reason)
             } else {
@@ -71,7 +98,7 @@ class CallViewModel : BaseViewModel() {
             }
         }
 
-        Shared.voximplantCallManager.setRenderSurface = { surface, size ->
+        voximplantCallManager.setRenderSurface = { surface, size ->
             deepARHelper.setRenderSurface(surface, size)
         }
 
@@ -79,15 +106,15 @@ class CallViewModel : BaseViewModel() {
             deepARHelper.processImage(image, mirroring)
         }
 
-        Shared.voximplantCallManager.initVideoStreams()
+        voximplantCallManager.initVideoStreams()
     }
 
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
-            enableVideoButton.postValue(true)
-            _muted = Shared.voximplantCallManager.muted
-            _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
+            displayName.postValue(voximplantCallManager.callerDisplayName)
+
+            _sendingVideo = voximplantCallManager.hasLocalVideoStream
 
             enableVideoButton.postValue(true)
         } else {
@@ -96,14 +123,14 @@ class CallViewModel : BaseViewModel() {
             attachCustomSource(cameraPreset)
             if (isIncoming) {
                 try {
-                    Shared.voximplantCallManager.answerCall()
+                    voximplantCallManager.answerCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
                 }
             } else {
                 try {
-                    Shared.voximplantCallManager.startCall()
+                    voximplantCallManager.startCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
@@ -115,16 +142,16 @@ class CallViewModel : BaseViewModel() {
     private fun attachCustomSource(cameraPreset: CameraResolutionPreset) {
         val surfaceTextureHelper: SurfaceTextureHelper? = SurfaceTextureHelper.create(
             DEEP_AR,
-            Shared.eglBase.eglBaseContext,
+            eglBase.eglBaseContext,
         )
         surfaceTextureHelper?.setTextureSize(cameraPreset.height, cameraPreset.width)
-        Shared.voximplantCallManager.customVideoSource = Voximplant.getCustomVideoSource()
-        Shared.voximplantCallManager.customVideoSource?.setSurfaceTextureHelper(surfaceTextureHelper)
-        Shared.voximplantCallManager.customVideoSource?.setCustomVideoSourceListener(object : ICustomVideoSourceListener {
+        voximplantCallManager.customVideoSource = Voximplant.getCustomVideoSource()
+        voximplantCallManager.customVideoSource?.setSurfaceTextureHelper(surfaceTextureHelper)
+        voximplantCallManager.customVideoSource?.setCustomVideoSourceListener(object : ICustomVideoSourceListener {
             override fun onStarted() {
                 if (surfaceTextureHelper?.surfaceTexture != null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        Shared.voximplantCallManager.setRenderSurface?.invoke(
+                        voximplantCallManager.setRenderSurface?.invoke(
                             Surface(surfaceTextureHelper.surfaceTexture),
                             Size(cameraPreset.height, cameraPreset.width)
                         )
@@ -134,17 +161,16 @@ class CallViewModel : BaseViewModel() {
 
             override fun onStopped() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    Shared.voximplantCallManager.setRenderSurface?.invoke(null, Size(0, 0))
+                    voximplantCallManager.setRenderSurface?.invoke(null, Size(0, 0))
                 }
             }
         })
-        Shared.voximplantCallManager.managedCall?.useCustomVideoSource(Shared.voximplantCallManager.customVideoSource)
+        voximplantCallManager.managedCall?.useCustomVideoSource(voximplantCallManager.customVideoSource)
     }
 
     fun mute() {
         try {
-            Shared.voximplantCallManager.muteActiveCall(!_muted)
-            _muted = !_muted
+            muted.value?.let { voximplantCallManager.muteActiveCall(!it) }
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             postError(e.message.toString())
@@ -152,7 +178,7 @@ class CallViewModel : BaseViewModel() {
     }
 
     fun selectAudioDevice(id: Int) {
-        Shared.voximplantCallManager.selectAudioDevice(id)
+        voximplantCallManager.selectAudioDevice(id)
     }
 
     fun sendVideo() {
@@ -166,7 +192,7 @@ class CallViewModel : BaseViewModel() {
             cameraHelper.stopCamera()
         }
 
-        Shared.voximplantCallManager.sendVideo(!_sendingVideo) { error ->
+        voximplantCallManager.sendVideo(!_sendingVideo) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
@@ -179,11 +205,18 @@ class CallViewModel : BaseViewModel() {
 
     fun hangup() {
         try {
-            Shared.voximplantCallManager.hangup()
+            voximplantCallManager.hangup()
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             finish.postValue(Unit)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _callStatus.removeSource(voximplantCallManager.callState)
+        _callStatus.removeSource(voximplantCallManager.callDuration)
+        _callStatus.removeSource(voximplantCallManager.onHold)
     }
 
 }

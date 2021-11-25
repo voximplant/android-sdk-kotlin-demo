@@ -19,7 +19,6 @@ import com.voximplant.demos.kotlin.utils.Shared.getResource
 * Disconnecting -> ICall.hangup(), ICall.reject()
 * Disconnected -> onCallDisconnected(), onCallFailed()
 * Reconnecting -> onCallReconnecting()
-* On hold -> ICall.hold()
 *
 * */
 enum class CallState(private val resourceId: Int) {

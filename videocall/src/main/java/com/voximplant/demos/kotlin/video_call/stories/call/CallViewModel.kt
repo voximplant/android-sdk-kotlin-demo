@@ -9,29 +9,27 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.utils.APP_TAG
-import com.voximplant.demos.kotlin.utils.BaseViewModel
-import com.voximplant.demos.kotlin.utils.CallManagerException
-import com.voximplant.demos.kotlin.utils.Shared
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.cameraManager
+import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.VideoQuality
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CallViewModel : BaseViewModel() {
-    val onHold = MutableLiveData<Boolean>()
-    private var _onHold: Boolean = false
-        set(value) {
-            field = value
-            onHold.postValue(value)
-        }
-
-    val muted = MutableLiveData<Boolean>()
-    private var _muted: Boolean = false
-        set(value) {
-            field = value
-            muted.postValue(value)
-        }
+    private val _callState = MutableLiveData<CallState>()
+    private val _callStatus = MediatorLiveData<String?>()
+    val callStatus: LiveData<String?>
+        get() = _callStatus
+    val displayName = MutableLiveData<String>()
+    val muted
+        get() = voximplantCallManager.muted
+    private val _onHold = MutableLiveData<Boolean>()
+    val onHold
+        get() = _onHold
 
     val sharingScreen = MutableLiveData<Boolean>()
     private var _sharingScreen: Boolean = false
@@ -48,33 +46,79 @@ class CallViewModel : BaseViewModel() {
         }
 
     val availableAudioDevices: List<String>
-        get() = Shared.voximplantCallManager.availableAudioDevices.map { device ->
-            if (device.name == Shared.voximplantCallManager.selectedAudioDevice.value?.name) {
+        get() = voximplantCallManager.availableAudioDevices.map { device ->
+            if (device.name == voximplantCallManager.selectedAudioDevice.value?.name) {
                 "${device.name} (Current)"
             } else {
                 device.name
             }
         }
 
+    val showLocalVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showLocalVideoView
+    val showRemoteVideoView: LiveData<Boolean>
+        get() = voximplantCallManager.showRemoteVideoView
+    val remoteVideoIsPortrait: LiveData<Boolean>
+        get() = voximplantCallManager.remoteVideoIsPortrait
+
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
     val activeDevice: LiveData<AudioDevice>
-        get() = Shared.voximplantCallManager.selectedAudioDevice
+        get() = voximplantCallManager.selectedAudioDevice
     val enableHoldButton = MutableLiveData(false)
     val enableVideoButton = MutableLiveData(false)
     val enableSharingButton = MutableLiveData(false)
 
-    override fun onCreate() {
-        super.onCreate()
+    init {
+        _callStatus.addSource(voximplantCallManager.callState) { callState ->
+            _callState.postValue(callState)
+            _callStatus.postValue(callState.toString())
+            if (callState == CallState.CONNECTED) {
+                enableHoldButton.postValue(true)
+                voximplantCallManager.onHold.value?.let {
+                    if (it) {
+                        _callStatus.postValue(Shared.getResource.getString(R.string.call_on_hold))
+                        enableVideoButton.postValue(false)
+                        enableSharingButton.postValue(false)
+                    } else {
+                        enableVideoButton.postValue(true)
+                        enableSharingButton.postValue(true)
+                    }
+                }
+            } else {
+                enableHoldButton.postValue(false)
+                enableVideoButton.postValue(false)
+                enableSharingButton.postValue(false)
+            }
+        }
 
-        Shared.voximplantCallManager.onCallConnect = {
+        _callStatus.addSource(voximplantCallManager.callDuration) { value ->
+            val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val formattedCallDuration: String = dateFormat.format(Date(value))
+            _callStatus.postValue(formattedCallDuration)
+        }
+
+        _callStatus.addSource(voximplantCallManager.onHold) { onHold ->
+            _onHold.postValue(onHold)
+            enableHoldButton.postValue(true)
+            if (onHold) {
+                _callStatus.postValue(Shared.getResource.getString(R.string.call_on_hold))
+            } else {
+                enableVideoButton.postValue(true)
+                enableSharingButton.postValue(true)
+            }
+        }
+
+        voximplantCallManager.onCallConnect = {
+            displayName.postValue(voximplantCallManager.callerDisplayName)
             enableHoldButton.postValue(true)
             enableVideoButton.postValue(true)
             enableSharingButton.postValue(true)
         }
 
-        Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
+        voximplantCallManager.onCallDisconnect = { failed, reason ->
             if (failed) {
                 moveToCallFailed.postValue(reason)
             } else {
@@ -82,33 +126,29 @@ class CallViewModel : BaseViewModel() {
             }
         }
 
-        Shared.voximplantCallManager.initVideoStreams()
+        voximplantCallManager.initVideoStreams()
     }
 
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
-            _muted = Shared.voximplantCallManager.muted
-            _onHold = Shared.voximplantCallManager.onHold
-            _sharingScreen = Shared.voximplantCallManager.sharingScreen
-            _sendingVideo = Shared.voximplantCallManager.hasLocalVideoStream
+            displayName.postValue(voximplantCallManager.callerDisplayName)
+
+            _sharingScreen = voximplantCallManager.sharingScreen
+            _sendingVideo = voximplantCallManager.hasLocalVideoStream
 
             enableHoldButton.postValue(true)
-            if (!_onHold) {
-                enableVideoButton.postValue(true)
-                enableSharingButton.postValue(true)
-            }
         } else {
             if (isIncoming) {
                 try {
-                    Shared.voximplantCallManager.answerCall()
+                    voximplantCallManager.answerCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
                 }
             } else {
                 try {
-                    Shared.voximplantCallManager.startCall()
+                    voximplantCallManager.startCall()
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
@@ -119,8 +159,7 @@ class CallViewModel : BaseViewModel() {
 
     fun mute() {
         try {
-            Shared.voximplantCallManager.muteActiveCall(!_muted)
-            _muted = !_muted
+            muted.value?.let { voximplantCallManager.muteActiveCall(!it) }
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             postError(e.message.toString())
@@ -131,24 +170,13 @@ class CallViewModel : BaseViewModel() {
         enableHoldButton.postValue(false)
         enableVideoButton.postValue(false)
         enableSharingButton.postValue(false)
-
-        Shared.voximplantCallManager.holdActiveCall(!_onHold) { error ->
-            error?.let {
-                Log.e(APP_TAG, it.message.toString())
-                postError(it.message.toString())
-            } ?: run {
-                _onHold = !_onHold
-            }
-            enableHoldButton.postValue(true)
-            if (!_onHold) {
-                enableVideoButton.postValue(true)
-                enableSharingButton.postValue(true)
-            }
+        voximplantCallManager.onHold.value?.let { isOnHold ->
+            voximplantCallManager.holdActiveCall(!isOnHold)
         }
     }
 
     fun selectAudioDevice(id: Int) {
-        Shared.voximplantCallManager.selectAudioDevice(id)
+        voximplantCallManager.selectAudioDevice(id)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -160,7 +188,7 @@ class CallViewModel : BaseViewModel() {
         if (!_sharingScreen) {
             request { intent ->
                 intent?.let {
-                    Shared.voximplantCallManager.shareScreen(it) { e ->
+                    voximplantCallManager.shareScreen(it) { e ->
                         e?.let { error ->
                             Log.e(APP_TAG, error.message.toString())
                             postError(error.message.toString())
@@ -179,7 +207,7 @@ class CallViewModel : BaseViewModel() {
                 }
             }
         } else {
-            Shared.voximplantCallManager.sendVideo(_sendingVideo) { error ->
+            voximplantCallManager.sendVideo(_sendingVideo) { error ->
                 error?.let {
                     Log.e(APP_TAG, it.message.toString())
                     postError(it.message.toString())
@@ -198,7 +226,7 @@ class CallViewModel : BaseViewModel() {
         enableVideoButton.postValue(false)
         enableSharingButton.postValue(false)
 
-        Shared.voximplantCallManager.sendVideo(!_sendingVideo) { error ->
+        voximplantCallManager.sendVideo(!_sendingVideo) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
@@ -223,11 +251,18 @@ class CallViewModel : BaseViewModel() {
 
     fun hangup() {
         try {
-            Shared.voximplantCallManager.hangup()
+            voximplantCallManager.hangup()
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
             finish.postValue(Unit)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _callStatus.removeSource(voximplantCallManager.callState)
+        _callStatus.removeSource(voximplantCallManager.callDuration)
+        _callStatus.removeSource(voximplantCallManager.onHold)
     }
 
     companion object {

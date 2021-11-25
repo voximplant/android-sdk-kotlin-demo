@@ -232,7 +232,7 @@ class NotificationHelper(
                             color = context.getColor(R.color.colorRed)
                             setColorized(true).setStyle(NotificationCompat.DecoratedCustomViewStyle())
                         }
-                        setContentText("$userName - ${context.getString(R.string.call_state_on_hold)}")
+                        setContentText("$userName - ${context.getString(R.string.call_on_hold)}")
                     }
                     else -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

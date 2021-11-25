@@ -72,7 +72,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 audioCallManager.onHold.value?.let {
                     _enableKeypad.postValue(!it)
                     if (it) {
-                        _callStatus.postValue(getResource.getString(R.string.call_state_on_hold))
+                        _callStatus.postValue(getResource.getString(R.string.call_on_hold))
                         onHideKeypadPressed.postValue(Unit)
                     }
                 }
@@ -86,7 +86,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             _onHold.postValue(onHold)
             _enableKeypad.postValue(!onHold)
             if (onHold) {
-                _callStatus.postValue(getResource.getString(R.string.call_state_on_hold))
+                _callStatus.postValue(getResource.getString(R.string.call_on_hold))
                 onHideKeypadPressed.postValue(Unit)
             }
         }

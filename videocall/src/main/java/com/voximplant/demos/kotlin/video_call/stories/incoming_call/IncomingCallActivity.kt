@@ -18,7 +18,6 @@ import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
-import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.sdk.Voximplant
 import kotlinx.android.synthetic.main.activity_incoming_call.*
 
@@ -85,12 +84,6 @@ class IncomingCallActivity :
             }
         })
 
-        model.moveToMainActivity.observe(this, {
-            Intent(this, MainActivity::class.java).also {
-                startActivity(it)
-            }
-        })
-
         model.displayName.observe(this, {
             incoming_call_from.text = it
         })
@@ -102,6 +95,8 @@ class IncomingCallActivity :
             permissionsRequestCompletion = { model.answer() }
             requestPermissions()
         }
+
+        model.viewCreated()
     }
 
     override fun onBackPressed() {}

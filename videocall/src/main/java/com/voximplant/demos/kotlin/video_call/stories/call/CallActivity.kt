@@ -23,19 +23,26 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
+import com.voximplant.demos.kotlin.video_call.databinding.ActivityCallBinding
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.sdk.hardware.AudioDevice
 import kotlinx.android.synthetic.main.activity_call.*
+import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
+import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
-
+    private lateinit var binding: ActivityCallBinding
     private var screenSharingRequestCompletion: ((Intent?) -> Unit)? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_call)
+        binding = ActivityCallBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
+        binding.model = model
 
         local_video_view.setZOrderMediaOverlay(true)
 
@@ -114,12 +121,16 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             model.changeCam()
         }
 
-        Shared.voximplantCallManager.showLocalVideoView.observe(this, {
+        model.showLocalVideoView.observe(this, {
             local_video_view.visibility = if (it) VISIBLE else INVISIBLE
         })
 
-        Shared.voximplantCallManager.showRemoteVideoView.observe(this, {
+        model.showRemoteVideoView.observe(this, {
             remote_video_view.visibility = if (it) VISIBLE else INVISIBLE
+        })
+
+        model.remoteVideoIsPortrait.observe(this, { isPortrait ->
+            remote_video_view.setScalingType(if (isPortrait) SCALE_ASPECT_FILL else SCALE_ASPECT_FIT)
         })
 
         model.activeDevice.observe(this, { audioDevice ->
