@@ -4,7 +4,6 @@
 
 package com.voximplant.demos.kotlin.audio_call.services
 
-import android.net.Uri
 import android.telecom.CallAudioState
 import android.telecom.Connection
 import android.util.Log
@@ -41,8 +40,18 @@ class CallConnection : Connection() {
         audioCallManager.hangupOngoingCall()
     }
 
-    override fun onReject(rejectReason: Int) {
+    override fun onReject() {
         Log.i(APP_TAG, "CallConnection::onReject")
+        audioCallManager.declineIncomingCall()
+    }
+
+    override fun onReject(rejectReason: Int) {
+        Log.i(APP_TAG, "CallConnection::onReject with reason: $rejectReason")
+        audioCallManager.declineIncomingCall()
+    }
+
+    override fun onReject(replyMessage: String?) {
+        Log.i(APP_TAG, "CallConnection::onReject with reply message: $replyMessage")
         audioCallManager.declineIncomingCall()
     }
 

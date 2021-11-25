@@ -20,6 +20,23 @@ The application is able to:
 - receive push notifications (requires additional setup)
 - proximity sensor usage
 
+## Install the app
+
+### From the source code
+
+1. Clone this repository
+2. Select AudioCall and build the project using Android Studio
+
+### Download the application build
+
+Use the [invite link](https://appdistribution.firebase.dev/i/a22e2c002c4ae0fd) to get access the latest builds and subscribe for the application updates.
+
+| :warning: &nbsp;&nbsp; Please consider that you need to set up a Voximplant account to make calls. Please follow the instructions below. |
+| :--- |
+
+| :warning: &nbsp;&nbsp; Push notifications require additional setup. If the application is built from the source code, [set up push notifications](https://voximplant.com/docs/howtos/sdks/push_notifications/android_sdk). If the application was installed from the invite link, push notifications cannot be configured. |
+| :--- |
+
 ## Getting started
 To get started, you'll need to [register](https://voximplant.com) a free Voximplant developer account.
 
@@ -52,12 +69,6 @@ const newCall = VoxEngine.callUserDirect(
 VoxEngine.easyProcess(e.call, newCall, ()=>{}, true);
 });
 ```
-
-## Installing
-1. Clone this repo
-2. Select AudioCall and build the project using Android Studio
-
-Also you can setup [push notifications](https://voximplant.com/docs/howtos/sdks/push_notifications/android_sdk) to receive incoming calls via Firebase Cloud Messaging.
 
 ## Usage
 

@@ -8,22 +8,25 @@ import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import com.google.android.material.snackbar.Snackbar
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentCallFailedBinding
 import com.voximplant.demos.kotlin.utils.FAIL_REASON
 import com.voximplant.demos.kotlin.utils.IS_OUTGOING_CALL
+import com.voximplant.demos.kotlin.utils.ProgressHUDView
 
 class CallFailedFragment : Fragment() {
     private lateinit var binding: FragmentCallFailedBinding
     private val viewModel: CallFailedViewModel by navGraphViewModels(R.id.nav_call_graph)
+
+    private val rootViewGroup: ViewGroup
+        get() = activity?.window?.decorView?.rootView as ViewGroup
+    private var progressHUDView: ProgressHUDView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +60,22 @@ class CallFailedFragment : Fragment() {
             false
         }
 
+        viewModel.showProgress.observe(viewLifecycleOwner, { textID ->
+            showProgressHUD(resources.getString(textID))
+        })
+
+        viewModel.hideProgress.observe(viewLifecycleOwner, {
+            hideProgressHUD()
+        })
+
+        viewModel.showStringSnackbar.observe(viewLifecycleOwner, { value ->
+            Snackbar.make(view, value, Snackbar.LENGTH_LONG).show()
+        })
+
+        viewModel.showIntSnackbar.observe(viewLifecycleOwner, { value ->
+            Snackbar.make(view, getString(value), Snackbar.LENGTH_LONG).show()
+        })
+
         viewModel.moveToCall.observe(viewLifecycleOwner, {
             findNavController().navigate(
                 R.id.action_callFailedFragment_to_callFragment,
@@ -73,4 +92,26 @@ class CallFailedFragment : Fragment() {
         animator.setTarget(view)
         animator.start()
     }
+
+    private fun showProgressHUD(text: String) {
+        progressHUDView?.setText(text)
+            ?: run {
+                progressHUDView = ProgressHUDView(requireContext())
+                progressHUDView?.setText(text)
+                rootViewGroup.addView(progressHUDView)
+                activity?.window?.setFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                )
+            }
+    }
+
+    private fun hideProgressHUD() {
+        progressHUDView?.let {
+            rootViewGroup.removeView(it)
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+            progressHUDView = null
+        }
+    }
+
 }

@@ -283,7 +283,7 @@ class VoximplantCallManager(
         showLocalVideoView.postValue(false)
         showRemoteVideoView.postValue(false)
         removeCall()
-        onCallDisconnect?.invoke(false, appContext.getString(R.string.disconnected))
+        onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
     }
 
     override fun onCallFailed(
