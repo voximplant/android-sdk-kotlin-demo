@@ -18,6 +18,10 @@ class IncomingCallViewModel : ViewModel() {
     val moveToCall = MutableLiveData<Unit>()
 
     init {
+        audioCallManager.onCallAnswer = {
+            moveToCall.postValue(Unit)
+        }
+
         audioCallManager.onCallDisconnect = { _, _ ->
             finishActivity.postValue(Unit)
         }
