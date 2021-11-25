@@ -107,10 +107,9 @@ See the following files for code details:
 ### Call controls
 <table>
   <tr>
-    <td>Main</td>
     <td>Ongoing call</td>
-    <td>Incoming call</td>
-    <td>Failed call</td>
+    <td>Screen sharing</td>
+    <td>Audio settings</td>
   </tr>
   <tr>
     <td><img src="../screenshots/videocall_ongoing_call.png" width=400></td>
