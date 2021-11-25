@@ -32,6 +32,23 @@ we have made NotificationHelper class build and show full screen notifications
 See the following file for code details:
 - [NotificationHelper](src/main/java/com/voximplant/demos/kotlin/video_call/utils/NotificationHelper.kt)
 
+## Install the app
+
+### From the source code
+
+1. Clone this repository
+2. Select VideoCall and build the project using Android Studio
+
+### Download the application build
+
+Use the [invite link](https://appdistribution.firebase.dev/i/a5de9a57807a0f49) to get access the latest builds and subscribe for the application updates.
+
+| :warning: &nbsp;&nbsp; Please consider that you need to set up a Voximplant account to make calls. Please follow the instructions below. |
+| :--- |
+
+| :warning: &nbsp;&nbsp; Push notifications require additional setup. If the application is built from the source code, [set up push notifications](https://voximplant.com/docs/howtos/sdks/push_notifications/android_sdk). If the application was installed from the invite link, push notifications cannot be configured. |
+| :--- |
+
 ## Getting started
 To get started, you'll need to [register](https://voximplant.com) a free Voximplant developer account.
 
@@ -63,11 +80,6 @@ You can set up it manually using our [quickstart guide](https://voximplant.com/d
   VoxEngine.easyProcess(e.call, newCall, ()=>{}, true);
   });
   ```
-
-## Installing
-1. Clone this repo 
-
-2. Select VideoCall and build the project using Android Studio
 
 ## Usage
 
