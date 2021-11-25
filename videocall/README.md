@@ -41,7 +41,7 @@ See the following file for code details:
 
 ### Download the application build
 
-Use the [invite link](https://appdistribution.firebase.dev/i/a5de9a57807a0f49) to get access the latest builds and subscribe for the application updates.
+Use the [invite link](https://appdistribution.firebase.dev/i/e66224fa6587cf1c) to get access the latest builds and subscribe for the application updates.
 
 | :warning: &nbsp;&nbsp; Please consider that you need to set up a Voximplant account to make calls. Please follow the instructions below. |
 | :--- |
