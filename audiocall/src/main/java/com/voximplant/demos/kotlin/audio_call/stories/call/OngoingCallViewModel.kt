@@ -128,6 +128,8 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 Log.e(APP_TAG, "OngoingCallViewModel::onCreateWithCall ${e.message}")
                 finishActivity.postValue(Unit)
             }
+        } else {
+            finishActivity.postValue(Unit)
         }
     }
 
