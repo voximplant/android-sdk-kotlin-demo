@@ -24,9 +24,7 @@ class CallFailedViewModel : ViewModel() {
     val finishActivity = MutableLiveData<Unit>()
 
     init {
-        displayName.postValue(
-            audioCallManager.latestCallerDisplayName ?: audioCallManager.latestCallerUsername.orEmpty()
-        )
+        displayName.postValue(audioCallManager.latestCallerUsername)
     }
 
     fun cancel() {
