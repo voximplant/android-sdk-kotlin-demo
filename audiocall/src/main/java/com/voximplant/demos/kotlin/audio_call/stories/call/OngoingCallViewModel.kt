@@ -121,7 +121,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
             displayName.postValue(audioCallManager.callerDisplayName)
             _enableButtons.postValue(true)
         } else if (isOutgoing) {
-            displayName.postValue(audioCallManager.latestCallerUsername)
+            displayName.postValue(audioCallManager.endpointUsername)
             try {
                 audioCallManager.startOutgoingCall()
             } catch (e: CallManagerException) {

@@ -75,9 +75,9 @@ class VoximplantCallManager(
     val selectedAudioDevice: LiveData<AudioDevice> = _selectedAudioDevice
     val availableAudioDevices: MutableList<AudioDevice> get() = audioDeviceManager.audioDevices
 
-    var latestCallerDisplayName: String? = null
+    var endpointDisplayName: String? = null
         private set
-    var latestCallerUsername: String? = null
+    var endpointUsername: String? = null
         private set
 
     private val _muted = MutableLiveData(false)
@@ -146,8 +146,8 @@ class VoximplantCallManager(
         call.also {
             it.addCallListener(this)
             managedCall = it
-            latestCallerDisplayName = it.endpoints.firstOrNull()?.userName
-            latestCallerUsername = it.endpoints.firstOrNull()?.userDisplayName
+            endpointDisplayName = it.endpoints.firstOrNull()?.userName
+            endpointUsername = it.endpoints.firstOrNull()?.userDisplayName
             presentIncomingCallUI()
         }
     }
@@ -204,7 +204,7 @@ class VoximplantCallManager(
             }
             setCallState(CallState.OUTGOING)
             managedCall = client.call(user, callSettings)?.also {
-                latestCallerUsername = user
+                endpointUsername = user
                 it.addCallListener(this)
             }
                 ?: throw callCreationError
@@ -257,7 +257,7 @@ class VoximplantCallManager(
                         managedCall?.let { startCallTimer(it) }
                     }
                     _callState.value?.let {
-                        Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
+                        Shared.notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = it, isOnHold = hold)
                     }
                 }
 
@@ -324,6 +324,8 @@ class VoximplantCallManager(
         managedCall?.removeCallListener(this)
         managedCall?.endpoints?.firstOrNull()?.setEndpointListener(null)
         managedCall = null
+        endpointDisplayName = null
+        endpointUsername = null
         _callTimer.cancel()
         _callTimer.purge()
         _muted.postValue(false)
@@ -349,7 +351,7 @@ class VoximplantCallManager(
             // Update notification
             if (newState in arrayOf(CallState.CONNECTED, CallState.RECONNECTING)) {
                 _onHold.value?.let {
-                    Shared.notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
+                    Shared.notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = newState, isOnHold = it)
                 }
             }
         }
@@ -396,7 +398,7 @@ class VoximplantCallManager(
         Shared.notificationHelper.cancelIncomingCallNotification()
         call?.let { startCallTimer(it) }
         playConnectedTone()
-        latestCallerDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
+        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         startForegroundCallService()
     }
 
@@ -439,7 +441,7 @@ class VoximplantCallManager(
             appContext.registerReceiver(callBroadcastReceiver, filter)
             Shared.notificationHelper.createOngoingCallNotification(
                 appContext,
-                latestCallerDisplayName ?: latestCallerUsername,
+                endpointDisplayName ?: endpointUsername,
                 appContext.getString(R.string.call_in_progress),
                 callActivity,
             )
@@ -533,7 +535,7 @@ class VoximplantCallManager(
             Shared.notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,
-                latestCallerDisplayName ?: latestCallerUsername.orEmpty()
+                endpointDisplayName ?: endpointUsername.orEmpty()
             )
         }
     }

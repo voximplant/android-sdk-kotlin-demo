@@ -27,8 +27,8 @@ class IncomingCallViewModel : ViewModel() {
         }
 
         displayName.postValue(
-            audioCallManager.latestCallerDisplayName
-                ?: audioCallManager.latestCallerUsername.orEmpty()
+            audioCallManager.endpointDisplayName
+                ?: audioCallManager.endpointUsername.orEmpty()
         )
     }
 
