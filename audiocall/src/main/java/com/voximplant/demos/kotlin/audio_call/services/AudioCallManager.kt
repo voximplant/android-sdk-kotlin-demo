@@ -56,9 +56,9 @@ class AudioCallManager(
         get() = CallSettings().apply { videoFlags = VideoFlags(false, false) }
 
     // Call properties
-    var latestCallerDisplayName: String? = null
+    var endpointDisplayName: String? = null
         private set
-    var latestCallerUsername: String? = null
+    var endpointUsername: String? = null
         private set
     private val _muted = MutableLiveData(false)
     val muted: LiveData<Boolean>
@@ -102,8 +102,8 @@ class AudioCallManager(
         call.also {
             it.addCallListener(this)
             managedCall = it
-            latestCallerUsername = it.endpoints.firstOrNull()?.userName
-            latestCallerDisplayName = it.endpoints.firstOrNull()?.userDisplayName
+            endpointUsername = it.endpoints.firstOrNull()?.userName
+            endpointDisplayName = it.endpoints.firstOrNull()?.userDisplayName
         }
         telecomManager.addIncomingCall()
     }
@@ -114,7 +114,7 @@ class AudioCallManager(
         onCallConnect?.invoke()
         call?.let { startCallTimer(it) }
         playConnectedTone()
-        latestCallerDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
+        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         startForegroundCallService()
     }
 
@@ -227,7 +227,7 @@ class AudioCallManager(
             }
             setCallState(CallState.OUTGOING)
             managedCall = client.call(user, callSettings)?.also {
-                latestCallerUsername = user
+                endpointUsername = user
                 telecomManager.addOutgoingCall(user)
                 it.addCallListener(this)
             }
@@ -292,7 +292,7 @@ class AudioCallManager(
                         managedCall?.let { startCallTimer(it) }
                     }
                     _callState.value?.let {
-                        notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = it, isOnHold = hold)
+                        notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = it, isOnHold = hold)
                     }
                 }
 
@@ -338,6 +338,8 @@ class AudioCallManager(
         managedCall?.removeCallListener(this)
         managedCall?.endpoints?.firstOrNull()?.setEndpointListener(null)
         managedCall = null
+        endpointDisplayName = null
+        endpointUsername = null
         _callTimer.cancel()
         _callTimer.purge()
         _muted.postValue(false)
@@ -363,7 +365,7 @@ class AudioCallManager(
             // Update notification
             if (newState in arrayOf(CallState.CONNECTED, CallState.RECONNECTING)) {
                 _onHold.value?.let {
-                    notificationHelper.updateOngoingNotification(userName = latestCallerUsername, callState = newState, isOnHold = it)
+                    notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = newState, isOnHold = it)
                 }
             }
         }
@@ -379,7 +381,7 @@ class AudioCallManager(
             appContext.registerReceiver(callBroadcastReceiver, filter)
             notificationHelper.createOngoingCallNotification(
                 appContext,
-                latestCallerDisplayName ?: latestCallerUsername,
+                endpointDisplayName ?: endpointUsername,
                 appContext.getString(R.string.call_in_progress),
                 MainActivity::class.java,
             )
@@ -423,7 +425,7 @@ class AudioCallManager(
             notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,
-                latestCallerDisplayName ?: appContext.getString(R.string.unknown_user),
+                endpointDisplayName ?: appContext.getString(R.string.unknown_user),
             )
         }
     }

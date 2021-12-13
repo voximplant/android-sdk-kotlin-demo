@@ -120,15 +120,16 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
             displayName.postValue(audioCallManager.callerDisplayName)
             _enableButtons.postValue(true)
-        } else {
-            if (isOutgoing) {
-                try {
-                    audioCallManager.startOutgoingCall()
-                } catch (e: CallManagerException) {
-                    Log.e(APP_TAG, "OngoingCallViewModel::onCreateWithCall ${e.message}")
-                    finishActivity.postValue(Unit)
-                }
+        } else if (isOutgoing) {
+            displayName.postValue(audioCallManager.endpointUsername)
+            try {
+                audioCallManager.startOutgoingCall()
+            } catch (e: CallManagerException) {
+                Log.e(APP_TAG, "OngoingCallViewModel::onCreateWithCall ${e.message}")
+                finishActivity.postValue(Unit)
             }
+        } else {
+            finishActivity.postValue(Unit)
         }
     }
 

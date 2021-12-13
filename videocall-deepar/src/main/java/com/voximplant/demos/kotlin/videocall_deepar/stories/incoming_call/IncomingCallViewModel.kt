@@ -22,8 +22,8 @@ class IncomingCallViewModel : BaseViewModel() {
         }
 
         displayName.postValue(
-            Shared.voximplantCallManager.latestCallerDisplayName
-                ?: Shared.voximplantCallManager.latestCallerUsername.orEmpty()
+            Shared.voximplantCallManager.endpointDisplayName
+                ?: Shared.voximplantCallManager.endpointUsername.orEmpty()
         )
     }
 

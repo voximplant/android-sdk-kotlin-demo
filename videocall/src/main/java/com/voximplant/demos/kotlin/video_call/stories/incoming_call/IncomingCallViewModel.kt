@@ -20,8 +20,8 @@ class IncomingCallViewModel : BaseViewModel() {
         }
 
         displayName.postValue(
-            voximplantCallManager.latestCallerDisplayName
-                ?: voximplantCallManager.latestCallerUsername.orEmpty()
+            voximplantCallManager.endpointDisplayName
+                ?: voximplantCallManager.endpointUsername.orEmpty()
         )
     }
 

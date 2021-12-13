@@ -147,6 +147,7 @@ class CallViewModel : BaseViewModel() {
                     finish.postValue(Unit)
                 }
             } else {
+                displayName.postValue(voximplantCallManager.endpointUsername)
                 try {
                     voximplantCallManager.startCall()
                 } catch (e: CallManagerException) {

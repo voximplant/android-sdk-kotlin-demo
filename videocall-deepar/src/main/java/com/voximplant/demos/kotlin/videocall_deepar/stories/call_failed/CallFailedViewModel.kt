@@ -13,10 +13,7 @@ class CallFailedViewModel : BaseViewModel() {
 
     override fun onCreate() {
         super.onCreate()
-        displayName.postValue(
-            voximplantCallManager.latestCallerDisplayName
-                ?: voximplantCallManager.latestCallerDisplayName.orEmpty()
-        )
+        displayName.postValue(voximplantCallManager.endpointDisplayName ?: voximplantCallManager.endpointUsername)
     }
 
     fun cancel() {
@@ -35,7 +32,7 @@ class CallFailedViewModel : BaseViewModel() {
                 }
             } ?: run {
                 try {
-                    voximplantCallManager.createCall(voximplantCallManager.latestCallerUsername.orEmpty())
+                    voximplantCallManager.createCall(voximplantCallManager.endpointUsername.orEmpty())
                     moveToCall.postValue(Unit)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
