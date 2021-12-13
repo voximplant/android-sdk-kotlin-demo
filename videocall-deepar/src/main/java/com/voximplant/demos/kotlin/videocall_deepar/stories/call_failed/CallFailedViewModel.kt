@@ -13,7 +13,7 @@ class CallFailedViewModel : BaseViewModel() {
 
     override fun onCreate() {
         super.onCreate()
-        displayName.postValue(voximplantCallManager.endpointUsername)
+        displayName.postValue(voximplantCallManager.endpointDisplayName ?: voximplantCallManager.endpointUsername)
     }
 
     fun cancel() {
