@@ -146,8 +146,8 @@ class VoximplantCallManager(
         call.also {
             it.addCallListener(this)
             managedCall = it
-            endpointDisplayName = it.endpoints.firstOrNull()?.userName
-            endpointUsername = it.endpoints.firstOrNull()?.userDisplayName
+            endpointDisplayName = it.endpoints.firstOrNull()?.userDisplayName
+            endpointUsername = it.endpoints.firstOrNull()?.userName
             presentIncomingCallUI()
         }
     }
