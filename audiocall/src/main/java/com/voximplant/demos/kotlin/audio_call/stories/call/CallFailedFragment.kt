@@ -46,6 +46,8 @@ class CallFailedFragment : Fragment() {
         val reducer = AnimatorInflater.loadAnimator(context, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(context, R.animator.regain_size)
 
+        viewModel.setEndpoint(userName = arguments?.getString("userName"), displayName = arguments?.getString("displayName"))
+
         binding.callFailedStatus.text = arguments?.getString(FAIL_REASON)
 
         binding.cancel.setOnTouchListener { v, motionEvent ->

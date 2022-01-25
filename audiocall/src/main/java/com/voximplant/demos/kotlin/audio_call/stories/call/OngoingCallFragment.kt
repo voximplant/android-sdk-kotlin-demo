@@ -193,7 +193,11 @@ class OngoingCallFragment : Fragment() {
         viewModel.moveToCallFailed.observe(viewLifecycleOwner, { reason ->
             findNavController().navigate(
                 R.id.action_callFragment_to_callFailedFragment,
-                bundleOf(FAIL_REASON to reason)
+                bundleOf(
+                    "userName" to viewModel.userName.value,
+                    "displayName" to viewModel.displayName.value,
+                    FAIL_REASON to reason,
+                )
             )
         })
 

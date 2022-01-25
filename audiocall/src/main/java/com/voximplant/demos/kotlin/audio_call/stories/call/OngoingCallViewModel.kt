@@ -39,7 +39,12 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     private val _enableKeypad = MutableLiveData(false)
     val enableKeypad: LiveData<Boolean>
         get() = _enableKeypad
-    val displayName = MutableLiveData<String>()
+    private val _userName = MutableLiveData<String?>()
+    val userName: LiveData<String?>
+        get() = _userName
+    private val _displayName = MutableLiveData<String?>()
+    val displayName: LiveData<String?>
+        get() = _displayName
     val charDTMF = MutableLiveData<String>()
     val onHideKeypadPressed = MutableLiveData<Unit>()
     private var audioDeviceManager: IAudioDeviceManager = Voximplant.getAudioDeviceManager()
@@ -93,7 +98,8 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
         audioCallManager.onCallConnect =
             {
-                displayName.postValue(audioCallManager.callerDisplayName)
+                _userName.postValue(audioCallManager.endpointUsername)
+                _displayName.postValue(audioCallManager.endpointDisplayName)
                 _enableButtons.postValue(true)
             }
 
@@ -118,10 +124,12 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         if (isOngoing || isIncoming) {
             // On return to call from notification
 
-            displayName.postValue(audioCallManager.callerDisplayName)
+            _displayName.postValue(audioCallManager.endpointUsername)
+            _displayName.postValue(audioCallManager.endpointDisplayName)
             _enableButtons.postValue(true)
         } else if (isOutgoing) {
-            displayName.postValue(audioCallManager.endpointUsername)
+            _userName.postValue(audioCallManager.endpointUsername)
+            _displayName.postValue(audioCallManager.endpointDisplayName)
             try {
                 audioCallManager.startOutgoingCall()
             } catch (e: CallManagerException) {
@@ -134,7 +142,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
     }
 
     private fun updateDisplayName() {
-        displayName.postValue(audioCallManager.callerDisplayName)
+        _displayName.postValue(audioCallManager.endpointDisplayName)
     }
 
     fun onHideKeypadPressed() {
