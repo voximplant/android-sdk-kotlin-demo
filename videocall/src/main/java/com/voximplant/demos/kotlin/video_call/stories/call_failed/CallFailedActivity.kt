@@ -7,9 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import com.voximplant.demos.kotlin.utils.BaseActivity
-import com.voximplant.demos.kotlin.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.utils.IS_INCOMING_CALL
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.databinding.ActivityCallFailedBinding
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
@@ -27,7 +25,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         binding.lifecycleOwner = this
         binding.model = model
 
-        model.setEndpoint(userName = intent.getStringExtra("userName"), displayName = intent.getStringExtra("displayName"))
+        model.setEndpoint(userName = intent.getStringExtra(ENDPOINT_USERNAME), displayName = intent.getStringExtra(ENDPOINT_DISPLAY_NAME))
 
         val failReason = intent.getStringExtra(FAIL_REASON)
         call_failed_status.text = failReason

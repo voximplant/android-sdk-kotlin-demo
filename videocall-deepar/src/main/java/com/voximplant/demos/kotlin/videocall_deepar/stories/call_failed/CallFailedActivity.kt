@@ -25,7 +25,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         binding.lifecycleOwner = this
         binding.model = model
 
-        model.setEndpoint(userName = intent.getStringExtra("userName"), displayName = intent.getStringExtra("displayName"))
+        model.setEndpoint(userName = intent.getStringExtra(ENDPOINT_USERNAME), displayName = intent.getStringExtra(ENDPOINT_DISPLAY_NAME))
 
         val failReason = intent.getStringExtra(FAIL_REASON)
         call_failed_status.text = failReason

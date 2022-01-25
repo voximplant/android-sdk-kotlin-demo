@@ -8,17 +8,17 @@ import com.voximplant.demos.kotlin.utils.Shared.authService
 import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 
 class CallFailedViewModel : BaseViewModel() {
-    private val _userName = MutableLiveData<String>()
-    val userName: LiveData<String>
+    private val _userName = MutableLiveData<String?>()
+    val userName: LiveData<String?>
         get() = _userName
-    private val _displayName = MutableLiveData<String>()
-    val displayName: LiveData<String>
+    private val _displayName = MutableLiveData<String?>()
+    val displayName: LiveData<String?>
         get() = _displayName
 
     val moveToCall = MutableLiveData<Unit>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
-    fun setEndpoint(displayName: String?, userName: String?) {
+    fun setEndpoint(userName: String?, displayName: String?) {
         Log.d(APP_TAG, "CallFailedViewModel::setEndpoint userName: $userName, displayName: $displayName")
         _userName.postValue(userName)
         _displayName.postValue(displayName)

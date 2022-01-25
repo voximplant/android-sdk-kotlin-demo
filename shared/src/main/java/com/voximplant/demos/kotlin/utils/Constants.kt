@@ -6,6 +6,8 @@ const val DEEP_AR = "DeepAR"
 const val IS_INCOMING_CALL = "is_incoming"
 const val IS_ONGOING_CALL = "is_ongoing"
 const val IS_OUTGOING_CALL = "is_outgoing"
+const val ENDPOINT_USERNAME = "username"
+const val ENDPOINT_DISPLAY_NAME = "display_name"
 const val FAIL_REASON = "fail_reason"
 const val LAST_OUTGOING_CALL_USERNAME = "outgoing_call_username"
 
