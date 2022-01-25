@@ -59,8 +59,6 @@ class VoximplantCallManager(
     val callState: LiveData<CallState>
         get() = _callState
     private val _previousCallState = MutableLiveData(CallState.NONE)
-    val callerDisplayName
-        get() = managedCall?.endpoints?.get(0)?.userDisplayName
     private var _callTimer: Timer = Timer("callTimer")
     private val _callDuration = MutableLiveData(0L)
     val callDuration: LiveData<Long>

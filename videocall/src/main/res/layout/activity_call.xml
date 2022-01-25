@@ -54,7 +54,7 @@
                 android:gravity="center"
                 android:lines="1"
                 android:minLines="1"
-                android:text="@{model.displayName, default=displayName}"
+                android:text="@{model.displayName ?? model.userName, default=displayName}"
                 android:textAlignment="center"
                 android:textSize="26sp"
                 app:autoSizeMaxTextSize="26sp"
