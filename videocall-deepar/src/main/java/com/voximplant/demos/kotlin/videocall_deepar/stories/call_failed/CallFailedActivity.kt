@@ -11,14 +11,21 @@ import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
 import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityCallFailedBinding
 import kotlinx.android.synthetic.main.activity_call_failed.*
 
 class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
+    private lateinit var binding: ActivityCallFailedBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_call_failed)
+        binding = ActivityCallFailedBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
+        binding.model = model
+
+        model.setEndpoint(userName = intent.getStringExtra(ENDPOINT_USERNAME), displayName = intent.getStringExtra(ENDPOINT_DISPLAY_NAME))
 
         val failReason = intent.getStringExtra(FAIL_REASON)
         call_failed_status.text = failReason

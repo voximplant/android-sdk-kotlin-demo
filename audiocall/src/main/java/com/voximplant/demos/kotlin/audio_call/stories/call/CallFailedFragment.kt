@@ -16,9 +16,7 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentCallFailedBinding
-import com.voximplant.demos.kotlin.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.utils.IS_OUTGOING_CALL
-import com.voximplant.demos.kotlin.utils.ProgressHUDView
+import com.voximplant.demos.kotlin.utils.*
 
 class CallFailedFragment : Fragment() {
     private lateinit var binding: FragmentCallFailedBinding
@@ -45,6 +43,8 @@ class CallFailedFragment : Fragment() {
 
         val reducer = AnimatorInflater.loadAnimator(context, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(context, R.animator.regain_size)
+
+        viewModel.setEndpoint(userName = arguments?.getString(ENDPOINT_USERNAME), displayName = arguments?.getString(ENDPOINT_DISPLAY_NAME))
 
         binding.callFailedStatus.text = arguments?.getString(FAIL_REASON)
 

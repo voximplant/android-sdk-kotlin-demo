@@ -1,106 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    tools:context=".stories.call_failed.CallFailedActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageButton
-        android:id="@+id/cancel_call_button"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="40dp"
-        android:background="@drawable/button_image_red_passive"
-        android:contentDescription="@string/cancel"
-        app:tint="@color/colorRed"
-        app:layout_constraintEnd_toStartOf="@+id/call_back_button"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline5"
-        app:srcCompat="@drawable/ic_clear_black_45dp" />
+    <data>
 
-    <ImageButton
-        android:id="@+id/call_back_button"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="40dp"
-        android:background="@drawable/button_image_passive"
-        android:contentDescription="@string/call_back"
-        app:tint="@color/colorButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/cancel_call_button"
-        app:layout_constraintTop_toTopOf="@+id/guideline5"
-        app:srcCompat="@drawable/ic_phone_black_40dp" />
+        <variable
+            name="model"
+            type="com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedViewModel" />
+    </data>
 
-    <TextView
-        android:id="@+id/call_failed_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/call_failed"
-        android:textColor="@android:color/white"
-        android:fontFamily="@font/roboto"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/caller_name_call_failed" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
+        tools:context=".stories.call_failed.CallFailedActivity">
 
-    <TextView
-        android:id="@+id/caller_name_call_failed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@android:color/transparent"
-        android:text=""
-        android:textColor="@android:color/white"
-        android:fontFamily="@font/roboto"
-        android:textSize="40sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_conversion_absoluteHeight="0dp"
-        tools:layout_conversion_absoluteWidth="0dp" />
+        <ImageButton
+            android:id="@+id/cancel_call_button"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="40dp"
+            android:background="@drawable/button_image_red_passive"
+            android:contentDescription="@string/cancel"
+            app:tint="@color/colorRed"
+            app:layout_constraintEnd_toStartOf="@+id/call_back_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline5"
+            app:srcCompat="@drawable/ic_clear_black_45dp" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:layout_marginTop="5dp"
-        android:text="@string/call_back"
-        app:layout_constraintEnd_toEndOf="@+id/call_back_button"
-        app:layout_constraintStart_toStartOf="@+id/call_back_button"
-        app:layout_constraintTop_toBottomOf="@+id/call_back_button" />
+        <ImageButton
+            android:id="@+id/call_back_button"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="40dp"
+            android:background="@drawable/button_image_passive"
+            android:contentDescription="@string/call_back"
+            app:tint="@color/colorButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/cancel_call_button"
+            app:layout_constraintTop_toTopOf="@+id/guideline5"
+            app:srcCompat="@drawable/ic_phone_black_40dp" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:layout_marginTop="5dp"
-        android:text="@string/cancel"
-        app:layout_constraintEnd_toEndOf="@+id/cancel_call_button"
-        app:layout_constraintStart_toStartOf="@+id/cancel_call_button"
-        app:layout_constraintTop_toBottomOf="@+id/cancel_call_button" />
+        <TextView
+            android:id="@+id/call_failed_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="@string/call_failed"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/roboto"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/caller_name_call_failed" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75" />
+        <TextView
+            android:id="@+id/caller_name_call_failed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:background="@android:color/transparent"
+            android:text="@{model.displayName ?? model.userName, default=displayName}"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/roboto"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="0dp"
+            tools:layout_conversion_absoluteWidth="0dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:layout_marginTop="5dp"
+            android:text="@string/call_back"
+            app:layout_constraintEnd_toEndOf="@+id/call_back_button"
+            app:layout_constraintStart_toStartOf="@+id/call_back_button"
+            app:layout_constraintTop_toBottomOf="@+id/call_back_button" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:layout_marginTop="5dp"
+            android:text="@string/cancel"
+            app:layout_constraintEnd_toEndOf="@+id/cancel_call_button"
+            app:layout_constraintStart_toStartOf="@+id/cancel_call_button"
+            app:layout_constraintTop_toBottomOf="@+id/cancel_call_button" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.75" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

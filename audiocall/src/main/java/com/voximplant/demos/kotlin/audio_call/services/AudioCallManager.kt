@@ -40,8 +40,6 @@ class AudioCallManager(
     private var managedCall: ICall? = null
     val callExists: Boolean
         get() = managedCall != null
-    val callerDisplayName
-        get() = managedCall?.endpoints?.get(0)?.userDisplayName
     var managedCallConnection: CallConnection? = null
     private val _callState = MutableLiveData(CallState.NONE)
     val callState: LiveData<CallState>

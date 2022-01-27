@@ -193,6 +193,8 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
         model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
+                it.putExtra(ENDPOINT_USERNAME, model.userName.value)
+                it.putExtra(ENDPOINT_DISPLAY_NAME, model.displayName.value)
                 it.putExtra(FAIL_REASON, reason)
                 startActivity(it)
             }

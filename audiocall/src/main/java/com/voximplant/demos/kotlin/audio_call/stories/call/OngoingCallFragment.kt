@@ -21,10 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentOngoingCallBinding
-import com.voximplant.demos.kotlin.utils.FAIL_REASON
-import com.voximplant.demos.kotlin.utils.IS_INCOMING_CALL
-import com.voximplant.demos.kotlin.utils.IS_ONGOING_CALL
-import com.voximplant.demos.kotlin.utils.IS_OUTGOING_CALL
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.hardware.AudioDevice
 
 class OngoingCallFragment : Fragment() {
@@ -193,7 +190,11 @@ class OngoingCallFragment : Fragment() {
         viewModel.moveToCallFailed.observe(viewLifecycleOwner, { reason ->
             findNavController().navigate(
                 R.id.action_callFragment_to_callFailedFragment,
-                bundleOf(FAIL_REASON to reason)
+                bundleOf(
+                    ENDPOINT_USERNAME to viewModel.userName.value,
+                    ENDPOINT_DISPLAY_NAME to viewModel.displayName.value,
+                    FAIL_REASON to reason,
+                )
             )
         })
 

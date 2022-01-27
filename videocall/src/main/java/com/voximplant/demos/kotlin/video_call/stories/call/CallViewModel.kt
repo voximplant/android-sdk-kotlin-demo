@@ -24,7 +24,12 @@ class CallViewModel : BaseViewModel() {
     private val _callStatus = MediatorLiveData<String?>()
     val callStatus: LiveData<String?>
         get() = _callStatus
-    val displayName = MutableLiveData<String>()
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String>
+        get() = _userName
+    private val _displayName = MutableLiveData<String>()
+    val displayName: LiveData<String>
+        get() = _displayName
     val muted
         get() = voximplantCallManager.muted
     private val _onHold = MutableLiveData<Boolean>()
@@ -112,7 +117,8 @@ class CallViewModel : BaseViewModel() {
         }
 
         voximplantCallManager.onCallConnect = {
-            displayName.postValue(voximplantCallManager.callerDisplayName)
+            _userName.postValue(voximplantCallManager.endpointUsername)
+            _displayName.postValue(voximplantCallManager.endpointDisplayName)
             enableHoldButton.postValue(true)
             enableVideoButton.postValue(true)
             enableSharingButton.postValue(true)
@@ -132,7 +138,8 @@ class CallViewModel : BaseViewModel() {
     fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
         if (isActive) {
             // On return to call from notification
-            displayName.postValue(voximplantCallManager.callerDisplayName)
+            _userName.postValue(voximplantCallManager.endpointUsername)
+            _displayName.postValue(voximplantCallManager.endpointDisplayName)
 
             _sharingScreen = voximplantCallManager.sharingScreen
             _sendingVideo = voximplantCallManager.hasLocalVideoStream
@@ -147,7 +154,8 @@ class CallViewModel : BaseViewModel() {
                     finish.postValue(Unit)
                 }
             } else {
-                displayName.postValue(voximplantCallManager.endpointUsername)
+                _userName.postValue(voximplantCallManager.endpointUsername)
+                _displayName.postValue(voximplantCallManager.endpointDisplayName)
                 try {
                     voximplantCallManager.startCall()
                 } catch (e: CallManagerException) {
