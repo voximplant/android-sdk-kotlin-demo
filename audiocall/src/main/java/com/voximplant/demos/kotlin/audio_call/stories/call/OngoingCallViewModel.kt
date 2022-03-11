@@ -72,6 +72,7 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
             _callState.postValue(callState)
+            updateDisplayName()
             if (callState == CallState.CONNECTED) {
                 _enableButtons.postValue(true)
                 if (audioCallManager.onHold.value == true) {
