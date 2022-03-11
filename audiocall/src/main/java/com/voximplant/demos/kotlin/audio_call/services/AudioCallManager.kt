@@ -109,10 +109,10 @@ class AudioCallManager(
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
         managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
+        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         onCallConnect?.invoke()
         call?.let { startCallTimer(it) }
         playConnectedTone()
-        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         startForegroundCallService()
     }
 
@@ -127,7 +127,6 @@ class AudioCallManager(
         answeredElsewhere: Boolean,
     ) {
         Log.i(APP_TAG, "AudioCallManager::onCallDisconnected answeredElsewhere: $answeredElsewhere")
-        removeCall()
         when {
             answeredElsewhere -> {
                 managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ANSWERED_ELSEWHERE))
@@ -146,6 +145,7 @@ class AudioCallManager(
             }
         }
         setCallState(CallState.DISCONNECTED)
+        removeCall()
         managedCallConnection?.destroy()
         onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
     }
