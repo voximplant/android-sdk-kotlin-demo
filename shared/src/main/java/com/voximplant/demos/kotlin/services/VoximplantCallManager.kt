@@ -392,11 +392,11 @@ class VoximplantCallManager(
         headers: Map<String?, String?>?,
     ) {
         setCallState(CallState.CONNECTED)
+        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         onCallConnect?.invoke()
         Shared.notificationHelper.cancelIncomingCallNotification()
         call?.let { startCallTimer(it) }
         playConnectedTone()
-        endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         startForegroundCallService()
     }
 
@@ -411,8 +411,8 @@ class VoximplantCallManager(
         answeredElsewhere: Boolean,
     ) {
         Log.i(APP_TAG, "VoximplantCallManager::onCallDisconnected answeredElsewhere: $answeredElsewhere")
-        removeCall()
         setCallState(CallState.DISCONNECTED)
+        removeCall()
         showLocalVideoView.postValue(false)
         showRemoteVideoView.postValue(false)
         onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))

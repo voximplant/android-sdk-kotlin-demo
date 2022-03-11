@@ -72,14 +72,15 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         _callStatus.addSource(audioCallManager.callState) { callState ->
             _callStatus.postValue(callState.toString())
             _callState.postValue(callState)
+            updateDisplayName()
             if (callState == CallState.CONNECTED) {
                 _enableButtons.postValue(true)
-                audioCallManager.onHold.value?.let {
-                    _enableKeypad.postValue(!it)
-                    if (it) {
-                        _callStatus.postValue(getResource.getString(R.string.call_on_hold))
-                        onHideKeypadPressed.postValue(Unit)
-                    }
+                if (audioCallManager.onHold.value == true) {
+                    _callStatus.postValue(getResource.getString(R.string.call_on_hold))
+                    _enableKeypad.postValue(false)
+                    onHideKeypadPressed.postValue(Unit)
+                } else {
+                    _enableKeypad.postValue(true)
                 }
             } else {
                 _enableButtons.postValue(false)
@@ -89,10 +90,12 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
         _callStatus.addSource(audioCallManager.onHold) { onHold ->
             _onHold.postValue(onHold)
-            _enableKeypad.postValue(!onHold)
             if (onHold) {
                 _callStatus.postValue(getResource.getString(R.string.call_on_hold))
                 onHideKeypadPressed.postValue(Unit)
+            }
+            if (_callState.value == CallState.CONNECTED) {
+                _enableKeypad.postValue(!onHold)
             }
         }
 
