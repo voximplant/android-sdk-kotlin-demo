@@ -71,6 +71,10 @@ class IncomingCallActivity :
             model.decline()
         }
 
+        preset_camera_switch.setOnClickListener {
+            model.switchPresetCamera()
+        }
+
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
@@ -94,6 +98,10 @@ class IncomingCallActivity :
         model.displayName.observe(this, {
             incoming_call_from.text = it
         })
+
+        model.localVideoPresetEnabled.observe(this) {
+            preset_camera_switch.isChecked = it;
+        }
 
         val intent = intent
         val result = intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)

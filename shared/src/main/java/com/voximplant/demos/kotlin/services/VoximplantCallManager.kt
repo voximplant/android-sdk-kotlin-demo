@@ -114,7 +114,7 @@ class VoximplantCallManager(
     private var changeRemoteStream: remoteStreamRendering? = null
     private var localVideoStream: ILocalVideoStream? = null
     private var remoteVideoStream: IRemoteVideoStream? = null
-    val hasLocalVideoStream: Boolean
+    private val hasLocalVideoStream: Boolean
         get() = localVideoStream != null
     private val hasRemoteVideoStream: Boolean
         get() = remoteVideoStream != null

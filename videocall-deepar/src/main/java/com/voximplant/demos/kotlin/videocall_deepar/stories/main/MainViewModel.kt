@@ -1,9 +1,12 @@
 package com.voximplant.demos.kotlin.videocall_deepar.stories.main
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.services.*
+import com.voximplant.demos.kotlin.services.AuthService
+import com.voximplant.demos.kotlin.services.AuthServiceListener
 import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.demos.kotlin.videocall_deepar.R
 
 class MainViewModel : BaseViewModel(), AuthServiceListener {
@@ -12,6 +15,9 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
     val moveToLogin = MutableLiveData<Unit>()
+
+    val localVideoPresetEnabled: LiveData<Boolean>
+        get() = voximplantCallManager.localVideoPresetEnabled
 
     override fun onCreate() {
         super.onCreate()
@@ -30,7 +36,7 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
                 }
             } ?: run {
                 try {
-                    Shared.voximplantCallManager.createCall(user ?: "")
+                    voximplantCallManager.createCall(user ?: "")
                     moveToCall.postValue(Unit)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
@@ -38,6 +44,10 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
                 }
             }
         }
+    }
+
+    fun switchPresetCamera() {
+        voximplantCallManager.switchPresetCamera()
     }
 
     fun logout() {
