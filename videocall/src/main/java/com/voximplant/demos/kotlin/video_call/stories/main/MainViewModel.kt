@@ -1,6 +1,7 @@
 package com.voximplant.demos.kotlin.video_call.stories.main
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.services.*
 import com.voximplant.demos.kotlin.utils.*
@@ -14,6 +15,9 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     val moveToCall = MutableLiveData<Unit>()
     val moveToLogin = MutableLiveData<Unit>()
     val invalidInputError = MutableLiveData<Int>()
+
+    val localVideoPresetEnabled: LiveData<Boolean>
+        get() = callManager.localVideoPresetEnabled
 
     override fun onCreate() {
         super.onCreate()
@@ -45,6 +49,10 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
                 }
             }
         }
+    }
+
+    fun switchPresetCamera() {
+        callManager.switchPresetCamera()
     }
 
     fun logout() {

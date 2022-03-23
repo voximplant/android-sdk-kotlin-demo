@@ -56,6 +56,10 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             requestPermissions()
         }
 
+        preset_camera_switch.setOnClickListener {
+            model.switchPresetCamera()
+        }
+
         model.displayName.observe(this, {
             logged_in_label.text = it
         })
@@ -76,6 +80,10 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         model.invalidInputError.observe(this, {
             showError(call_to, resources.getString(it))
         })
+
+        model.localVideoPresetEnabled.observe(this) {
+            preset_camera_switch.isChecked = it;
+        }
     }
 
     override fun onBackPressed() {}

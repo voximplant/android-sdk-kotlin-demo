@@ -1,6 +1,7 @@
 package com.voximplant.demos.kotlin.video_call.stories.incoming_call
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.notificationHelper
@@ -10,6 +11,9 @@ class IncomingCallViewModel : BaseViewModel() {
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
     val moveToCallFailed = MutableLiveData<String>()
+
+    val localVideoPresetEnabled: LiveData<Boolean>
+        get() = voximplantCallManager.localVideoPresetEnabled
 
     init {
         voximplantCallManager.onCallDisconnect = { failed, reason ->
@@ -46,4 +50,9 @@ class IncomingCallViewModel : BaseViewModel() {
         }
         finish.postValue(Unit)
     }
+
+    fun switchPresetCamera() {
+        voximplantCallManager.switchPresetCamera()
+    }
+
 }

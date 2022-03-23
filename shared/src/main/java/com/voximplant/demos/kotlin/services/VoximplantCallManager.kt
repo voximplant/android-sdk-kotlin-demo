@@ -65,7 +65,12 @@ class VoximplantCallManager(
         get() = _callDuration
     val callBroadcastReceiver: BroadcastReceiver = CallBroadcastReceiver()
     private val callSettings: CallSettings
-        get() = CallSettings().also { it.videoFlags = videoFlags }
+        get() = CallSettings().also { it.videoFlags = VideoFlags(videoFlags.receiveVideo, _localVideoPresetEnabled.value == true) }
+
+    private val _localVideoPresetEnabled = MutableLiveData(videoFlags.sendVideo)
+    val localVideoPresetEnabled: LiveData<Boolean>
+        get() = _localVideoPresetEnabled
+
     private val audioDeviceManager = Voximplant.getAudioDeviceManager()
     var customVideoSource: ICustomVideoSource? = null
 
@@ -113,6 +118,9 @@ class VoximplantCallManager(
         get() = localVideoStream != null
     private val hasRemoteVideoStream: Boolean
         get() = remoteVideoStream != null
+    private val _sendingLocalVideo = MutableLiveData(_localVideoPresetEnabled.value == true)
+    val sendingLocalVideo: LiveData<Boolean>
+        get() = _sendingLocalVideo
 
     var setRenderSurface: ((surface: Surface?, size: Size) -> Unit)? = null
 
@@ -212,6 +220,7 @@ class VoximplantCallManager(
     fun startCall() =
         executeOrThrow {
             _callDuration.postValue(0)
+            _sendingLocalVideo.postValue(callSettings.videoFlags.sendVideo)
             setCallState(CallState.CONNECTING)
             managedCall?.start()
                 ?: throw noActiveCallError
@@ -221,6 +230,7 @@ class VoximplantCallManager(
     fun answerCall() =
         executeOrThrow {
             _callDuration.postValue(0)
+            _sendingLocalVideo.postValue(callSettings.videoFlags.sendVideo)
             setCallState(CallState.CONNECTING)
             managedCall?.answer(callSettings)
                 ?: throw noActiveCallError
@@ -264,6 +274,11 @@ class VoximplantCallManager(
         }
     }
 
+    fun switchPresetCamera() {
+        Log.d(APP_TAG, "VoximplantCallManager::switchPresetCamera")
+        _localVideoPresetEnabled.value = _localVideoPresetEnabled.value != true
+    }
+
     fun selectAudioDevice(id: Int) {
         audioDeviceManager.selectAudioDevice(audioDeviceManager.audioDevices[id])
     }
@@ -284,6 +299,7 @@ class VoximplantCallManager(
     fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) =
         managedCall?.sendVideo(send, object : ICallCompletionHandler {
             override fun onComplete() {
+                _sendingLocalVideo.postValue(send)
                 sharingScreen = false
                 completion(null)
             }
@@ -366,6 +382,7 @@ class VoximplantCallManager(
                     )
                 } else {
                     videoStream.removeVideoRenderer(videoSink)
+                    _sendingLocalVideo.postValue(false)
                     showLocalVideoView.postValue(false)
                 }
             }
@@ -495,6 +512,7 @@ class VoximplantCallManager(
         videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT, object : RendererEvents {
             override fun onFirstFrameRendered() {
                 if (isLocal) {
+                    _sendingLocalVideo.postValue(true)
                     showLocalVideoView.postValue(true)
                 } else {
                     showRemoteVideoView.postValue(true)

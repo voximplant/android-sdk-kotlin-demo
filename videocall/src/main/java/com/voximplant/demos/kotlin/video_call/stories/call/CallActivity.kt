@@ -172,7 +172,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             }
         })
 
-        model.sendingVideo.observe(this, { sendingVideo ->
+        model.sendingLocalVideo.observe(this, { sendingVideo ->
             if (sendingVideo) {
                 video_button.setBackgroundResource(R.drawable.normal_call_option_back)
                 video_button_icon.setImageResource(R.drawable.ic_camon)

@@ -43,12 +43,8 @@ class CallViewModel : BaseViewModel() {
             sharingScreen.postValue(value)
         }
 
-    val sendingVideo = MutableLiveData<Boolean>()
-    private var _sendingVideo: Boolean = true
-        set(value) {
-            field = value
-            sendingVideo.postValue(value)
-        }
+    val sendingLocalVideo: LiveData<Boolean>
+        get() = voximplantCallManager.sendingLocalVideo
 
     val availableAudioDevices: List<String>
         get() = voximplantCallManager.availableAudioDevices.map { device ->
@@ -142,7 +138,6 @@ class CallViewModel : BaseViewModel() {
             _displayName.postValue(voximplantCallManager.endpointDisplayName)
 
             _sharingScreen = voximplantCallManager.sharingScreen
-            _sendingVideo = voximplantCallManager.hasLocalVideoStream
 
             enableHoldButton.postValue(true)
         } else {
@@ -203,7 +198,6 @@ class CallViewModel : BaseViewModel() {
                             postError(error.message.toString())
                         } ?: run {
                             _sharingScreen = !_sharingScreen
-                            _sendingVideo = false
                         }
                         enableHoldButton.postValue(true)
                         enableVideoButton.postValue(true)
@@ -216,7 +210,7 @@ class CallViewModel : BaseViewModel() {
                 }
             }
         } else {
-            voximplantCallManager.sendVideo(_sendingVideo) { error ->
+            voximplantCallManager.sendVideo(sendingLocalVideo.value != true) { error ->
                 error?.let {
                     Log.e(APP_TAG, it.message.toString())
                     postError(it.message.toString())
@@ -235,12 +229,11 @@ class CallViewModel : BaseViewModel() {
         enableVideoButton.postValue(false)
         enableSharingButton.postValue(false)
 
-        voximplantCallManager.sendVideo(!_sendingVideo) { error ->
+        voximplantCallManager.sendVideo(sendingLocalVideo.value != true) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
             } ?: run {
-                _sendingVideo = !_sendingVideo
                 _sharingScreen = false
             }
             enableHoldButton.postValue(true)
