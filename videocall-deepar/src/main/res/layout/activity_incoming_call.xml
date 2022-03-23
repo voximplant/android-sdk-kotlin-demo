@@ -129,7 +129,7 @@
         android:layout_marginBottom="16dp"
         android:checked="true"
         android:minHeight="48dp"
-        android:text="Enable camera"
+        android:text="@string/enable_camera_label"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toEndOf="parent"
