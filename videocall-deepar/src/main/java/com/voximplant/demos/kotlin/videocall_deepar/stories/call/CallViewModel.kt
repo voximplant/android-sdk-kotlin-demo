@@ -82,7 +82,6 @@ class CallViewModel : BaseViewModel() {
             val formattedCallDuration: String = dateFormat.format(Date(value))
             _callStatus.postValue(formattedCallDuration)
         }
-
         voximplantCallManager.onCallConnect = {
             _userName.postValue(voximplantCallManager.endpointUsername)
             _displayName.postValue(voximplantCallManager.endpointDisplayName)
@@ -119,11 +118,11 @@ class CallViewModel : BaseViewModel() {
 
             enableVideoButton.postValue(true)
         } else {
-            if (voximplantCallManager.sendingLocalVideo.value == true) {
+            if (voximplantCallManager.localVideoPresetEnabled.value == true) {
                 deepARHelper.startDeepAR()
                 cameraHelper.startCamera(cameraPreset, lensReset = true)
-                attachCustomSource(cameraPreset)
             }
+            attachCustomSource(cameraPreset)
             if (isIncoming) {
                 try {
                     voximplantCallManager.answerCall()
