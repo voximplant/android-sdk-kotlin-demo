@@ -81,4 +81,6 @@
     <string name="settings">Settings</string>
     <string name="permission_mic_to_call">To make calls, give microphone access</string>
     <string name="permission_denied">permission denied</string>
+
+    <string name="enable_camera_label">Enable camera</string>
 </resources>

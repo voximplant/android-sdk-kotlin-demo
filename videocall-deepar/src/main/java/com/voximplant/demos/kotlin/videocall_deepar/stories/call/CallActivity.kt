@@ -117,7 +117,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             }
         })
 
-        model.sendingVideo.observe(this, { sendingVideo ->
+        model.sendingLocalVideo.observe(this, { sendingVideo ->
             if (sendingVideo) {
                 video_button.setBackgroundResource(R.drawable.normal_call_option_back)
                 video_button_icon.setImageResource(R.drawable.ic_camon)
@@ -140,6 +140,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
                 it.putExtra(ENDPOINT_USERNAME, model.userName.value)
                 it.putExtra(ENDPOINT_DISPLAY_NAME, model.displayName.value)
                 it.putExtra(FAIL_REASON, reason)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })
@@ -156,7 +157,8 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
 
         model.onCreateWithCall(
             intent.getBooleanExtra(IS_INCOMING_CALL, true),
-            intent.getBooleanExtra(IS_ONGOING_CALL, false)
+            intent.getBooleanExtra(IS_ONGOING_CALL, false),
+            sendVideo = intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true),
         )
 
     }

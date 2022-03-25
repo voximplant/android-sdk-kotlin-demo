@@ -1,8 +1,12 @@
 package com.voximplant.demos.kotlin.videocall_deepar.stories.incoming_call
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.APP_TAG
+import com.voximplant.demos.kotlin.utils.BaseViewModel
+import com.voximplant.demos.kotlin.utils.CallManagerException
+import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 
 class IncomingCallViewModel : BaseViewModel() {
     val displayName = MutableLiveData<String>()
@@ -10,11 +14,14 @@ class IncomingCallViewModel : BaseViewModel() {
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
+    private val _localVideoPresetEnabled = MutableLiveData(true)
+    val localVideoPresetEnabled: LiveData<Boolean>
+        get() = _localVideoPresetEnabled
 
     override fun onCreate() {
         super.onCreate()
 
-        Shared.voximplantCallManager.onCallDisconnect = { failed, reason ->
+        voximplantCallManager.onCallDisconnect = { failed, reason ->
             finish.postValue(Unit)
             if (failed) {
                 moveToCallFailed.postValue(reason)
@@ -22,8 +29,8 @@ class IncomingCallViewModel : BaseViewModel() {
         }
 
         displayName.postValue(
-            Shared.voximplantCallManager.endpointDisplayName
-                ?: Shared.voximplantCallManager.endpointUsername.orEmpty()
+            voximplantCallManager.endpointDisplayName
+                ?: voximplantCallManager.endpointUsername.orEmpty()
         )
     }
 
@@ -33,10 +40,15 @@ class IncomingCallViewModel : BaseViewModel() {
 
     fun decline() {
         try {
-            Shared.voximplantCallManager.declineCall()
+            voximplantCallManager.declineCall()
         } catch (e: CallManagerException) {
             Log.e(APP_TAG, e.message.toString())
         }
         moveToMainActivity.postValue(Unit)
     }
+
+    fun toggleLocalVideoPreset() {
+        _localVideoPresetEnabled.postValue(_localVideoPresetEnabled.value != true)
+    }
+
 }

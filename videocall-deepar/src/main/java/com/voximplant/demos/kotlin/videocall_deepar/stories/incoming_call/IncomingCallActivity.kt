@@ -15,11 +15,11 @@ import android.view.View
 import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import com.voximplant.demos.kotlin.utils.*
 import kotlinx.android.synthetic.main.activity_incoming_call.*
 
 class IncomingCallActivity :
@@ -71,9 +71,14 @@ class IncomingCallActivity :
             model.decline()
         }
 
+        preset_camera_switch.setOnClickListener {
+            model.toggleLocalVideoPreset()
+        }
+
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
                 startActivity(it)
             }
         })
@@ -81,6 +86,7 @@ class IncomingCallActivity :
         model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
                 it.putExtra(FAIL_REASON, reason)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })
@@ -94,6 +100,10 @@ class IncomingCallActivity :
         model.displayName.observe(this, {
             incoming_call_from.text = it
         })
+
+        model.localVideoPresetEnabled.observe(this) {
+            preset_camera_switch.isChecked = it;
+        }
 
         val intent = intent
         val result = intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)

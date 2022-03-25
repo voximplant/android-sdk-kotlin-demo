@@ -28,7 +28,7 @@ class CallFailedViewModel : BaseViewModel() {
         moveToMainActivity.postValue(Unit)
     }
 
-    fun callBack() {
+    fun callBack(sendVideo: Boolean = true) {
         showProgress.postValue(R.string.reconnecting)
         authService.reconnectIfNeeded { error ->
             hideProgress.postValue(Unit)
@@ -40,7 +40,7 @@ class CallFailedViewModel : BaseViewModel() {
                 }
             } ?: run {
                 try {
-                    voximplantCallManager.createCall(_userName.value.orEmpty())
+                    voximplantCallManager.createCall(_userName.value.orEmpty(), sendVideo = sendVideo)
                     moveToCall.postValue(Unit)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())

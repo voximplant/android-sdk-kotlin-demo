@@ -70,9 +70,14 @@ class IncomingCallActivity :
             model.decline()
         }
 
+        preset_camera_switch.setOnClickListener {
+            model.toggleLocalVideoPreset()
+        }
+
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
                 startActivity(it)
             }
         })
@@ -80,6 +85,7 @@ class IncomingCallActivity :
         model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
                 it.putExtra(FAIL_REASON, reason)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })
@@ -87,6 +93,10 @@ class IncomingCallActivity :
         model.displayName.observe(this, {
             incoming_call_from.text = it
         })
+
+        model.localVideoPresetEnabled.observe(this) {
+            preset_camera_switch.isChecked = it;
+        }
 
         val intent = intent
         val result = intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)

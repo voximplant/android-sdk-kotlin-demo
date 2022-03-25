@@ -43,12 +43,8 @@ class CallViewModel : BaseViewModel() {
             sharingScreen.postValue(value)
         }
 
-    val sendingVideo = MutableLiveData<Boolean>()
-    private var _sendingVideo: Boolean = true
-        set(value) {
-            field = value
-            sendingVideo.postValue(value)
-        }
+    val sendingLocalVideo: LiveData<Boolean>
+        get() = voximplantCallManager.sendingLocalVideo
 
     val availableAudioDevices: List<String>
         get() = voximplantCallManager.availableAudioDevices.map { device ->
@@ -135,20 +131,19 @@ class CallViewModel : BaseViewModel() {
         voximplantCallManager.initVideoStreams()
     }
 
-    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
+    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean, sendVideo: Boolean = true) {
         if (isActive) {
             // On return to call from notification
             _userName.postValue(voximplantCallManager.endpointUsername)
             _displayName.postValue(voximplantCallManager.endpointDisplayName)
 
             _sharingScreen = voximplantCallManager.sharingScreen
-            _sendingVideo = voximplantCallManager.hasLocalVideoStream
 
             enableHoldButton.postValue(true)
         } else {
             if (isIncoming) {
                 try {
-                    voximplantCallManager.answerCall()
+                    voximplantCallManager.answerCall(sendVideo = sendVideo)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)
@@ -203,7 +198,6 @@ class CallViewModel : BaseViewModel() {
                             postError(error.message.toString())
                         } ?: run {
                             _sharingScreen = !_sharingScreen
-                            _sendingVideo = false
                         }
                         enableHoldButton.postValue(true)
                         enableVideoButton.postValue(true)
@@ -216,7 +210,7 @@ class CallViewModel : BaseViewModel() {
                 }
             }
         } else {
-            voximplantCallManager.sendVideo(_sendingVideo) { error ->
+            voximplantCallManager.sendVideo(sendingLocalVideo.value != true) { error ->
                 error?.let {
                     Log.e(APP_TAG, it.message.toString())
                     postError(it.message.toString())
@@ -235,12 +229,11 @@ class CallViewModel : BaseViewModel() {
         enableVideoButton.postValue(false)
         enableSharingButton.postValue(false)
 
-        voximplantCallManager.sendVideo(!_sendingVideo) { error ->
+        voximplantCallManager.sendVideo(sendingLocalVideo.value != true) { error ->
             error?.let {
                 Log.e(APP_TAG, it.message.toString())
                 postError(it.message.toString())
             } ?: run {
-                _sendingVideo = !_sendingVideo
                 _sharingScreen = false
             }
             enableHoldButton.postValue(true)

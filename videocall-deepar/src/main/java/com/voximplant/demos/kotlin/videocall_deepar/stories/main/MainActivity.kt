@@ -11,10 +11,10 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.login.LoginActivity
-import com.voximplant.demos.kotlin.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
@@ -54,6 +54,10 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             requestPermissions()
         }
 
+        preset_camera_switch.setOnClickListener {
+            model.toggleLocalVideoPreset()
+        }
+
         model.displayName.observe(this, {
             logged_in_label.text = it
         })
@@ -61,6 +65,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, false)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
                 startActivity(it)
             }
         })
@@ -70,6 +75,10 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
                 startActivity(it)
             }
         })
+
+        model.localVideoPresetEnabled.observe(this) {
+            preset_camera_switch.isChecked = it;
+        }
     }
 
     override fun onBackPressed() {}

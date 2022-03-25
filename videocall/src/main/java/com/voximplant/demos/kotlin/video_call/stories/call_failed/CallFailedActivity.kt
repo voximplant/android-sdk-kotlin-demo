@@ -50,7 +50,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         }
 
         call_back_button.setOnClickListener {
-            model.callBack()
+            model.callBack(sendVideo = intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
         }
 
         model.displayName.observe(this, {
@@ -60,6 +60,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, false)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })
