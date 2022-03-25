@@ -7,11 +7,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
+import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityCallFailedBinding
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import com.voximplant.demos.kotlin.utils.*
-import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityCallFailedBinding
 import kotlinx.android.synthetic.main.activity_call_failed.*
 
 class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
@@ -50,7 +50,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         }
 
         call_back_button.setOnClickListener {
-            model.callBack()
+            model.callBack(sendVideo = intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
         }
 
         model.displayName.observe(this, {
@@ -60,6 +60,7 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, false)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })

@@ -14,8 +14,9 @@ class IncomingCallViewModel : BaseViewModel() {
     val moveToCallFailed = MutableLiveData<String>()
     val moveToMainActivity = MutableLiveData<Unit>()
 
+    private val _localVideoPresetEnabled = MutableLiveData(true)
     val localVideoPresetEnabled: LiveData<Boolean>
-        get() = voximplantCallManager.localVideoPresetEnabled
+        get() = _localVideoPresetEnabled
 
     override fun onCreate() {
         super.onCreate()
@@ -46,8 +47,8 @@ class IncomingCallViewModel : BaseViewModel() {
         moveToMainActivity.postValue(Unit)
     }
 
-    fun switchPresetCamera() {
-        voximplantCallManager.switchPresetCamera()
+    fun toggleLocalVideoPreset() {
+        _localVideoPresetEnabled.postValue(_localVideoPresetEnabled.value != true)
     }
 
 }

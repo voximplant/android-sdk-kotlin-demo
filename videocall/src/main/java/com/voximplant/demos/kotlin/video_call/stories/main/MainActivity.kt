@@ -57,7 +57,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
 
         preset_camera_switch.setOnClickListener {
-            model.switchPresetCamera()
+            model.toggleLocalVideoPreset()
         }
 
         model.displayName.observe(this, {
@@ -67,6 +67,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, false)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
                 startActivity(it)
             }
         })

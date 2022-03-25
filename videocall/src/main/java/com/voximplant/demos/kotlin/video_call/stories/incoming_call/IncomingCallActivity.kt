@@ -20,7 +20,6 @@ import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.sdk.Voximplant
 import kotlinx.android.synthetic.main.activity_incoming_call.*
-import kotlinx.android.synthetic.main.activity_incoming_call.preset_camera_switch
 
 class IncomingCallActivity :
     BaseActivity<IncomingCallViewModel>(IncomingCallViewModel::class.java) {
@@ -72,12 +71,13 @@ class IncomingCallActivity :
         }
 
         preset_camera_switch.setOnClickListener {
-            model.switchPresetCamera()
+            model.toggleLocalVideoPreset()
         }
 
         model.moveToCall.observe(this, {
             Intent(this, CallActivity::class.java).also {
                 it.putExtra(IS_INCOMING_CALL, true)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
                 startActivity(it)
             }
         })
@@ -85,6 +85,7 @@ class IncomingCallActivity :
         model.moveToCallFailed.observe(this, { reason ->
             Intent(this, CallFailedActivity::class.java).also {
                 it.putExtra(FAIL_REASON, reason)
+                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
                 startActivity(it)
             }
         })

@@ -15,6 +15,8 @@ const val ACTION_ANSWER_INCOMING_CALL = "action_answer_incoming_call"
 const val ACTION_DECLINE_INCOMING_CALL = "action_decline_incoming_call"
 const val ACTION_HANGUP_ONGOING_CALL = "action_hangup_ongoing_call"
 
+const val PRESET_SEND_LOCAL_VIDEO = "preset_send_local_video"
+
 const val ACTION_FOREGROUND_SERVICE_START = "com.voximplant.demos.kotlin.videocall.service_start"
 const val ACTION_FOREGROUND_SERVICE_STOP = "com.voximplant.demos.kotlin.videocall.service_stop"
 

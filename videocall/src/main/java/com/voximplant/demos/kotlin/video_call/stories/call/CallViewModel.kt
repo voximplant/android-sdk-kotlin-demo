@@ -131,7 +131,7 @@ class CallViewModel : BaseViewModel() {
         voximplantCallManager.initVideoStreams()
     }
 
-    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
+    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean, sendVideo: Boolean = true) {
         if (isActive) {
             // On return to call from notification
             _userName.postValue(voximplantCallManager.endpointUsername)
@@ -143,7 +143,7 @@ class CallViewModel : BaseViewModel() {
         } else {
             if (isIncoming) {
                 try {
-                    voximplantCallManager.answerCall()
+                    voximplantCallManager.answerCall(sendVideo = sendVideo)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)

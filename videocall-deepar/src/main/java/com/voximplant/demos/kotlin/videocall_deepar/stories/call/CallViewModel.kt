@@ -110,7 +110,7 @@ class CallViewModel : BaseViewModel() {
         voximplantCallManager.initVideoStreams()
     }
 
-    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean) {
+    fun onCreateWithCall(isIncoming: Boolean, isActive: Boolean, sendVideo: Boolean = true) {
         if (isActive) {
             // On return to call from notification
             _userName.postValue(voximplantCallManager.endpointUsername)
@@ -118,14 +118,14 @@ class CallViewModel : BaseViewModel() {
 
             enableVideoButton.postValue(true)
         } else {
-            if (voximplantCallManager.localVideoPresetEnabled.value == true) {
+            if (sendVideo) {
                 deepARHelper.startDeepAR()
                 cameraHelper.startCamera(cameraPreset, lensReset = true)
             }
             attachCustomSource(cameraPreset)
             if (isIncoming) {
                 try {
-                    voximplantCallManager.answerCall()
+                    voximplantCallManager.answerCall(sendVideo = sendVideo)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
                     finish.postValue(Unit)

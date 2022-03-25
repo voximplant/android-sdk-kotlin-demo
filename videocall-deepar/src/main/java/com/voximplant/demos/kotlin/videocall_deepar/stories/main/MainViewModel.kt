@@ -16,8 +16,9 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     val moveToCall = MutableLiveData<Unit>()
     val moveToLogin = MutableLiveData<Unit>()
 
+    private val _localVideoPresetEnabled = MutableLiveData(true)
     val localVideoPresetEnabled: LiveData<Boolean>
-        get() = voximplantCallManager.localVideoPresetEnabled
+        get() = _localVideoPresetEnabled
 
     override fun onCreate() {
         super.onCreate()
@@ -36,7 +37,7 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
                 }
             } ?: run {
                 try {
-                    voximplantCallManager.createCall(user ?: "")
+                    voximplantCallManager.createCall(user ?: "", sendVideo = _localVideoPresetEnabled.value == true)
                     moveToCall.postValue(Unit)
                 } catch (e: CallManagerException) {
                     Log.e(APP_TAG, e.message.toString())
@@ -46,8 +47,8 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
         }
     }
 
-    fun switchPresetCamera() {
-        voximplantCallManager.switchPresetCamera()
+    fun toggleLocalVideoPreset() {
+        _localVideoPresetEnabled.postValue(_localVideoPresetEnabled.value != true)
     }
 
     fun logout() {
