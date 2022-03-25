@@ -65,7 +65,7 @@ class VoximplantCallManager(
         get() = _callDuration
     val callBroadcastReceiver: BroadcastReceiver = CallBroadcastReceiver()
     private val callSettings: CallSettings
-        get() = CallSettings().also { it.videoFlags = VideoFlags(videoFlags.receiveVideo, videoFlags.sendVideo) }
+        get() = CallSettings().also { it.videoFlags = videoFlags }
 
     private val audioDeviceManager = Voximplant.getAudioDeviceManager()
     var customVideoSource: ICustomVideoSource? = null
@@ -373,7 +373,6 @@ class VoximplantCallManager(
                     )
                 } else {
                     videoStream.removeVideoRenderer(videoSink)
-                    _sendingLocalVideo.postValue(false)
                     showLocalVideoView.postValue(false)
                 }
             }
@@ -503,7 +502,6 @@ class VoximplantCallManager(
         videoStream.addVideoRenderer(videoSink, RenderScaleType.SCALE_FIT, object : RendererEvents {
             override fun onFirstFrameRendered() {
                 if (isLocal) {
-                    _sendingLocalVideo.postValue(true)
                     showLocalVideoView.postValue(true)
                 } else {
                     showRemoteVideoView.postValue(true)
