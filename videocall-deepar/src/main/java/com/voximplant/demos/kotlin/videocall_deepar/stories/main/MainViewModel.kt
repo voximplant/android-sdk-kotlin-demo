@@ -7,7 +7,6 @@ import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.services.AuthServiceListener
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
-import com.voximplant.demos.kotlin.videocall_deepar.R
 
 class MainViewModel : BaseViewModel(), AuthServiceListener {
     private val authService: AuthService = Shared.authService
@@ -19,6 +18,10 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     private val _localVideoPresetEnabled = MutableLiveData(true)
     val localVideoPresetEnabled: LiveData<Boolean>
         get() = _localVideoPresetEnabled
+
+    init {
+        authService.listener = this
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -53,6 +56,16 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
 
     fun logout() {
         authService.logout()
+    }
+
+    override fun onConnectionFailed(error: AuthError) {
+        super.onConnectionFailed(error)
+        postError(R.string.error_logout_failed_network_issues)
+    }
+
+    override fun onLogout() {
+        super.onLogout()
         moveToLogin.postValue(Unit)
     }
+
 }

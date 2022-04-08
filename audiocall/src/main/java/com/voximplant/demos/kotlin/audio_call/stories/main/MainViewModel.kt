@@ -20,6 +20,10 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     val moveToLogin = MutableLiveData<Unit>()
     val invalidInputError = MutableLiveData<Int>()
 
+    init {
+        authService.listener = this
+    }
+
     override fun onCreate() {
         super.onCreate()
         displayName.postValue("${Shared.getResource.getString(R.string.logged_in_as)} ${authService.displayName}")
@@ -54,6 +58,16 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
 
     fun logout() {
         authService.logout()
+    }
+
+    override fun onConnectionFailed(error: AuthError) {
+        super.onConnectionFailed(error)
+        postError(R.string.error_logout_failed_network_issues)
+    }
+
+    override fun onLogout() {
+        super.onLogout()
         moveToLogin.postValue(Unit)
     }
+
 }
