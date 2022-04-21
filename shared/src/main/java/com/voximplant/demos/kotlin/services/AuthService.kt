@@ -111,11 +111,15 @@ class AuthService(
     fun logout() {
         needToLogout = true
         if (clientState == ClientState.LOGGED_IN) {
-            enablePushNotifications(false)
-            displayName = null
-            tokens.removeTokens()
-            client.disconnect()
-            LAST_OUTGOING_CALL_USERNAME.removeKeyFromPrefs(appContext)
+            enablePushNotifications(
+                false,
+                completion = {
+                    displayName = null
+                    tokens.removeTokens()
+                    client.disconnect()
+                    LAST_OUTGOING_CALL_USERNAME.removeKeyFromPrefs(appContext)
+                },
+            )
         } else {
             loginWithToken()
         }
@@ -131,11 +135,21 @@ class AuthService(
         loginWithToken()
     }
 
-    private fun enablePushNotifications(enable: Boolean) {
+    private fun enablePushNotifications(enable: Boolean, completion: ((PushTokenError?) -> Unit)? = null) {
+        val handler = object : IPushTokenCompletionHandler {
+            override fun onSuccess() {
+                completion?.invoke(null)
+            }
+
+            override fun onFailure(error: PushTokenError?) {
+                completion?.invoke(error)
+            }
+        }
+
         if (enable) {
-            client.registerForPushNotifications(firebaseToken, null)
+            client.registerForPushNotifications(firebaseToken, handler)
         } else {
-            client.unregisterFromPushNotifications(firebaseToken, null)
+            client.unregisterFromPushNotifications(firebaseToken, handler)
         }
     }
 
