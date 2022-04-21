@@ -61,12 +61,10 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     }
 
     override fun onConnectionFailed(error: AuthError) {
-        super.onConnectionFailed(error)
         postError(R.string.error_logout_failed_network_issues)
     }
 
     override fun onLogout() {
-        super.onLogout()
         moveToLogin.postValue(Unit)
     }
 
