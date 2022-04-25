@@ -2,7 +2,6 @@ package com.voximplant.demos.kotlin.services
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.iid.*
 import com.google.firebase.messaging.FirebaseMessaging
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.client.*
@@ -36,6 +35,7 @@ class AuthService(
 
     val possibleToLogin: Boolean
         get() = tokens.state == TokensState.Valid && username != null
+    private var needToLogout = false
 
     init {
         client.setClientLoginListener(this)
@@ -109,12 +109,19 @@ class AuthService(
     private var reconnectCompletion: ((AuthError?) -> Unit)? = null
 
     fun logout() {
+        needToLogout = true
         if (clientState == ClientState.LOGGED_IN) {
-            enablePushNotifications(false)
-            displayName = null
-            tokens.removeTokens()
-            client.disconnect()
-            LAST_OUTGOING_CALL_USERNAME.removeKeyFromPrefs(appContext)
+            enablePushNotifications(
+                false,
+                completion = {
+                    displayName = null
+                    tokens.removeTokens()
+                    client.disconnect()
+                    LAST_OUTGOING_CALL_USERNAME.removeKeyFromPrefs(appContext)
+                },
+            )
+        } else {
+            loginWithToken()
         }
     }
 
@@ -128,11 +135,21 @@ class AuthService(
         loginWithToken()
     }
 
-    private fun enablePushNotifications(enable: Boolean) {
+    private fun enablePushNotifications(enable: Boolean, completion: ((PushTokenError?) -> Unit)? = null) {
+        val handler = object : IPushTokenCompletionHandler {
+            override fun onSuccess() {
+                completion?.invoke(null)
+            }
+
+            override fun onFailure(error: PushTokenError?) {
+                completion?.invoke(error)
+            }
+        }
+
         if (enable) {
-            client.registerForPushNotifications(firebaseToken, null)
+            client.registerForPushNotifications(firebaseToken, handler)
         } else {
-            client.unregisterFromPushNotifications(firebaseToken, null)
+            client.unregisterFromPushNotifications(firebaseToken, handler)
         }
     }
 
@@ -153,7 +170,12 @@ class AuthService(
 
     @Synchronized
     override fun onConnectionClosed() {
-        listener?.onConnectionClosed()
+        if (needToLogout) {
+            listener?.onLogout()
+            needToLogout = false
+        } else {
+            listener?.onConnectionClosed()
+        }
     }
 
     @Synchronized
@@ -161,6 +183,10 @@ class AuthService(
         displayName: String?,
         authParams: AuthParams?
     ) {
+        if (needToLogout) {
+            logout()
+            return
+        }
         enablePushNotifications(true)
         this.displayName = displayName ?: this.username?.split('@')?.first()
         if (authParams != null)

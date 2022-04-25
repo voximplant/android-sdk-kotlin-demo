@@ -8,7 +8,7 @@ buildscript {
         firebase_crashlytics_version = '2.7.1'
         firebase_bom_version = '28.0.1'
 
-        voximplant_sdk_version = '2.32.1'
+        voximplant_sdk_version = '2.32.4'
 
         material_version = '1.4.0'
         appcompat_version = '1.3.1'

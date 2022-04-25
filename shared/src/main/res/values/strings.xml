@@ -69,6 +69,7 @@
     <string name="error_login_failed_mau_limit">Login failed due to MAU limit is reached</string>
     <string name="error_login_failed_network_issues">Login failed due to network issues. Please try again</string>
     <string name="error_login_failed_internal_error">Login failed due to internal error. Please try again</string>
+    <string name="error_logout_failed_network_issues">Logout failed due to network issues. Please try again</string>
     <string name="error_no_active_call">No active call found</string>
     <string name="error_already_managing_call">Already managing a call</string>
     <string name="error_creating_call">There was an error creating call</string>
