@@ -19,6 +19,7 @@ import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.audio_call.permissionsHelper
 import com.voximplant.demos.kotlin.utils.APP_TAG
+import com.voximplant.demos.kotlin.utils.Shared.phoneAccount
 
 class TelecomManager(private val context: Context) {
     private val telecomManager: TelecomManager =
@@ -31,31 +32,20 @@ class TelecomManager(private val context: Context) {
 
     fun registerAccount() {
         val accountHandle = getAccountHandle()
-        var phoneAccount = telecomManager.getPhoneAccount(accountHandle)
-        if (phoneAccount == null) {
-            val builder = PhoneAccount.builder(accountHandle, APP_TAG)
-            builder.setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
-            builder.addSupportedUriScheme("sip")
-            builder.setIcon(Icon.createWithResource(context, R.drawable.ic_vox_notification))
-            phoneAccount = builder.build()
-            telecomManager.registerPhoneAccount(phoneAccount)
-            if (telecomManager.getPhoneAccount(accountHandle) != null) {
-                Log.i(APP_TAG, "TelecomManager::registerAccount: Account registered")
-            } else {
-                Log.w(APP_TAG, "TelecomManager::registerAccount: Account not registered")
-            }
-        } else {
-            Log.i(APP_TAG, "TelecomManager::registerAccount: Account already exists")
-        }
+        val builder = PhoneAccount.builder(accountHandle, APP_TAG)
+        builder.setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
+        builder.addSupportedUriScheme("sip")
+        builder.setIcon(Icon.createWithResource(context, R.drawable.ic_vox_notification))
+        phoneAccount = builder.build()
+        telecomManager.registerPhoneAccount(phoneAccount)
     }
 
     fun addIncomingCall() {
-        val accountHandle = getAccountHandle()
-        if (telecomManager.getPhoneAccount(accountHandle) != null) {
+        if (phoneAccount != null) {
             Log.i(APP_TAG, "TelecomManager::addIncomingCall")
             val extras = Bundle()
-            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, accountHandle)
-            telecomManager.addNewIncomingCall(accountHandle, extras)
+            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
+            telecomManager.addNewIncomingCall(phoneAccount?.accountHandle, extras)
         } else {
             Log.w(
                 APP_TAG,
@@ -67,11 +57,10 @@ class TelecomManager(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun addOutgoingCall(userName: String) {
-        val accountHandle = getAccountHandle()
-        if (telecomManager.getPhoneAccount(accountHandle) != null) {
+        if (phoneAccount != null) {
             Log.i(APP_TAG, "TelecomManager::addOutgoingCall")
             val extras = Bundle()
-            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, accountHandle)
+            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
             if (permissionsHelper.allPermissionsGranted()) {
                 telecomManager.placeCall(Uri.parse("sip:$userName"), extras)
             }
