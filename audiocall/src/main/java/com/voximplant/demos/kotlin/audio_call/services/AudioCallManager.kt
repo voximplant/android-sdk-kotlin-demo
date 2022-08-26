@@ -474,7 +474,6 @@ private class AudioCallActionReceiver(private val onReceive: (AudioCallActionRec
 class AudioCallBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            ACTION_ANSWER_INCOMING_CALL -> audioCallManager.showIncomingCallFragment(answer = true)
             ACTION_DECLINE_INCOMING_CALL -> audioCallManager.declineIncomingCall()
             ACTION_HANGUP_ONGOING_CALL -> audioCallManager.hangupOngoingCall()
         }
