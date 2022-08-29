@@ -583,7 +583,6 @@ class VoximplantCallManager(
 class CallBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            ACTION_ANSWER_INCOMING_CALL -> Shared.voximplantCallManager.showIncomingCallActivity(answer = true)
             ACTION_DECLINE_INCOMING_CALL -> Shared.voximplantCallManager.declineCall()
             ACTION_HANGUP_ONGOING_CALL -> Shared.voximplantCallManager.hangup()
         }

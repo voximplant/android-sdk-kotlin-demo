@@ -23,6 +23,7 @@
         <activity
             android:name=".stories.login.LoginActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -33,6 +34,7 @@
         <activity
             android:name=".stories.main.MainActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -43,19 +45,23 @@
         <activity
             android:name=".stories.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
             android:screenOrientation="nosensor" />
         <activity
             android:name=".stories.incoming_call.IncomingCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
             android:screenOrientation="nosensor"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
         <activity
             android:name=".stories.call_failed.CallFailedActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
             android:screenOrientation="nosensor" />
 
         <service
             android:name="com.voximplant.demos.kotlin.services.CallService"
+            android:exported="false"
             android:foregroundServiceType="camera|microphone" />
         <service
             android:name="com.voximplant.demos.kotlin.services.FirebasePushService"
