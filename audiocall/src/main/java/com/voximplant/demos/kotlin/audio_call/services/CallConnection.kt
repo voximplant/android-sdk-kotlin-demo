@@ -72,6 +72,7 @@ class CallConnection : Connection() {
 
     override fun onCallAudioStateChanged(state: CallAudioState?) {
         Log.i(APP_TAG, "CallConnection::onCallAudioStateChanged $state")
+        audioCallManager.onCallAudioStateChanged(state)
     }
 
     init {

@@ -17,7 +17,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
-import com.voximplant.demos.kotlin.audio_call.permissionsHelper
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.Shared.phoneAccount
 
@@ -61,13 +60,11 @@ class TelecomManager(private val context: Context) {
             Log.i(APP_TAG, "TelecomManager::addOutgoingCall")
             val extras = Bundle()
             extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
-            if (permissionsHelper.allPermissionsGranted()) {
-                telecomManager.placeCall(Uri.parse("sip:$userName"), extras)
-            }
+            telecomManager.placeCall(Uri.parse("sip:$userName"), extras)
         } else {
             Log.w(
                 APP_TAG,
-                "TelecomManager::addIncomingCall: Couldn't add outgoing call. Account not registered"
+                "TelecomManager::addOutgoingCall: Couldn't add outgoing call. Account not registered"
             )
         }
     }

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
+import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
@@ -28,6 +29,8 @@ import com.voximplant.sdk.client.IClient
 import com.voximplant.sdk.client.IClientIncomingCallListener
 import com.voximplant.sdk.hardware.AudioFileUsage
 import com.voximplant.sdk.hardware.IAudioFile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 
@@ -65,6 +68,9 @@ class AudioCallManager(
     val onHold: LiveData<Boolean>
         get() = _onHold
 
+    private val _callAudioState = MutableStateFlow<CallAudioState?>(null)
+    val callAudioState = _callAudioState.asStateFlow()
+
     private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
     private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
     private var callConnectedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
@@ -77,6 +83,20 @@ class AudioCallManager(
 
     init {
         client.setClientIncomingCallListener(this)
+    }
+
+    fun selectAudioDevice(route: String) {
+        when (route) {
+            "EARPIECE" -> {
+                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_EARPIECE)
+            }
+            "SPEAKER" -> {
+                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_SPEAKER)
+            }
+            "BLUETOOTH" -> {
+                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH)
+            }
+        }
     }
 
     fun createConnection(): CallConnection? {
@@ -107,6 +127,7 @@ class AudioCallManager(
     }
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
+        Log.i(APP_TAG, "AudioCallManager:: onCallConnected")
         managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
         endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
@@ -461,6 +482,9 @@ class AudioCallManager(
         callFailedToneFile?.play(false)
     }
 
+    fun onCallAudioStateChanged(state: CallAudioState?) {
+        _callAudioState.value = state
+    }
 }
 
 private class AudioCallActionReceiver(private val onReceive: (AudioCallActionReceiver) -> Unit) :
