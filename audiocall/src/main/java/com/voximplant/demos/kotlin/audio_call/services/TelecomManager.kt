@@ -4,7 +4,7 @@
 
 package com.voximplant.demos.kotlin.audio_call.services
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Icon
@@ -14,6 +14,7 @@ import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
@@ -33,7 +34,7 @@ class TelecomManager(private val context: Context) {
         val accountHandle = getAccountHandle()
         val builder = PhoneAccount.builder(accountHandle, APP_TAG)
         builder.setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
-        builder.addSupportedUriScheme("sip")
+        builder.addSupportedUriScheme(PhoneAccount.SCHEME_SIP)
         builder.setIcon(Icon.createWithResource(context, R.drawable.ic_vox_notification))
         phoneAccount = builder.build()
         telecomManager.registerPhoneAccount(phoneAccount)
@@ -41,31 +42,34 @@ class TelecomManager(private val context: Context) {
 
     fun addIncomingCall() {
         if (phoneAccount != null) {
-            Log.i(APP_TAG, "TelecomManager::addIncomingCall")
-            val extras = Bundle()
-            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
-            telecomManager.addNewIncomingCall(phoneAccount?.accountHandle, extras)
+            if (telecomManager.isIncomingCallPermitted(phoneAccount?.accountHandle)) {
+                Log.i(APP_TAG, "TelecomManager::addIncomingCall")
+                val extras = Bundle()
+                extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
+                telecomManager.addNewIncomingCall(phoneAccount?.accountHandle, extras)
+            } else {
+                Log.e(APP_TAG, "TelecomManager::addIncomingCall: Incoming call not permitted")
+            }
         } else {
-            Log.w(
-                APP_TAG,
-                "TelecomManager::addIncomingCall: Couldn't add incoming call. Account not registered"
-            )
+            Log.w(APP_TAG, "TelecomManager::addIncomingCall: Couldn't add incoming call. Account not registered")
             audioCallManager.showIncomingCallUI()
         }
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(anyOf = [Manifest.permission.CALL_PHONE, Manifest.permission.MANAGE_OWN_CALLS])
     fun addOutgoingCall(userName: String) {
         if (phoneAccount != null) {
-            Log.i(APP_TAG, "TelecomManager::addOutgoingCall")
-            val extras = Bundle()
-            extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
-            telecomManager.placeCall(Uri.parse("sip:$userName"), extras)
+            if (telecomManager.isOutgoingCallPermitted(phoneAccount?.accountHandle)) {
+                Log.i(APP_TAG, "TelecomManager::addOutgoingCall")
+                val uri: Uri = Uri.fromParts(PhoneAccount.SCHEME_SIP, userName, null)
+                val extras = Bundle()
+                extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccount?.accountHandle)
+                telecomManager.placeCall(uri, extras)
+            } else {
+                Log.e(APP_TAG, "TelecomManager::addOutgoingCall: Outgoing call not permitted")
+            }
         } else {
-            Log.w(
-                APP_TAG,
-                "TelecomManager::addOutgoingCall: Couldn't add outgoing call. Account not registered"
-            )
+            Log.w(APP_TAG, "TelecomManager::addOutgoingCall: Couldn't add outgoing call. Account not registered")
         }
     }
 }

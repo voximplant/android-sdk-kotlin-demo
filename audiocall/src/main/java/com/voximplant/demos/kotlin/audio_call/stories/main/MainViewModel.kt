@@ -22,6 +22,9 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
 
     init {
         authService.listener = this
+        audioCallManager.outgoingCallStarted = {
+            moveToCall.postValue(Unit)
+        }
     }
 
     override fun onCreate() {

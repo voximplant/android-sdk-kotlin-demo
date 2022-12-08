@@ -8,7 +8,6 @@ import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.telecom.CallAudioState
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -24,8 +23,9 @@ import androidx.navigation.navGraphViewModels
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentOngoingCallBinding
 import com.voximplant.demos.kotlin.utils.*
-import kotlinx.coroutines.flow.StateFlow
+import com.voximplant.sdk.hardware.AudioDevice
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class OngoingCallFragment : Fragment() {
     private lateinit var binding: FragmentOngoingCallBinding
@@ -34,9 +34,7 @@ class OngoingCallFragment : Fragment() {
     private var shouldClearTextView = true
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOngoingCallBinding.inflate(layoutInflater)
         binding.model = viewModel
@@ -58,14 +56,14 @@ class OngoingCallFragment : Fragment() {
             showKeypad(false)
         })
 
-        lifecycleScope.launchWhenCreated {
-            viewModel.callAudioState.collect { state ->
-                when (state?.route) {
-                    CallAudioState.ROUTE_EARPIECE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_internal)
-                    CallAudioState.ROUTE_SPEAKER -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_external)
-                    CallAudioState.ROUTE_WIRED_HEADSET -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_headphones)
-                    CallAudioState.ROUTE_BLUETOOTH -> binding.audioButtonIcon.setImageResource(R.drawable.ic_bluetooth)
-                    else -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
+        lifecycleScope.launch {
+            viewModel.selectedAudioDevice.collect { audioDevice ->
+                when (audioDevice) {
+                    AudioDevice.EARPIECE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_internal)
+                    AudioDevice.SPEAKER -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_external)
+                    AudioDevice.WIRED_HEADSET -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_headphones)
+                    AudioDevice.BLUETOOTH -> binding.audioButtonIcon.setImageResource(R.drawable.ic_bluetooth)
+                    AudioDevice.NONE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
                 }
             }
         }
@@ -99,7 +97,7 @@ class OngoingCallFragment : Fragment() {
         }
 
         binding.audioButton.setOnClickListener {
-            showAudioDeviceSelectionDialog(viewModel.callAudioState)
+            showAudioDeviceSelectionDialog(viewModel.availableAudioDevices.value)
         }
 
         binding.holdButton.setOnClickListener {
@@ -122,10 +120,7 @@ class OngoingCallFragment : Fragment() {
             if (shouldClearTextView) {
                 binding.callerNameTextView.text = symbol
             } else {
-                binding.callerNameTextView.text =
-                    if (binding.callerNameTextView.text.length < 15) binding.callerNameTextView.text
-                        .toString() + symbol else binding.callerNameTextView.text.toString()
-                        .substring(1) + symbol
+                binding.callerNameTextView.text = if (binding.callerNameTextView.text.length < 15) binding.callerNameTextView.text.toString() + symbol else binding.callerNameTextView.text.toString().substring(1) + symbol
             }
             shouldClearTextView = false
         })
@@ -148,8 +143,7 @@ class OngoingCallFragment : Fragment() {
             if (muted) {
                 binding.muteButton.setCardBackgroundColor(
                     ContextCompat.getColor(
-                        requireContext(),
-                        R.color.colorRed
+                        requireContext(), R.color.colorRed
                     )
                 )
                 binding.muteButtonIcon.setImageResource(R.drawable.ic_micoff)
@@ -157,8 +151,7 @@ class OngoingCallFragment : Fragment() {
             } else {
                 binding.muteButton.setCardBackgroundColor(
                     ContextCompat.getColor(
-                        requireContext(),
-                        R.color.call_option_default_back
+                        requireContext(), R.color.call_option_default_back
                     )
                 )
                 binding.muteButtonIcon.setImageResource(R.drawable.ic_micon)
@@ -171,16 +164,14 @@ class OngoingCallFragment : Fragment() {
             if (onHold) {
                 binding.holdButton.setCardBackgroundColor(
                     ContextCompat.getColor(
-                        requireContext(),
-                        R.color.colorRed
+                        requireContext(), R.color.colorRed
                     )
                 )
                 binding.holdValue = getString(R.string.resume)
             } else {
                 binding.holdButton.setCardBackgroundColor(
                     ContextCompat.getColor(
-                        requireContext(),
-                        R.color.call_option_default_back
+                        requireContext(), R.color.call_option_default_back
                     )
                 )
                 binding.holdValue = getString(R.string.hold)
@@ -193,8 +184,7 @@ class OngoingCallFragment : Fragment() {
 
         viewModel.moveToCallFailed.observe(viewLifecycleOwner, { reason ->
             findNavController().navigate(
-                R.id.action_callFragment_to_callFailedFragment,
-                bundleOf(
+                R.id.action_callFragment_to_callFailedFragment, bundleOf(
                     ENDPOINT_USERNAME to viewModel.userName.value,
                     ENDPOINT_DISPLAY_NAME to viewModel.displayName.value,
                     FAIL_REASON to reason,
@@ -213,27 +203,24 @@ class OngoingCallFragment : Fragment() {
         activity?.onBackPressedDispatcher?.addCallback(this) { }
     }
 
-
-    private fun showAudioDeviceSelectionDialog(callAudioState: StateFlow<CallAudioState?>?) {
-        lifecycleScope.launchWhenCreated {
-            callAudioState?.collect { state ->
-                val routes = state?.supportedRouteMask?.let { CallAudioState.audioRouteToString(it) }?.split(", ")
-                AlertDialog.Builder(requireContext()).setTitle(R.string.alert_select_audio_device)
-                    .setItems(routes?.toTypedArray()?.map {
-                        if (CallAudioState.audioRouteToString(state.route) == it) {
-                            "$it (Current)"
-                        } else {
-                            it
-                        }
-                    }?.toTypedArray()) { _, which ->
-                        routes?.get(which)?.let {
-                            viewModel.selectAudioDevice(it)
-                        }
-                    }
-                    .create()
-                    .show()
+    private fun showAudioDeviceSelectionDialog(audioDevices: List<AudioDevice>) {
+        val dialogBuilder = AlertDialog.Builder(requireContext()).setTitle(R.string.alert_select_audio_device)
+        val items = audioDevices.map { audioDevice ->
+            if (viewModel.selectedAudioDevice.value == audioDevice) {
+                "${audioDevice.name} (Current)"
+            } else {
+                audioDevice.name
             }
+        }.toTypedArray()
+
+        dialogBuilder.setItems(items) { dialog, which ->
+            audioDevices[which].let { audioDevice ->
+                viewModel.selectAudioDevice(audioDevice)
+            }
+            dialog.cancel()
         }
+
+        dialogBuilder.create().show()
     }
 
     private fun animate(view: View, animator: Animator) {

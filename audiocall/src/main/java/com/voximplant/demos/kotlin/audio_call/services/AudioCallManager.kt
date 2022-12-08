@@ -10,7 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
-import android.telecom.CallAudioState
+import android.telecom.Connection
 import android.telecom.DisconnectCause
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
@@ -27,9 +27,12 @@ import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import com.voximplant.sdk.client.IClientIncomingCallListener
+import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.AudioFileUsage
+import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
 import com.voximplant.sdk.hardware.IAudioFile
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
@@ -37,7 +40,7 @@ import kotlin.concurrent.scheduleAtFixedRate
 class AudioCallManager(
     private val appContext: Context,
     private val client: IClient,
-) : IClientIncomingCallListener, ICallListener, IEndpointListener {
+) : IClientIncomingCallListener, ICallListener, IEndpointListener, IAudioDeviceEventsListener {
 
     // Call management
     private var managedCall: ICall? = null
@@ -68,8 +71,12 @@ class AudioCallManager(
     val onHold: LiveData<Boolean>
         get() = _onHold
 
-    private val _callAudioState = MutableStateFlow<CallAudioState?>(null)
-    val callAudioState = _callAudioState.asStateFlow()
+    private val audioDeviceManager = Voximplant.getAudioDeviceManager()
+
+    private val _selectedAudioDevice = MutableStateFlow(audioDeviceManager.activeDevice)
+    val selectedAudioDevice: StateFlow<AudioDevice> = _selectedAudioDevice.asStateFlow()
+    private val _availableAudioDevices = MutableStateFlow(audioDeviceManager.audioDevices)
+    val availableAudioDevices = _availableAudioDevices.asStateFlow()
 
     private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
     private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
@@ -77,32 +84,34 @@ class AudioCallManager(
     private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
 
     // Call events
+    var outgoingCallStarted: (() -> Unit)? = null
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
     var onCallAnswer: (() -> Unit)? = null
 
     init {
         client.setClientIncomingCallListener(this)
+        audioDeviceManager.addAudioDeviceEventsListener(this)
     }
 
-    fun selectAudioDevice(route: String) {
-        when (route) {
-            "EARPIECE" -> {
-                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_EARPIECE)
-            }
-            "SPEAKER" -> {
-                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_SPEAKER)
-            }
-            "BLUETOOTH" -> {
-                managedCallConnection?.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH)
-            }
-        }
+    fun selectAudioDevice(audioDevice: AudioDevice) {
+        audioDeviceManager.selectAudioDevice(audioDevice)
     }
 
-    fun createConnection(): CallConnection? {
+    fun createIncomingConnection(): CallConnection? {
+        Log.i(APP_TAG, "AudioCallManager::createIncomingConnection")
         managedCallConnection = CallConnection()
         managedCallConnection?.setInitialized()
-        Log.i(APP_TAG, "AudioCallManager::createConnection: Connection created & initialized")
+        audioDeviceManager.setTelecomConnection(managedCallConnection)
+        return managedCallConnection
+    }
+
+    fun createOutgoingConnection(): CallConnection? {
+        Log.i(APP_TAG, "AudioCallManager::createOutgoingConnection")
+        managedCallConnection = CallConnection()
+        managedCallConnection?.setInitialized()
+        audioDeviceManager.setTelecomConnection(managedCallConnection)
+        managedCall?.start() ?: throw noActiveCallError
         return managedCallConnection
     }
 
@@ -247,7 +256,6 @@ class AudioCallManager(
             setCallState(CallState.OUTGOING)
             managedCall = client.call(user, callSettings)?.also {
                 endpointUsername = user
-                telecomManager.addOutgoingCall(user)
                 it.addCallListener(this)
             }
                 ?: throw callCreationError
@@ -256,9 +264,9 @@ class AudioCallManager(
     @Throws(CallManagerException::class)
     fun startOutgoingCall() =
         executeOrThrow {
+            endpointUsername?.let { username -> telecomManager.addOutgoingCall(username) }
             _callDuration.postValue(0)
             setCallState(CallState.CONNECTING)
-            managedCall?.start() ?: throw noActiveCallError
         }
 
     @Throws(CallManagerException::class)
@@ -482,8 +490,14 @@ class AudioCallManager(
         callFailedToneFile?.play(false)
     }
 
-    fun onCallAudioStateChanged(state: CallAudioState?) {
-        _callAudioState.value = state
+    override fun onAudioDeviceChanged(currentAudioDevice: AudioDevice?) {
+        Log.d(APP_TAG, "AudioCallManager::onAudioDeviceChanged::currentAudioDevice: $currentAudioDevice")
+        _selectedAudioDevice.value = currentAudioDevice
+    }
+
+    override fun onAudioDeviceListChanged(newDeviceList: MutableList<AudioDevice>?) {
+        Log.d(APP_TAG, "AudioCallManager::onAudioDeviceListChanged::newDeviceList: $newDeviceList")
+        _availableAudioDevices.value = newDeviceList
     }
 }
 

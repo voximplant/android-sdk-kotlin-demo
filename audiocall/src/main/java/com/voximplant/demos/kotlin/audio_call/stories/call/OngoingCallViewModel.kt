@@ -15,6 +15,8 @@ import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.CallManagerException
 import com.voximplant.demos.kotlin.utils.CallState
 import com.voximplant.demos.kotlin.utils.Shared.getResource
+import com.voximplant.sdk.hardware.AudioDevice
+import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,7 +46,8 @@ class OngoingCallViewModel : ViewModel() {
     val charDTMF = MutableLiveData<String>()
     val onHideKeypadPressed = MutableLiveData<Unit>()
 
-    val callAudioState = audioCallManager.callAudioState
+    val availableAudioDevices: StateFlow<List<AudioDevice>> = audioCallManager.availableAudioDevices
+    val selectedAudioDevice: StateFlow<AudioDevice> = audioCallManager.selectedAudioDevice
 
     val moveToCallFailed = MutableLiveData<String>()
     val finishActivity = MutableLiveData<Unit>()
@@ -153,8 +156,8 @@ class OngoingCallViewModel : ViewModel() {
         }
     }
 
-    fun selectAudioDevice(route: String) {
-        audioCallManager.selectAudioDevice(route)
+    fun selectAudioDevice(audioDevice: AudioDevice) {
+        audioCallManager.selectAudioDevice(audioDevice)
     }
 
     fun sendDTMF(DTMF: String) {
