@@ -96,16 +96,17 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
     override fun onStart() {
         super.onStart()
         permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.text.toString()) }
-        permissionsHelper.permissionDenied =
-            { _, openAppSettings ->
-                Snackbar.make(
-                    binding.root,
-                    applicationContext.getString(R.string.permission_mic_to_call),
-                    Snackbar.LENGTH_LONG
-                )
-                    .setAction(applicationContext.getString(R.string.settings)) { openAppSettings() }
-                    .show()
+        permissionsHelper.permissionDenied = { permission, openAppSettings ->
+            var message: String? = null
+            if (permission == android.Manifest.permission.RECORD_AUDIO) {
+                message = applicationContext.getString(R.string.permission_mic_to_call)
+            } else if (permission == android.Manifest.permission.BLUETOOTH_CONNECT) {
+                message = applicationContext.getString(R.string.permission_bluetooth_to_call)
             }
+            if (message != null) {
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).setAction(applicationContext.getString(R.string.settings)) { openAppSettings() }.show()
+            }
+        }
     }
 
     override fun onBackPressed() {}

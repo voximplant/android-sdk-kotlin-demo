@@ -80,7 +80,8 @@
     <string name="username_is_calling">is calling</string>
     <string name="ongoing">Ongoing</string>
     <string name="settings">Settings</string>
-    <string name="permission_mic_to_call">To make calls, give microphone access</string>
+    <string name="permission_mic_to_call">To make calls, grant access to microphone</string>
+    <string name="permission_bluetooth_to_call">To make calls, grant access to nearby devices</string>
     <string name="permission_denied">permission denied</string>
 
     <string name="enable_camera_label">Enable camera</string>
