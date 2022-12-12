@@ -84,7 +84,6 @@ class AudioCallManager(
     private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
 
     // Call events
-    var outgoingCallStarted: (() -> Unit)? = null
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
     var onCallConnect: (() -> Unit)? = null
     var onCallAnswer: (() -> Unit)? = null
