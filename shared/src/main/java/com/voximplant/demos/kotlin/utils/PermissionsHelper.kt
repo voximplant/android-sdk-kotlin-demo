@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat.startActivity
 class PermissionsHelper(private val context: Context, val requiredPermissions: Array<String>) {
 
     var allPermissionsGranted: (() -> Unit)? = null
-    var permissionDenied: ((message: String, openAppSettings: () -> Unit) -> Unit)? = null
+    var permissionDenied: ((permission: String, openAppSettings: () -> Unit) -> Unit)? = null
 
     fun permissionsResult(
         permissions: Array<out String>,
@@ -28,8 +28,8 @@ class PermissionsHelper(private val context: Context, val requiredPermissions: A
                 if (grantResults[index] == PackageManager.PERMISSION_DENIED) {
                     Log.w(APP_TAG, "$permission permission denied")
                     allGranted = false
-                    permissionDenied?.invoke("$permission ${context.getString(R.string.permission_denied)}")
-                    { openAppSettings() }
+                    permissionDenied?.invoke(permission, ::openAppSettings)
+                    break
                 }
             }
             if (allGranted)

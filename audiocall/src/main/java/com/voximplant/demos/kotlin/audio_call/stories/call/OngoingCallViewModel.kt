@@ -15,14 +15,12 @@ import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.CallManagerException
 import com.voximplant.demos.kotlin.utils.CallState
 import com.voximplant.demos.kotlin.utils.Shared.getResource
-import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
-import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
-import com.voximplant.sdk.hardware.IAudioDeviceManager
+import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.*
 
-class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
+class OngoingCallViewModel : ViewModel() {
 
     private val _callState = MutableLiveData<CallState>()
     private val _callStatus = MediatorLiveData<String?>()
@@ -47,16 +45,9 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         get() = _displayName
     val charDTMF = MutableLiveData<String>()
     val onHideKeypadPressed = MutableLiveData<Unit>()
-    private var audioDeviceManager: IAudioDeviceManager = Voximplant.getAudioDeviceManager()
-    val availableAudioDevices: List<String>
-        get() = audioDeviceManager.audioDevices.map { audioDevice ->
-            if (audioDevice.equals(audioDeviceManager.activeDevice)) {
-                "${audioDevice.name} (Current)"
-            } else {
-                audioDevice.name
-            }
-        }
-    val activeDevice = MutableLiveData(audioDeviceManager.activeDevice)
+
+    val availableAudioDevices: StateFlow<List<AudioDevice>> = audioCallManager.availableAudioDevices
+    val selectedAudioDevice: StateFlow<AudioDevice> = audioCallManager.selectedAudioDevice
 
     val moveToCallFailed = MutableLiveData<String>()
     val finishActivity = MutableLiveData<Unit>()
@@ -108,7 +99,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
         audioCallManager.onCallDisconnect =
             { failed, reason ->
-                audioDeviceManager.removeAudioDeviceEventsListener(this)
                 if (failed) {
                     moveToCallFailed.postValue(reason)
                 } else {
@@ -116,7 +106,6 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
                 }
             }
 
-        audioDeviceManager.addAudioDeviceEventsListener(this)
     }
 
     fun onCreateWithCall(
@@ -167,8 +156,8 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
         }
     }
 
-    fun selectAudioDevice(id: Int) {
-        audioDeviceManager.selectAudioDevice(audioDeviceManager.audioDevices[id])
+    fun selectAudioDevice(audioDevice: AudioDevice) {
+        audioCallManager.selectAudioDevice(audioDevice)
     }
 
     fun sendDTMF(DTMF: String) {
@@ -187,15 +176,9 @@ class OngoingCallViewModel : ViewModel(), IAudioDeviceEventsListener {
 
     override fun onCleared() {
         super.onCleared()
-        audioDeviceManager.removeAudioDeviceEventsListener(this)
         _callStatus.removeSource(audioCallManager.callState)
         _callStatus.removeSource(audioCallManager.callDuration)
         _callStatus.removeSource(audioCallManager.onHold)
     }
 
-    override fun onAudioDeviceChanged(currentAudioDevice: AudioDevice?) {
-        activeDevice.postValue(currentAudioDevice)
-    }
-
-    override fun onAudioDeviceListChanged(newDeviceList: MutableList<AudioDevice>?) {}
 }

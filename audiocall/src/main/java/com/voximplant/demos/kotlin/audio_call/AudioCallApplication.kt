@@ -7,6 +7,7 @@ package com.voximplant.demos.kotlin.audio_call
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -14,10 +15,10 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
+import com.voximplant.demos.kotlin.audio_call.services.AudioCallManager
 import com.voximplant.demos.kotlin.audio_call.services.TelecomManager
 import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.utils.*
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManager
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.client.ClientConfig
 import java.util.concurrent.Executors
@@ -38,13 +39,16 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
         val client = Voximplant.getClientInstance(
             Executors.newSingleThreadExecutor(),
             applicationContext,
-            ClientConfig().also { it.packageName = packageName }
+            ClientConfig().also { it.packageName = packageName },
         )
 
-        permissionsHelper = PermissionsHelper(
-            applicationContext,
-            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS),
-        )
+        val requiredPermissions = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS)
+        } else {
+            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT)
+        }
+
+        permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
         telecomManager = TelecomManager(applicationContext).apply { registerAccount() }
 
         Shared.notificationHelper =
