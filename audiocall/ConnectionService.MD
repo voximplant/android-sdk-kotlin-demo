@@ -37,7 +37,8 @@ For a self-managed `ConnectionService`, set `PhoneAccount.CAPABILITY_SELF_MANAGE
 ### Android Telecom Connection
 A `Connection` represents a phone call or connection to a remote endpoint that carries voice and/or video traffic.
 
-By that definition, creating a new Android Telecom Connection for each Voximplant call (`ICall`) is required. This way the Voximplant `ICall` interface manages a VoIP call and Telecom Connection registers this call in the telecom subsystem.
+This definition requires a new Android Telecom Connection to be created for each outgoing (before `ICall.start()`) and incoming (before `ICall.answer()`) Voximplant call.
+This way the Voximplant ICall interface manages a VoIP call and Telecom Connection registers this call in the telecom subsystem.
 
 Every self-managed `Connection` must be specified with the following parameters:
 ```Kotlin
@@ -46,6 +47,9 @@ audioModeIsVoip = true
 ```
 
 You can also use additional features such as putting a call on hold or muting with `connectionCapabilities`. Find the full list of features on the [Android Developers](https://developer.android.com/reference/android/telecom/Connection) site.
+
+Please note:
+Each new `Connection` should be passed to the Voximplant SDK via `IAudioDeviceManager.setTelecomConnection()` to manage audio devices.
 
 ### Make an outgoing call
 To create an outgoing call, check that a `PhoneAccount` is registered and then use the `TelecomManager.placeCall()` method.
