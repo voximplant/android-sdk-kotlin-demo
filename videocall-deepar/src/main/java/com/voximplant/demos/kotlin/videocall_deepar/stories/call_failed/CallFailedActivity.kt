@@ -12,7 +12,6 @@ import com.voximplant.demos.kotlin.videocall_deepar.R
 import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityCallFailedBinding
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
-import kotlinx.android.synthetic.main.activity_call_failed.*
 
 class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel::class.java) {
     private lateinit var binding: ActivityCallFailedBinding
@@ -28,51 +27,49 @@ class CallFailedActivity : BaseActivity<CallFailedViewModel>(CallFailedViewModel
         model.setEndpoint(userName = intent.getStringExtra(ENDPOINT_USERNAME), displayName = intent.getStringExtra(ENDPOINT_DISPLAY_NAME))
 
         val failReason = intent.getStringExtra(FAIL_REASON)
-        call_failed_status.text = failReason
+        binding.callFailedStatus.text = failReason
 
         val reducer = AnimatorInflater.loadAnimator(applicationContext, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(applicationContext, R.animator.regain_size)
 
-        cancel_call_button.setOnTouchListener { view, motionEvent ->
+        binding.cancelCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        call_back_button.setOnTouchListener { view, motionEvent ->
+        binding.callBackButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        cancel_call_button.setOnClickListener {
+        binding.cancelCallButton.setOnClickListener {
             model.cancel()
         }
 
-        call_back_button.setOnClickListener {
+        binding.callBackButton.setOnClickListener {
             model.callBack(sendVideo = intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
         }
 
-        model.displayName.observe(this, {
-            caller_name_call_failed.text = it
-        })
+        model.displayName.observe(this) {
+            binding.callerNameCallFailed.text = it
+        }
 
-        model.moveToCall.observe(this, {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_INCOMING_CALL, false)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
-                startActivity(it)
+        model.moveToCall.observe(this) {
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_INCOMING_CALL, false)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
+                startActivity(this)
             }
-        })
+        }
 
-        model.moveToMainActivity.observe(this, {
+        model.moveToMainActivity.observe(this) {
             Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
     }
-
-    override fun onBackPressed() {}
 
     private fun animate(view: View, animator: Animator) {
         animator.setTarget(view)

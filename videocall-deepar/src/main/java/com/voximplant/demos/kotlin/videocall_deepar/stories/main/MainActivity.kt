@@ -13,71 +13,71 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.videocall_deepar.R
+import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityMainBinding
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call.CallActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.login.LoginActivity
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
-    private var permissionsRequestCompletion: (() -> Unit)? = null
+    private lateinit var binding: ActivityMainBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser =
-            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        call_to.setText(OUTGOING_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
+        binding.callTo.setText(OUTGOING_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
 
-        start_call_button.setOnTouchListener { view, motionEvent ->
+        binding.startCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        logout_button.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
             model.logout()
         }
 
-        shareLogMainButton.setOnClickListener {
+        binding.shareLogMainButton.setOnClickListener {
             Shared.shareHelper.shareLog(this)
         }
 
-        start_call_button.setOnClickListener {
-            call_to.text.toString().saveToPrefs(applicationContext, OUTGOING_USERNAME)
+        binding.startCallButton.setOnClickListener {
+            binding.callTo.text.toString().saveToPrefs(applicationContext, OUTGOING_USERNAME)
             permissionsRequestCompletion = {
-                model.call(call_to.text.toString())
+                model.call(binding.callTo.text.toString())
             }
             requestPermissions()
         }
 
-        preset_camera_switch.setOnClickListener {
+        binding.presetCameraSwitch.setOnClickListener {
             model.toggleLocalVideoPreset()
         }
 
-        model.displayName.observe(this, {
-            logged_in_label.text = it
-        })
+        model.displayName.observe(this) {
+            binding.loggedInLabel.text = it
+        }
 
-        model.moveToCall.observe(this, {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_INCOMING_CALL, false)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
-                startActivity(it)
+        model.moveToCall.observe(this) {
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_INCOMING_CALL, false)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
+                startActivity(this)
             }
-        })
+        }
 
-        model.moveToLogin.observe(this, {
+        model.moveToLogin.observe(this) {
             Intent(this, LoginActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
         model.localVideoPresetEnabled.observe(this) {
-            preset_camera_switch.isChecked = it;
+            binding.presetCameraSwitch.isChecked = it
         }
     }
 
