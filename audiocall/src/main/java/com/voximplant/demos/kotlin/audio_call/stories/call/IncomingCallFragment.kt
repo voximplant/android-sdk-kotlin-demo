@@ -57,26 +57,15 @@ class IncomingCallFragment : Fragment() {
         }
 
         permissionsHelper.allPermissionsGranted = { viewModel.answer() }
-        permissionsHelper.permissionDenied =
-            { _, openAppSettings ->
-                Snackbar.make(
-                    binding.root,
-                    requireContext().getString(R.string.permission_mic_to_call),
-                    Snackbar.LENGTH_LONG
-                )
-                    .setAction(requireContext().getString(R.string.settings)) { openAppSettings() }
-                    .show()
-            }
+        permissionsHelper.permissionDenied = { _, openAppSettings ->
+            Snackbar.make(binding.root, requireContext().getString(R.string.permission_mic_to_call), Snackbar.LENGTH_LONG).setAction(requireContext().getString(R.string.settings)) { openAppSettings() }.show()
+        }
 
         binding.answerButton.setOnClickListener {
             if (permissionsHelper.allPermissionsGranted()) {
                 viewModel.answer()
             } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    permissionsHelper.requiredPermissions,
-                    1
-                )
+                ActivityCompat.requestPermissions(requireActivity(), permissionsHelper.requiredPermissions, 1)
             }
         }
 
@@ -99,11 +88,7 @@ class IncomingCallFragment : Fragment() {
             if (permissionsHelper.allPermissionsGranted()) {
                 viewModel.answer()
             } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    permissionsHelper.requiredPermissions,
-                    1
-                )
+                ActivityCompat.requestPermissions(requireActivity(), permissionsHelper.requiredPermissions, 1)
             }
         }
 

@@ -4,6 +4,7 @@
 
 package com.voximplant.demos.kotlin.audio_call.stories.main
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
@@ -98,9 +99,9 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.text.toString()) }
         permissionsHelper.permissionDenied = { permission, openAppSettings ->
             var message: String? = null
-            if (permission == android.Manifest.permission.RECORD_AUDIO) {
+            if (permission == Manifest.permission.RECORD_AUDIO) {
                 message = applicationContext.getString(R.string.permission_mic_to_call)
-            } else if (permission == android.Manifest.permission.BLUETOOTH_CONNECT) {
+            } else if (permission == Manifest.permission.BLUETOOTH_CONNECT) {
                 message = applicationContext.getString(R.string.permission_bluetooth_to_call)
             }
             if (message != null) {
