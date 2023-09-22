@@ -9,12 +9,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.voximplant.demos.kotlin.video_call"
-        minSdkVersion 19
-        targetSdkVersion 31
+        minSdk 19
+        targetSdk 33
         multiDexEnabled true
         versionCode 1
         versionName "1.1.10"

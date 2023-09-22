@@ -13,12 +13,12 @@ def apikeyProperties = new Properties()
 apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
 android {
-    compileSdkVersion 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.voximplant.demos.kotlin.videocall_deepar"
-        minSdkVersion 21
-        targetSdkVersion 31
+        minSdk 21
+        targetSdk 33
         multiDexEnabled true
         versionCode 1
         versionName "1.1.10"

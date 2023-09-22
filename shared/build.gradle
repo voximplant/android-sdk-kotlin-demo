@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdk 33
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 30
+        minSdk 19
+        targetSdk 33
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
