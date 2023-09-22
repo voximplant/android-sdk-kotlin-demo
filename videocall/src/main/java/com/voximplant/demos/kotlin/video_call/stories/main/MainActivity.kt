@@ -14,76 +14,76 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
+import com.voximplant.demos.kotlin.video_call.databinding.ActivityMainBinding
+import com.voximplant.demos.kotlin.video_call.permissionsHelper
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.login.LoginActivity
-import com.voximplant.sdk.Voximplant
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
-    private var permissionsRequestCompletion: (() -> Unit)? = null
+    private lateinit var binding: ActivityMainBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser =
-            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        call_to.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
+        binding.callTo.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
 
-        start_call_button.setOnTouchListener { view, motionEvent ->
+        binding.startCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        logout_button.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
             model.logout()
         }
 
-        shareLogMainButton.setOnClickListener {
+        binding.shareLogMainButton.setOnClickListener {
             Shared.shareHelper.shareLog(this)
         }
 
-        start_call_button.setOnClickListener {
-            call_to.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
+        binding.startCallButton.setOnClickListener {
+            binding.callTo.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
             permissionsRequestCompletion = {
                 model.call(call_to.text.toString())
             }
             requestPermissions()
         }
 
-        preset_camera_switch.setOnClickListener {
+        binding.presetCameraSwitch.setOnClickListener {
             model.toggleLocalVideoPreset()
         }
 
-        model.displayName.observe(this, {
-            logged_in_label.text = it
-        })
+        model.displayName.observe(this) { value ->
+            binding.loggedInLabel.text = value
+        }
 
-        model.moveToCall.observe(this, {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_INCOMING_CALL, false)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
-                startActivity(it)
+        model.moveToCall.observe(this) {
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_INCOMING_CALL, false)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
+                startActivity(this)
             }
-        })
+        }
 
-        model.moveToLogin.observe(this, {
+        model.moveToLogin.observe(this) {
             Intent(this, LoginActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
-        model.invalidInputError.observe(this, {
-            showError(call_to, resources.getString(it))
-        })
+        model.invalidInputError.observe(this) { value ->
+            showError(binding.callTo, resources.getString(value))
+        }
 
-        model.localVideoPresetEnabled.observe(this) {
-            preset_camera_switch.isChecked = it;
+        model.localVideoPresetEnabled.observe(this) { value ->
+            binding.presetCameraSwitch.isChecked = value
         }
     }
 

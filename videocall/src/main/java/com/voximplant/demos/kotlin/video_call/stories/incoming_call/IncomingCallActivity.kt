@@ -16,19 +16,20 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
+import com.voximplant.demos.kotlin.video_call.databinding.ActivityIncomingCallBinding
 import com.voximplant.demos.kotlin.video_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
-import com.voximplant.sdk.Voximplant
-import kotlinx.android.synthetic.main.activity_incoming_call.*
 
-class IncomingCallActivity :
-    BaseActivity<IncomingCallViewModel>(IncomingCallViewModel::class.java) {
+class IncomingCallActivity : BaseActivity<IncomingCallViewModel>(IncomingCallViewModel::class.java) {
+    private lateinit var binding: ActivityIncomingCallBinding
     private var permissionsRequestCompletion: (() -> Unit)? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_incoming_call)
+        binding = ActivityIncomingCallBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -37,70 +38,64 @@ class IncomingCallActivity :
             keyguardManager.requestDismissKeyguard(this, null)
         } else {
             @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            )
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
 
         val reducer = AnimatorInflater.loadAnimator(applicationContext, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(applicationContext, R.animator.regain_size)
 
-        answer_call_button.setOnTouchListener { view, motionEvent ->
+        binding.answerCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        decline_call_button.setOnTouchListener { view, motionEvent ->
+        binding.declineCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        answer_call_button.setOnClickListener {
+        binding.answerCallButton.setOnClickListener {
             permissionsRequestCompletion = {
                 model.answer()
             }
             requestPermissions()
         }
 
-        decline_call_button.setOnClickListener {
+        binding.declineCallButton.setOnClickListener {
             model.decline()
         }
 
-        preset_camera_switch.setOnClickListener {
+        binding.presetCameraSwitch.setOnClickListener {
             model.toggleLocalVideoPreset()
         }
 
-        model.moveToCall.observe(this, {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_INCOMING_CALL, true)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
-                startActivity(it)
+        model.moveToCall.observe(this) {
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_INCOMING_CALL, true)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, model.localVideoPresetEnabled.value == true)
+                startActivity(this)
             }
-        })
-
-        model.moveToCallFailed.observe(this, { reason ->
-            Intent(this, CallFailedActivity::class.java).also {
-                it.putExtra(FAIL_REASON, reason)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
-                startActivity(it)
-            }
-        })
-
-        model.displayName.observe(this, {
-            incoming_call_from.text = it
-        })
-
-        model.localVideoPresetEnabled.observe(this) {
-            preset_camera_switch.isChecked = it;
         }
 
-        val intent = intent
-        val result = intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)
-        if (result) {
+        model.moveToCallFailed.observe(this) { reason ->
+            Intent(this, CallFailedActivity::class.java).apply {
+                putExtra(FAIL_REASON, reason)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
+                startActivity(this)
+            }
+        }
+
+        model.displayName.observe(this) { value ->
+            binding.incomingCallFrom.text = value
+        }
+
+        model.localVideoPresetEnabled.observe(this) { value ->
+            binding.presetCameraSwitch.isChecked = value
+        }
+
+        if (intent.getBooleanExtra(ACTION_ANSWER_INCOMING_CALL, false)) {
             Shared.notificationHelper.cancelIncomingCallNotification()
             permissionsRequestCompletion = { model.answer() }
             requestPermissions()
@@ -108,9 +103,6 @@ class IncomingCallActivity :
 
         model.viewCreated()
     }
-
-    override fun onBackPressed() {}
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
