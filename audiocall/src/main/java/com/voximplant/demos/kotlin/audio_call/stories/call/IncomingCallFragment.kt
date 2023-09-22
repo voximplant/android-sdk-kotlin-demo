@@ -73,16 +73,13 @@ class IncomingCallFragment : Fragment() {
             viewModel.decline()
         }
 
-        viewModel.moveToCall.observe(viewLifecycleOwner, {
-            findNavController().navigate(
-                R.id.action_incomingCallFragment_to_callFragment,
-                arguments,
-            )
-        })
+        viewModel.moveToCall.observe(viewLifecycleOwner) {
+            findNavController().navigate(R.id.action_incomingCallFragment_to_callFragment, arguments)
+        }
 
-        viewModel.finishActivity.observe(viewLifecycleOwner, {
+        viewModel.finishActivity.observe(viewLifecycleOwner) {
             activity?.finish()
-        })
+        }
 
         if (arguments?.getBoolean(ACTION_ANSWER_INCOMING_CALL, false) == true) {
             if (permissionsHelper.allPermissionsGranted()) {

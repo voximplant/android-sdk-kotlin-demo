@@ -28,8 +28,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
         setContentView(binding.root)
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser =
-            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
         binding.loginButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
@@ -45,28 +44,28 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
             Shared.shareHelper.shareLog(this)
         }
 
-        model.didLogin.observe(this, {
+        model.didLogin.observe(this) {
             Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
-        model.invalidInputError.observe(this, {
+        model.invalidInputError.observe(this) {
             showError(
                 when (it.first) {
                     true -> binding.usernameView
                     false -> binding.passwordView
                 }, resources.getString(it.second)
             )
-        })
+        }
 
-        model.usernameFieldText.observe(this, {
-            binding.usernameView.setText(it)
-        })
+        model.usernameFieldText.observe(this) { value ->
+            binding.usernameView.setText(value)
+        }
 
-        model.passwordFieldText.observe(this, {
-            binding.passwordView.setText(it)
-        })
+        model.passwordFieldText.observe(this) { value ->
+            binding.passwordView.setText(value)
+        }
     }
 
     private fun showError(textView: EditText, text: String) {

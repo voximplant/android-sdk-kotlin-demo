@@ -60,32 +60,32 @@ class CallFailedFragment : Fragment() {
             false
         }
 
-        viewModel.showProgress.observe(viewLifecycleOwner, { textID ->
-            showProgressHUD(resources.getString(textID))
-        })
+        viewModel.showProgress.observe(viewLifecycleOwner) { stringId ->
+            showProgressHUD(resources.getString(stringId))
+        }
 
-        viewModel.hideProgress.observe(viewLifecycleOwner, {
+        viewModel.hideProgress.observe(viewLifecycleOwner) {
             hideProgressHUD()
-        })
+        }
 
-        viewModel.showStringSnackbar.observe(viewLifecycleOwner, { value ->
-            Snackbar.make(view, value, Snackbar.LENGTH_LONG).show()
-        })
+        viewModel.showStringSnackbar.observe(viewLifecycleOwner) { text ->
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG).show()
+        }
 
-        viewModel.showIntSnackbar.observe(viewLifecycleOwner, { value ->
-            Snackbar.make(view, getString(value), Snackbar.LENGTH_LONG).show()
-        })
+        viewModel.showIntSnackbar.observe(viewLifecycleOwner) { stringId ->
+            Snackbar.make(view, getString(stringId), Snackbar.LENGTH_LONG).show()
+        }
 
-        viewModel.moveToCall.observe(viewLifecycleOwner, {
+        viewModel.moveToCall.observe(viewLifecycleOwner) {
             findNavController().navigate(
                 R.id.action_callFailedFragment_to_callFragment,
                 bundleOf(IS_OUTGOING_CALL to true),
             )
-        })
+        }
 
-        viewModel.finishActivity.observe(viewLifecycleOwner, {
+        viewModel.finishActivity.observe(viewLifecycleOwner) {
             activity?.finish()
-        })
+        }
     }
 
     private fun animate(view: View, animator: Animator) {
