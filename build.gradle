@@ -3,8 +3,8 @@
 buildscript {
     ext {
         kotlin_version = '1.7.21'
-        gradle_version = '7.0.2'
-        google_services_version = '4.3.8'
+        gradle_version = '8.1.1'
+        google_services_version = '4.3.10'
         firebase_crashlytics_version = '2.7.1'
         firebase_bom_version = '28.0.1'
 
