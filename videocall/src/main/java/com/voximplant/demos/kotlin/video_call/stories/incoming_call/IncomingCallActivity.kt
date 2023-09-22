@@ -7,13 +7,14 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.core.app.ActivityCompat
-import androidx.core.content.PermissionChecker
+import androidx.core.content.ContextCompat
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.databinding.ActivityIncomingCallBinding
@@ -106,47 +107,36 @@ class IncomingCallActivity : BaseActivity<IncomingCallViewModel>(IncomingCallVie
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String>,
+        permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (grantResults.isNotEmpty()) {
-            var audioGranted = false
-            var videoGranted = false
-            for (i in permissions.indices) {
-                if (permissions[i] == Manifest.permission.RECORD_AUDIO && grantResults[i] == PermissionChecker.PERMISSION_GRANTED
-                ) {
-                    audioGranted = true
-                }
-                if (permissions[i] == Manifest.permission.CAMERA && grantResults[i] == PermissionChecker.PERMISSION_GRANTED
-                ) {
-                    videoGranted = true
+        if (requestCode == 1 && grantResults.isNotEmpty()) {
+            for (grantResult in grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    return  // no permission
                 }
             }
-            if (audioGranted && videoGranted) {
-                model.answer()
-            }
+            model.answer()
         }
     }
 
     private fun requestPermissions() {
-        val missingPermissions =
-            Voximplant.getMissingPermissions(applicationContext, true)
-        // due to the bug in android 6.0:
-        // https://stackoverflow.com/questions/32185628/connectivitymanager-requestnetwork-in-android-6-0
-        if (Build.VERSION.SDK_INT == 23) {
-            if (missingPermissions.contains(Manifest.permission.CHANGE_NETWORK_STATE)) {
-                missingPermissions.remove(Manifest.permission.CHANGE_NETWORK_STATE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.POST_NOTIFICATIONS), 1)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.BLUETOOTH_CONNECT), 1)
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), 1)
             }
-        }
-        if (missingPermissions.isEmpty()) {
-            permissionsRequestCompletion?.invoke()
         } else {
-            ActivityCompat.requestPermissions(
-                this,
-                missingPermissions.toTypedArray(),
-                PermissionChecker.PERMISSION_GRANTED
-            )
+            // Permission has already been granted
+            model.answer()
         }
     }
 

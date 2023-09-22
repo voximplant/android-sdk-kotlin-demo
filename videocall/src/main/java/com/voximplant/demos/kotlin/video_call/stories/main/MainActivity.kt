@@ -5,13 +5,12 @@ import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import androidx.core.app.ActivityCompat
-import androidx.core.content.PermissionChecker
+import com.google.android.material.snackbar.Snackbar
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.databinding.ActivityMainBinding
@@ -50,10 +49,11 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
         binding.startCallButton.setOnClickListener {
             binding.callTo.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
-            permissionsRequestCompletion = {
-                model.call(call_to.text.toString())
+            if (permissionsHelper.allPermissionsGranted()) {
+                model.call(binding.callTo.text.toString())
+            } else {
+                ActivityCompat.requestPermissions(this, permissionsHelper.requiredPermissions, 1)
             }
-            requestPermissions()
         }
 
         binding.presetCameraSwitch.setOnClickListener {
@@ -87,54 +87,6 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
     }
 
-    override fun onBackPressed() {}
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (grantResults.isNotEmpty()) {
-            var audioGranted = false
-            var videoGranted = false
-            for (i in permissions.indices) {
-                if (permissions[i] == Manifest.permission.RECORD_AUDIO && grantResults[i] == PermissionChecker.PERMISSION_GRANTED
-                ) {
-                    audioGranted = true
-                }
-                if (permissions[i] == Manifest.permission.CAMERA && grantResults[i] == PermissionChecker.PERMISSION_GRANTED
-                ) {
-                    videoGranted = true
-                }
-            }
-            if (audioGranted && videoGranted) {
-                permissionsRequestCompletion?.invoke()
-            }
-        }
-    }
-
-    private fun requestPermissions() {
-        val missingPermissions =
-            Voximplant.getMissingPermissions(applicationContext, true)
-        // due to the bug in android 6.0:
-        // https://stackoverflow.com/questions/32185628/connectivitymanager-requestnetwork-in-android-6-0
-        if (Build.VERSION.SDK_INT == 23) {
-            if (missingPermissions.contains(Manifest.permission.CHANGE_NETWORK_STATE)) {
-                missingPermissions.remove(Manifest.permission.CHANGE_NETWORK_STATE)
-            }
-        }
-        if (missingPermissions.isEmpty()) {
-            permissionsRequestCompletion?.invoke()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                missingPermissions.toTypedArray(),
-                PermissionChecker.PERMISSION_GRANTED
-            )
-        }
-    }
-
     private fun showError(textView: EditText, text: String) {
         textView.error = text
         textView.requestFocus()
@@ -143,5 +95,30 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
     private fun animate(view: View, animator: Animator) {
         animator.setTarget(view)
         animator.start()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.text.toString()) }
+        permissionsHelper.permissionDenied = { permission, openAppSettings ->
+            var message: String? = null
+            if (permission == Manifest.permission.RECORD_AUDIO) {
+                message = applicationContext.getString(R.string.permission_mic_to_call)
+            } else if (permission == Manifest.permission.BLUETOOTH_CONNECT) {
+                message = applicationContext.getString(R.string.permission_bluetooth_to_call)
+            }
+            if (message != null) {
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).setAction(applicationContext.getString(R.string.settings)) { openAppSettings() }.show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsHelper.permissionsResult(permissions, grantResults)
     }
 }
