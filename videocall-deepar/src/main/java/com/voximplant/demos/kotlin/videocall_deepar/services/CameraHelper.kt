@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class CameraHelper(var context: Context) {
+class CameraHelper(private var context: Context) {
     private var started: Boolean = false
     private lateinit var customLifecycle: CustomLifecycle
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -50,10 +50,10 @@ class CameraHelper(var context: Context) {
             .setTargetResolution(Size(cameraPreset.height, cameraPreset.width))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
-        imageAnalysis.setAnalyzer(cameraExecutor, { image ->
+        imageAnalysis.setAnalyzer(cameraExecutor) { image ->
             onImageReceived?.invoke(image, lensFacing == CameraSelector.LENS_FACING_FRONT)
             image.close()
-        })
+        }
 
         val cameraSelector =
             CameraSelector.Builder().requireLensFacing(lensFacing).build()
@@ -105,5 +105,5 @@ class CustomLifecycle : LifecycleOwner {
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
-    override fun getLifecycle(): Lifecycle = lifecycleRegistry
+    override val lifecycle: Lifecycle = lifecycleRegistry
 }
