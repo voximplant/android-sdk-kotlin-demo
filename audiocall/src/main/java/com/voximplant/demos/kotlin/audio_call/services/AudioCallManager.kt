@@ -55,7 +55,7 @@ class AudioCallManager(
     private val _callDuration = MutableLiveData(0L)
     val callDuration: LiveData<Long>
         get() = _callDuration
-    val callBroadcastReceiver: BroadcastReceiver = AudioCallBroadcastReceiver()
+    private val callBroadcastReceiver: BroadcastReceiver = AudioCallBroadcastReceiver()
     private val callSettings: CallSettings
         get() = CallSettings().apply { videoFlags = VideoFlags(false, false) }
 

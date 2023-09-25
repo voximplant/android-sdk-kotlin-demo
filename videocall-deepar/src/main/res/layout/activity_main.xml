@@ -106,7 +106,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_share_40" />
 
-        <Switch
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/preset_camera_switch"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

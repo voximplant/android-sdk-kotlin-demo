@@ -63,7 +63,7 @@ class VoximplantCallManager(
     private val _callDuration = MutableLiveData(0L)
     val callDuration: LiveData<Long>
         get() = _callDuration
-    val callBroadcastReceiver: BroadcastReceiver = CallBroadcastReceiver()
+    private val callBroadcastReceiver: BroadcastReceiver = CallBroadcastReceiver()
     private val callSettings: CallSettings
         get() = CallSettings().also { it.videoFlags = videoFlags }
 
@@ -545,7 +545,7 @@ class VoximplantCallManager(
         }
     }
 
-    fun showIncomingCallActivity(answer: Boolean = false) {
+    private fun showIncomingCallActivity(answer: Boolean = false) {
         Intent(appContext, incomingCallActivity).also {
             it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             it.putExtra(IS_INCOMING_CALL, true)

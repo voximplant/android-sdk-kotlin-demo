@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 
-class DeepARHelper(var context: Context) : AREventListener {
+class DeepARHelper(private var context: Context) : AREventListener {
     private var deepAR: DeepAR = DeepAR(context)
     private var initialized: Boolean = false
 

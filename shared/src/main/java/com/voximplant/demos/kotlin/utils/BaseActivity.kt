@@ -11,7 +11,7 @@ abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) 
     AppCompatActivity() {
 
     protected val model: T
-        get() = ViewModelProvider { this.viewModelStore }.get(modelType)
+        get() = ViewModelProvider { this.viewModelStore }[modelType]
 
     private val rootViewGroup: ViewGroup
         get() = window.decorView.rootView as ViewGroup
@@ -21,25 +21,25 @@ abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        model.showProgress.observe(this, { textID ->
+        model.showProgress.observe(this) { textID ->
             showProgressHUD(resources.getString(textID))
-        })
+        }
 
-        model.hideProgress.observe(this, {
+        model.hideProgress.observe(this) {
             hideProgressHUD()
-        })
+        }
 
-        model.stringError.observe(this, { text ->
+        model.stringError.observe(this) { text ->
             showError(text)
-        })
+        }
 
-        model.intError.observe(this, { textID ->
+        model.intError.observe(this) { textID ->
             showError(resources.getString(textID))
-        })
+        }
 
-        model.finish.observe(this, {
+        model.finish.observe(this) {
             finish()
-        })
+        }
 
         model.onCreate()
     }
