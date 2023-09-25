@@ -443,7 +443,7 @@ class VoximplantCallManager(
             val filter = IntentFilter().apply {
                 addAction(ACTION_HANGUP_ONGOING_CALL)
             }
-            appContext.registerReceiver(callBroadcastReceiver, filter)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             Shared.notificationHelper.createOngoingCallNotification(
                 appContext,
                 endpointDisplayName ?: endpointUsername,
@@ -536,7 +536,7 @@ class VoximplantCallManager(
                 addAction(ACTION_ANSWER_INCOMING_CALL)
                 addAction(ACTION_DECLINE_INCOMING_CALL)
             }
-            appContext.registerReceiver(callBroadcastReceiver, filter)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             Shared.notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,

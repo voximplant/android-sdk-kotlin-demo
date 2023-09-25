@@ -69,6 +69,16 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name="com.voximplant.demos.kotlin.services.CallBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="action_answer_incoming_call" />
+                <action android:name="action_decline_incoming_call" />
+                <action android:name="action_hangup_ongoing_call" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.voximplant.demos.kotlin.video_call.fileprovider"
