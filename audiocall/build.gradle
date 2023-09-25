@@ -44,11 +44,6 @@ android {
         viewBinding true
         dataBinding true
     }
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging true
-        }
-    }
     namespace 'com.voximplant.demos.kotlin.audio_call'
 }
 
