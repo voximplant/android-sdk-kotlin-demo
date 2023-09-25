@@ -10,9 +10,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
-import android.telecom.Connection
 import android.telecom.DisconnectCause
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -404,7 +404,7 @@ class AudioCallManager(
             val filter = IntentFilter().apply {
                 addAction(ACTION_HANGUP_ONGOING_CALL)
             }
-            appContext.registerReceiver(callBroadcastReceiver, filter)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             notificationHelper.createOngoingCallNotification(
                 appContext,
                 endpointDisplayName ?: endpointUsername,
@@ -447,7 +447,7 @@ class AudioCallManager(
                 addAction(ACTION_ANSWER_INCOMING_CALL)
                 addAction(ACTION_DECLINE_INCOMING_CALL)
             }
-            appContext.registerReceiver(callBroadcastReceiver, filter)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,
