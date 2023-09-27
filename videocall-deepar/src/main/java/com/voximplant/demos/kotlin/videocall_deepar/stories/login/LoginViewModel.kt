@@ -50,11 +50,6 @@ class LoginViewModel : BaseViewModel(), AuthServiceListener {
         passwordFieldText.postValue("")
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        authService.listener = null
-    }
-
     override fun onLoginSuccess(displayName: String) {
         super.onLoginSuccess(displayName)
         hideProgress.postValue(Unit)
@@ -91,4 +86,10 @@ class LoginViewModel : BaseViewModel(), AuthServiceListener {
         super.onConnectionClosed()
         hideProgress.postValue(Unit)
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        authService.listener = null
+    }
+
 }
