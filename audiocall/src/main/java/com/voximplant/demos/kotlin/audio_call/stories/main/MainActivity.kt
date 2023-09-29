@@ -4,6 +4,7 @@
 
 package com.voximplant.demos.kotlin.audio_call.stories.main
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
@@ -34,12 +35,9 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         binding.lifecycleOwner = this
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser =
-            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        binding.callTo.setText(
-            LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty()
-        )
+        binding.callTo.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
 
         binding.startCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
@@ -56,8 +54,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
 
         binding.startCallButton.setOnClickListener {
-            binding.callTo.text.toString()
-                .saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
+            binding.callTo.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
 
             if (permissionsHelper.allPermissionsGranted()) {
                 model.call(binding.callTo.text.toString())
@@ -66,29 +63,29 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             }
         }
 
-        model.moveToCall.observe(this, {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_OUTGOING_CALL, true)
-                startActivity(it)
+        model.moveToCall.observe(this) {
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_OUTGOING_CALL, true)
+                startActivity(this)
             }
-        })
+        }
 
-        model.moveToLogin.observe(this, {
+        model.moveToLogin.observe(this) {
             Intent(this, LoginActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
-        model.invalidInputError.observe(this, {
-            showError(binding.callTo, resources.getString(it))
-        })
+        model.invalidInputError.observe(this) { value ->
+            showError(binding.callTo, resources.getString(value))
+        }
 
         if (intent.getBooleanExtra(IS_ONGOING_CALL, false)) {
-            Intent(this, CallActivity::class.java).also {
-                it.putExtra(IS_ONGOING_CALL, true)
-                it.putExtra(IS_INCOMING_CALL, false)
-                it.putExtra(IS_OUTGOING_CALL, false)
-                startActivity(it)
+            Intent(this, CallActivity::class.java).apply {
+                putExtra(IS_ONGOING_CALL, true)
+                putExtra(IS_INCOMING_CALL, false)
+                putExtra(IS_OUTGOING_CALL, false)
+                startActivity(this)
             }
         }
     }
@@ -98,9 +95,9 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.text.toString()) }
         permissionsHelper.permissionDenied = { permission, openAppSettings ->
             var message: String? = null
-            if (permission == android.Manifest.permission.RECORD_AUDIO) {
+            if (permission == Manifest.permission.RECORD_AUDIO) {
                 message = applicationContext.getString(R.string.permission_mic_to_call)
-            } else if (permission == android.Manifest.permission.BLUETOOTH_CONNECT) {
+            } else if (permission == Manifest.permission.BLUETOOTH_CONNECT) {
                 message = applicationContext.getString(R.string.permission_bluetooth_to_call)
             }
             if (message != null) {

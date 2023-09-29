@@ -22,12 +22,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.Shared.voximplantCallManager
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.databinding.ActivityCallBinding
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.sdk.hardware.AudioDevice
-import kotlinx.android.synthetic.main.activity_call.*
 import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
 import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
 
@@ -44,180 +44,176 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
         binding.lifecycleOwner = this
         binding.model = model
 
-        local_video_view.setZOrderMediaOverlay(true)
+        binding.localVideoView.setZOrderMediaOverlay(true)
 
         val reducer = AnimatorInflater.loadAnimator(applicationContext, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(applicationContext, R.animator.regain_size)
 
-        mute_button.setOnTouchListener { view, motionEvent ->
+        binding.muteButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        audio_button.setOnTouchListener { view, motionEvent ->
+        binding.audioButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        hold_button.setOnTouchListener { view, motionEvent ->
+        binding.holdButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        sharing_button.setOnTouchListener { view, motionEvent ->
+        binding.sharingButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        video_button.setOnTouchListener { view, motionEvent ->
+        binding.videoButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        hangup_button.setOnTouchListener { view, motionEvent ->
+        binding.hangupButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        mute_button.setOnClickListener {
+        binding.muteButton.setOnClickListener {
             model.mute()
         }
 
-        audio_button.setOnClickListener {
+        binding.audioButton.setOnClickListener {
             showAudioDeviceSelectionDialog(model.availableAudioDevices)
         }
 
-        hold_button.setOnClickListener {
+        binding.holdButton.setOnClickListener {
             model.hold()
         }
 
-        sharing_button.setOnClickListener {
+        binding.sharingButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 model.shareScreen(::requestScreenCapture)
             } else {
-                Toast.makeText(
-                    applicationContext,
-                    getString(R.string.screen_sharing_min_api_warning),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(applicationContext, getString(R.string.screen_sharing_min_api_warning), Toast.LENGTH_LONG).show()
             }
         }
 
-        video_button.setOnClickListener {
+        binding.videoButton.setOnClickListener {
             model.sendVideo()
         }
 
-        hangup_button.setOnClickListener {
+        binding.hangupButton.setOnClickListener {
             model.hangup()
         }
 
-        local_video_view.setOnClickListener {
+        binding.localVideoView.setOnClickListener {
             model.changeCam()
         }
 
-        model.showLocalVideoView.observe(this, {
-            local_video_view.visibility = if (it) VISIBLE else INVISIBLE
-        })
+        model.showLocalVideoView.observe(this) { value ->
+            binding.localVideoView.visibility = if (value) VISIBLE else INVISIBLE
+        }
 
-        model.showRemoteVideoView.observe(this, {
-            remote_video_view.visibility = if (it) VISIBLE else INVISIBLE
-        })
+        model.showRemoteVideoView.observe(this) { value ->
+            binding.remoteVideoView.visibility = if (value) VISIBLE else INVISIBLE
+        }
 
-        model.remoteVideoIsPortrait.observe(this, { isPortrait ->
-            remote_video_view.setScalingType(if (isPortrait) SCALE_ASPECT_FILL else SCALE_ASPECT_FIT)
-        })
+        model.remoteVideoIsPortrait.observe(this) { isPortrait ->
+            binding.remoteVideoView.setScalingType(if (isPortrait) SCALE_ASPECT_FILL else SCALE_ASPECT_FIT)
+        }
 
-        model.activeDevice.observe(this, { audioDevice ->
+        model.activeDevice.observe(this) { audioDevice ->
             when (audioDevice) {
-                AudioDevice.EARPIECE -> audio_button_icon.setImageResource(R.drawable.ic_audio_internal)
-                AudioDevice.SPEAKER -> audio_button_icon.setImageResource(R.drawable.ic_audio_external)
-                AudioDevice.WIRED_HEADSET -> audio_button_icon.setImageResource(R.drawable.ic_audio_headphones)
-                AudioDevice.BLUETOOTH -> audio_button_icon.setImageResource(R.drawable.ic_bluetooth)
-                AudioDevice.NONE -> audio_button_icon.setImageResource(R.drawable.ic_audio_disabled)
-                null -> audio_button_icon.setImageResource(R.drawable.ic_audio_disabled)
+                AudioDevice.EARPIECE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_internal)
+                AudioDevice.SPEAKER -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_external)
+                AudioDevice.WIRED_HEADSET -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_headphones)
+                AudioDevice.BLUETOOTH -> binding.audioButtonIcon.setImageResource(R.drawable.ic_bluetooth)
+                AudioDevice.NONE -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
+                null -> binding.audioButtonIcon.setImageResource(R.drawable.ic_audio_disabled)
             }
-        })
+        }
 
-        model.muted.observe(this, { muted ->
+        model.muted.observe(this) { muted ->
             if (muted) {
-                mute_button.setBackgroundResource(R.drawable.red_call_option_back)
-                mute_button_icon.setImageResource(R.drawable.ic_micoff)
+                binding.muteButton.setBackgroundResource(R.drawable.red_call_option_back)
+                binding.muteButtonIcon.setImageResource(R.drawable.ic_micoff)
             } else {
-                mute_button.setBackgroundResource(R.drawable.normal_call_option_back)
-                mute_button_icon.setImageResource(R.drawable.ic_micon)
+                binding.muteButton.setBackgroundResource(R.drawable.normal_call_option_back)
+                binding.muteButtonIcon.setImageResource(R.drawable.ic_micon)
             }
-        })
+        }
 
-        model.onHold.observe(this, { onHold ->
+        model.onHold.observe(this) { onHold ->
             if (onHold) {
-                hold_button.setBackgroundResource(R.drawable.red_call_option_back)
-                hold_button_icon.setImageResource(R.drawable.ic_call_hold)
+                binding.holdButton.setBackgroundResource(R.drawable.red_call_option_back)
+                binding.holdButtonIcon.setImageResource(R.drawable.ic_call_hold)
             } else {
-                hold_button.setBackgroundResource(R.drawable.normal_call_option_back)
-                hold_button_icon.setImageResource(R.drawable.ic_call_hold)
+                binding.holdButton.setBackgroundResource(R.drawable.normal_call_option_back)
+                binding.holdButtonIcon.setImageResource(R.drawable.ic_call_hold)
             }
-        })
+        }
 
-        model.sharingScreen.observe(this, { sharingScreen ->
+        model.sharingScreen.observe(this) { sharingScreen ->
             if (sharingScreen) {
-                sharing_button.setBackgroundResource(R.drawable.red_call_option_back)
+                binding.sharingButton.setBackgroundResource(R.drawable.red_call_option_back)
             } else {
-                sharing_button.setBackgroundResource(R.drawable.normal_call_option_back)
+                binding.sharingButton.setBackgroundResource(R.drawable.normal_call_option_back)
             }
-        })
+        }
 
-        model.sendingLocalVideo.observe(this, { sendingVideo ->
+        model.sendingLocalVideo.observe(this) { sendingVideo ->
             if (sendingVideo) {
-                video_button.setBackgroundResource(R.drawable.normal_call_option_back)
-                video_button_icon.setImageResource(R.drawable.ic_camon)
+                binding.videoButton.setBackgroundResource(R.drawable.normal_call_option_back)
+                binding.videoButtonIcon.setImageResource(R.drawable.ic_camon)
             } else {
-                video_button.setBackgroundResource(R.drawable.red_call_option_back)
-                video_button_icon.setImageResource(R.drawable.ic_camoff)
-                local_video_view.visibility = INVISIBLE
+                binding.videoButton.setBackgroundResource(R.drawable.red_call_option_back)
+                binding.videoButtonIcon.setImageResource(R.drawable.ic_camoff)
+                binding.localVideoView.visibility = INVISIBLE
             }
-        })
+        }
 
-        Shared.voximplantCallManager.localVideoRenderer.observe(this, { completion ->
-            completion(local_video_view)
-        })
+        voximplantCallManager.localVideoRenderer.observe(this) { completion ->
+            completion(binding.localVideoView)
+        }
 
-        Shared.voximplantCallManager.remoteVideoRenderer.observe(this, { completion ->
-            completion(remote_video_view)
-        })
+        voximplantCallManager.remoteVideoRenderer.observe(this) { completion ->
+            completion(binding.remoteVideoView)
+        }
 
-        model.moveToCallFailed.observe(this, { reason ->
-            Intent(this, CallFailedActivity::class.java).also {
-                it.putExtra(ENDPOINT_USERNAME, model.userName.value)
-                it.putExtra(ENDPOINT_DISPLAY_NAME, model.displayName.value)
-                it.putExtra(FAIL_REASON, reason)
-                it.putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
-                startActivity(it)
+        model.moveToCallFailed.observe(this) { reason ->
+            Intent(this, CallFailedActivity::class.java).apply {
+                putExtra(ENDPOINT_USERNAME, model.userName.value)
+                putExtra(ENDPOINT_DISPLAY_NAME, model.displayName.value)
+                putExtra(FAIL_REASON, reason)
+                putExtra(PRESET_SEND_LOCAL_VIDEO, intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true))
+                startActivity(this)
             }
-        })
+        }
 
-        model.moveToMainActivity.observe(this, {
+        model.moveToMainActivity.observe(this) {
             Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
-        model.enableSharingButton.observe(this, {
-            sharing_button.isEnabled = it
-        })
+        model.enableSharingButton.observe(this) { value ->
+            binding.sharingButton.isEnabled = value
+        }
 
-        model.enableHoldButton.observe(this, {
-            hold_button.isEnabled = it
-        })
+        model.enableHoldButton.observe(this) { value ->
+            binding.holdButton.isEnabled = value
+        }
 
-        model.enableVideoButton.observe(this, {
-            video_button.isClickable = it
-        })
+        model.enableVideoButton.observe(this) { value ->
+            binding.videoButton.isClickable = value
+        }
 
         model.onCreateWithCall(
             intent.getBooleanExtra(IS_INCOMING_CALL, true),
@@ -225,8 +221,6 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
             sendVideo = intent.getBooleanExtra(PRESET_SEND_LOCAL_VIDEO, true),
         )
     }
-
-    override fun onBackPressed() {}
 
     private fun showAudioDeviceSelectionDialog(audioDevices: List<String>) {
         AlertDialog.Builder(this).setTitle(R.string.alert_select_audio_device)

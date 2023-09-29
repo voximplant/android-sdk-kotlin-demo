@@ -11,56 +11,58 @@ import android.widget.EditText
 import com.voximplant.demos.kotlin.utils.BaseActivity
 import com.voximplant.demos.kotlin.utils.Shared
 import com.voximplant.demos.kotlin.video_call.R
+import com.voximplant.demos.kotlin.video_call.databinding.ActivityLoginBinding
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
-import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
+    private lateinit var binding: ActivityLoginBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
 
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
-        val increaser =
-            AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
+        val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        loginButton.setOnTouchListener { view, motionEvent ->
+        binding.loginButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
             false
         }
 
-        loginButton.setOnClickListener {
-            model.login(usernameView.text.toString(), passwordView.text.toString())
+        binding.loginButton.setOnClickListener {
+            model.login(binding.usernameView.text.toString(), binding.passwordView.text.toString())
         }
 
-        shareLogLoginButton.setOnClickListener {
+        binding.shareLogLoginButton.setOnClickListener {
             Shared.shareHelper.shareLog(this)
         }
 
-        model.didLogin.observe(this, {
+        model.didLogin.observe(this) {
             Intent(this, MainActivity::class.java).also {
                 startActivity(it)
             }
-        })
+        }
 
-        model.invalidInputError.observe(this, {
+        model.invalidInputError.observe(this) { value ->
             showError(
-                when (it.first) {
-                    true -> usernameView
-                    false -> passwordView
-                }, resources.getString(it.second)
+                when (value.first) {
+                    true -> binding.usernameView
+                    false -> binding.passwordView
+                }, resources.getString(value.second)
             )
-        })
+        }
 
-        model.usernameFieldText.observe(this, {
-            usernameView.setText(it)
-        })
+        model.usernameFieldText.observe(this) { value ->
+            binding.usernameView.setText(value)
+        }
 
-        model.passwordFieldText.observe(this, {
-            passwordView.setText(it)
-        })
+        model.passwordFieldText.observe(this) { value ->
+            binding.passwordView.setText(value)
+        }
     }
 
     private fun showError(textView: EditText, text: String) {

@@ -24,7 +24,6 @@ import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.databinding.FragmentOngoingCallBinding
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.hardware.AudioDevice
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class OngoingCallFragment : Fragment() {
@@ -51,10 +50,10 @@ class OngoingCallFragment : Fragment() {
         val reducer = AnimatorInflater.loadAnimator(context, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(context, R.animator.regain_size)
 
-        viewModel.onHideKeypadPressed.observe(viewLifecycleOwner, {
+        viewModel.onHideKeypadPressed.observe(viewLifecycleOwner) {
             shouldClearTextView = true
             showKeypad(false)
-        })
+        }
 
         lifecycleScope.launch {
             viewModel.selectedAudioDevice.collect { audioDevice ->
@@ -116,30 +115,30 @@ class OngoingCallFragment : Fragment() {
             showKeypad(false)
         }
 
-        viewModel.charDTMF.observe(viewLifecycleOwner, { symbol ->
+        viewModel.charDTMF.observe(viewLifecycleOwner) { symbol ->
             if (shouldClearTextView) {
                 binding.callerNameTextView.text = symbol
             } else {
                 binding.callerNameTextView.text = if (binding.callerNameTextView.text.length < 15) binding.callerNameTextView.text.toString() + symbol else binding.callerNameTextView.text.toString().substring(1) + symbol
             }
             shouldClearTextView = false
-        })
+        }
 
-        viewModel.enableButtons.observe(viewLifecycleOwner, { enabled ->
+        viewModel.enableButtons.observe(viewLifecycleOwner) { enabled ->
             val alpha = if (enabled) 1.0 else 0.25
             binding.holdButton.alpha = alpha.toFloat()
             binding.keypadButton.alpha = alpha.toFloat()
             binding.holdButton.isEnabled = enabled
             binding.keypadButton.isEnabled = enabled
-        })
+        }
 
-        viewModel.enableKeypad.observe(viewLifecycleOwner, { enabled ->
+        viewModel.enableKeypad.observe(viewLifecycleOwner) { enabled ->
             val alpha = if (enabled) 1.0 else 0.25
             binding.keypadButton.alpha = alpha.toFloat()
             binding.keypadButton.isEnabled = enabled
-        })
+        }
 
-        viewModel.muted.observe(viewLifecycleOwner, { muted ->
+        viewModel.muted.observe(viewLifecycleOwner) { muted ->
             if (muted) {
                 binding.muteButton.setCardBackgroundColor(
                     ContextCompat.getColor(
@@ -157,46 +156,39 @@ class OngoingCallFragment : Fragment() {
                 binding.muteButtonIcon.setImageResource(R.drawable.ic_micon)
                 binding.muteValue = getString(R.string.mute)
             }
-        })
+        }
 
-        viewModel.onHold.observe(viewLifecycleOwner, { onHold ->
+        viewModel.onHold.observe(viewLifecycleOwner) { onHold ->
             binding.holdButton.isEnabled = true
             if (onHold) {
-                binding.holdButton.setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.colorRed
-                    )
-                )
+                binding.holdButton.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorRed))
                 binding.holdValue = getString(R.string.resume)
             } else {
-                binding.holdButton.setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(), R.color.call_option_default_back
-                    )
-                )
+                binding.holdButton.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.call_option_default_back))
                 binding.holdValue = getString(R.string.hold)
             }
-        })
+        }
 
-        viewModel.finishActivity.observe(viewLifecycleOwner, {
+        viewModel.finishActivity.observe(viewLifecycleOwner) {
             activity?.finish()
-        })
+        }
 
-        viewModel.moveToCallFailed.observe(viewLifecycleOwner, { reason ->
+        viewModel.moveToCallFailed.observe(viewLifecycleOwner) { reason ->
             findNavController().navigate(
-                R.id.action_callFragment_to_callFailedFragment, bundleOf(
+                R.id.action_callFragment_to_callFailedFragment,
+                bundleOf(
                     ENDPOINT_USERNAME to viewModel.userName.value,
                     ENDPOINT_DISPLAY_NAME to viewModel.displayName.value,
                     FAIL_REASON to reason,
-                )
+                ),
             )
-        })
+        }
 
-        arguments?.let {
+        arguments?.run {
             viewModel.onCreateWithCall(
-                it.getBoolean(IS_ONGOING_CALL, false),
-                it.getBoolean(IS_OUTGOING_CALL, false),
-                it.getBoolean(IS_INCOMING_CALL, false),
+                isOngoing = getBoolean(IS_ONGOING_CALL, false),
+                isOutgoing = getBoolean(IS_OUTGOING_CALL, false),
+                isIncoming = getBoolean(IS_INCOMING_CALL, false),
             )
         }
 

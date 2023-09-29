@@ -5,7 +5,6 @@ apply plugin: 'com.android.application'
 //apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 def apikeyPropertiesFile = rootProject.file("./videocall-deepar/apikey.properties")
@@ -13,15 +12,15 @@ def apikeyProperties = new Properties()
 apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
 android {
-    compileSdkVersion 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.voximplant.demos.kotlin.videocall_deepar"
-        minSdkVersion 21
-        targetSdkVersion 31
+        minSdk 21
+        targetSdk 33
         multiDexEnabled true
         versionCode 1
-        versionName "1.1.10"
+        versionName "1.2.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -29,8 +28,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -43,12 +42,18 @@ android {
         viewBinding true
         dataBinding true
     }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+    namespace 'com.voximplant.demos.kotlin.videocall_deepar'
 }
 
 dependencies {
     implementation project(':shared')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.core:core-ktx:$core_ctx_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayout_version"
@@ -74,8 +79,4 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$cameraX_version"
 
     implementation "androidx.multidex:multidex:$multidex_version"
-
-    testImplementation "junit:junit:$junit_version"
-    androidTestImplementation "androidx.test.ext:junit:$juint_ext_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
 }

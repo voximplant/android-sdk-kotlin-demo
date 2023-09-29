@@ -42,11 +42,14 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             ClientConfig().also { it.packageName = packageName },
         )
 
-        val requiredPermissions = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS)
-        } else {
-            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT)
-        }
+        val requiredPermissions =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.POST_NOTIFICATIONS)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT)
+            } else {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS)
+            }
 
         permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
         telecomManager = TelecomManager(applicationContext).apply { registerAccount() }

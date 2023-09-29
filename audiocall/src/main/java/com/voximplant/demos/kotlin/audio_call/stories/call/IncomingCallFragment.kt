@@ -57,26 +57,15 @@ class IncomingCallFragment : Fragment() {
         }
 
         permissionsHelper.allPermissionsGranted = { viewModel.answer() }
-        permissionsHelper.permissionDenied =
-            { _, openAppSettings ->
-                Snackbar.make(
-                    binding.root,
-                    requireContext().getString(R.string.permission_mic_to_call),
-                    Snackbar.LENGTH_LONG
-                )
-                    .setAction(requireContext().getString(R.string.settings)) { openAppSettings() }
-                    .show()
-            }
+        permissionsHelper.permissionDenied = { _, openAppSettings ->
+            Snackbar.make(binding.root, requireContext().getString(R.string.permission_mic_to_call), Snackbar.LENGTH_LONG).setAction(requireContext().getString(R.string.settings)) { openAppSettings() }.show()
+        }
 
         binding.answerButton.setOnClickListener {
             if (permissionsHelper.allPermissionsGranted()) {
                 viewModel.answer()
             } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    permissionsHelper.requiredPermissions,
-                    1
-                )
+                ActivityCompat.requestPermissions(requireActivity(), permissionsHelper.requiredPermissions, 1)
             }
         }
 
@@ -84,26 +73,19 @@ class IncomingCallFragment : Fragment() {
             viewModel.decline()
         }
 
-        viewModel.moveToCall.observe(viewLifecycleOwner, {
-            findNavController().navigate(
-                R.id.action_incomingCallFragment_to_callFragment,
-                arguments,
-            )
-        })
+        viewModel.moveToCall.observe(viewLifecycleOwner) {
+            findNavController().navigate(R.id.action_incomingCallFragment_to_callFragment, arguments)
+        }
 
-        viewModel.finishActivity.observe(viewLifecycleOwner, {
+        viewModel.finishActivity.observe(viewLifecycleOwner) {
             activity?.finish()
-        })
+        }
 
         if (arguments?.getBoolean(ACTION_ANSWER_INCOMING_CALL, false) == true) {
             if (permissionsHelper.allPermissionsGranted()) {
                 viewModel.answer()
             } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    permissionsHelper.requiredPermissions,
-                    1
-                )
+                ActivityCompat.requestPermissions(requireActivity(), permissionsHelper.requiredPermissions, 1)
             }
         }
 

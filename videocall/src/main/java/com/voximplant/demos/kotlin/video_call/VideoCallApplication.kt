@@ -1,6 +1,9 @@
 package com.voximplant.demos.kotlin.video_call
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -18,6 +21,9 @@ import com.voximplant.sdk.call.VideoFlags
 import com.voximplant.sdk.client.ClientConfig
 import java.util.concurrent.Executors
 
+@SuppressLint("StaticFieldLeak")
+lateinit var permissionsHelper: PermissionsHelper
+
 class VideoCallApplication : MultiDexApplication(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
@@ -31,6 +37,17 @@ class VideoCallApplication : MultiDexApplication(), LifecycleObserver {
                 it.packageName = packageName
             }
         )
+
+        val requiredPermissions =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.POST_NOTIFICATIONS)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH_CONNECT)
+            } else {
+                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
+            }
+
+        permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
 
         Shared.notificationHelper =
             NotificationHelper(
