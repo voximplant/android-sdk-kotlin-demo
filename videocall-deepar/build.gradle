@@ -44,7 +44,7 @@ android {
     }
     packagingOptions {
         jniLibs {
-            useLegacyPackaging true
+            useLegacyPackaging false
         }
     }
     namespace 'com.voximplant.demos.kotlin.videocall_deepar'
