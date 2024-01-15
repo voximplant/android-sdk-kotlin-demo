@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call
@@ -7,7 +7,6 @@ package com.voximplant.demos.kotlin.audio_call
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.Lifecycle
@@ -16,9 +15,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerBase
 import com.voximplant.demos.kotlin.audio_call.services.AudioCallManager
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerWithTelecom
+import com.voximplant.demos.kotlin.audio_call.services.TelecomManager
 import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.Voximplant
@@ -27,8 +25,10 @@ import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")
 lateinit var permissionsHelper: PermissionsHelper
-@SuppressLint("StaticFieldLeak")
 lateinit var audioCallManager: AudioCallManager
+
+@SuppressLint("StaticFieldLeak")
+lateinit var telecomManager: TelecomManager
 
 class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
     override fun onCreate() {
@@ -52,6 +52,7 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             }
 
         permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
+        telecomManager = TelecomManager(applicationContext).apply { registerAccount() }
 
         Shared.notificationHelper =
             NotificationHelper(
@@ -61,11 +62,10 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             )
         Shared.fileLogger = FileLogger(this)
         Shared.authService = AuthService(client, applicationContext)
-        audioCallManager = if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)) {
-            AudioCallManagerWithTelecom(applicationContext, client)
-        } else {
-            AudioCallManagerBase(applicationContext, client)
-        }
+        audioCallManager = AudioCallManager(
+            applicationContext,
+            client,
+        )
         Shared.shareHelper = ShareHelper.also {
             it.init(
                 this,

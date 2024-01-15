@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.services
@@ -18,12 +18,8 @@ class CallConnectionService : ConnectionService() {
         connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
     ): Connection? {
         Log.i(APP_TAG, "CallConnectionService::onCreateIncomingConnection $request")
-        return if (audioCallManager is AudioCallManagerWithTelecom) {
-            (audioCallManager as AudioCallManagerWithTelecom).createIncomingConnection()?.apply {
-                setRinging()
-            }
-        } else {
-            null
+        return audioCallManager.createIncomingConnection()?.apply {
+            setRinging()
         }
     }
 
@@ -40,11 +36,7 @@ class CallConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ): Connection? {
         Log.i(APP_TAG, "CallConnectionService::onCreateOutgoingConnection $request")
-        return if (audioCallManager is AudioCallManagerWithTelecom) {
-            (audioCallManager as AudioCallManagerWithTelecom).createOutgoingConnection()
-        } else {
-            return null
-        }
+        return audioCallManager.createOutgoingConnection()
     }
 
     override fun onCreateOutgoingConnectionFailed(

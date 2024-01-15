@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.services
@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
+import android.telecom.DisconnectCause
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
@@ -18,6 +19,7 @@ import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.audio_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.audio_call.stories.main.MainActivity
+import com.voximplant.demos.kotlin.audio_call.telecomManager
 import com.voximplant.demos.kotlin.services.CallService
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.notificationHelper
@@ -28,7 +30,6 @@ import com.voximplant.sdk.client.IClientIncomingCallListener
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.AudioFileUsage
 import com.voximplant.sdk.hardware.IAudioDeviceEventsListener
-import com.voximplant.sdk.hardware.IAudioDeviceManager
 import com.voximplant.sdk.hardware.IAudioFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,15 +37,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 
-abstract class AudioCallManager(
-    private val context: Context,
+class AudioCallManager(
+    private val appContext: Context,
     private val client: IClient,
 ) : IClientIncomingCallListener, ICallListener, IEndpointListener, IAudioDeviceEventsListener {
 
     // Call management
-    protected var managedCall: ICall? = null
+    private var managedCall: ICall? = null
     val callExists: Boolean
         get() = managedCall != null
+    var managedCallConnection: CallConnection? = null
     private val _callState = MutableLiveData(CallState.NONE)
     val callState: LiveData<CallState>
         get() = _callState
@@ -59,9 +61,9 @@ abstract class AudioCallManager(
 
     // Call properties
     var endpointDisplayName: String? = null
-        protected set
+        private set
     var endpointUsername: String? = null
-        protected set
+        private set
     private val _muted = MutableLiveData(false)
     val muted: LiveData<Boolean>
         get() = _muted
@@ -69,17 +71,17 @@ abstract class AudioCallManager(
     val onHold: LiveData<Boolean>
         get() = _onHold
 
-    protected val audioDeviceManager: IAudioDeviceManager = Voximplant.getAudioDeviceManager()
+    private val audioDeviceManager = Voximplant.getAudioDeviceManager()
 
     private val _selectedAudioDevice = MutableStateFlow(audioDeviceManager.activeDevice)
     val selectedAudioDevice: StateFlow<AudioDevice> = _selectedAudioDevice.asStateFlow()
     private val _availableAudioDevices = MutableStateFlow(audioDeviceManager.audioDevices)
     val availableAudioDevices = _availableAudioDevices.asStateFlow()
 
-    private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(context, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
-    private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(context, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
-    private var callConnectedToneFile: IAudioFile? = Voximplant.createAudioFile(context, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
-    private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(context, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
+    private var callProgressToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_progress_tone, AudioFileUsage.IN_CALL)
+    private var callReconnectingToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_reconnecting_tone, AudioFileUsage.IN_CALL)
+    private var callConnectedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_connected_tone, AudioFileUsage.IN_CALL)
+    private var callFailedToneFile: IAudioFile? = Voximplant.createAudioFile(appContext, R.raw.call_failed_tone, AudioFileUsage.IN_CALL)
 
     // Call events
     var onCallDisconnect: ((failed: Boolean, reason: String) -> Unit)? = null
@@ -95,6 +97,23 @@ abstract class AudioCallManager(
         audioDeviceManager.selectAudioDevice(audioDevice)
     }
 
+    fun createIncomingConnection(): CallConnection? {
+        Log.i(APP_TAG, "AudioCallManager::createIncomingConnection")
+        managedCallConnection = CallConnection()
+        managedCallConnection?.setInitialized()
+        audioDeviceManager.setTelecomConnection(managedCallConnection)
+        return managedCallConnection
+    }
+
+    fun createOutgoingConnection(): CallConnection? {
+        Log.i(APP_TAG, "AudioCallManager::createOutgoingConnection")
+        managedCallConnection = CallConnection()
+        managedCallConnection?.setInitialized()
+        audioDeviceManager.setTelecomConnection(managedCallConnection)
+        managedCall?.start() ?: throw noActiveCallError
+        return managedCallConnection
+    }
+
     override fun onIncomingCall(call: ICall, video: Boolean, headers: Map<String?, String?>?) {
         if (callExists) {
             // App will reject incoming calls if already have one, because it supports only single managed call at a time.
@@ -106,16 +125,18 @@ abstract class AudioCallManager(
             return
         }
         setCallState(CallState.INCOMING)
-        call.apply {
-            addCallListener(this@AudioCallManager)
-            managedCall = this
-            endpointUsername = endpoints.firstOrNull()?.userName
-            endpointDisplayName = endpoints.firstOrNull()?.userDisplayName
+        call.also {
+            it.addCallListener(this)
+            managedCall = it
+            endpointUsername = it.endpoints.firstOrNull()?.userName
+            endpointDisplayName = it.endpoints.firstOrNull()?.userDisplayName
         }
+        telecomManager.addIncomingCall()
     }
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {
         Log.i(APP_TAG, "AudioCallManager:: onCallConnected")
+        managedCallConnection?.setActive()
         setCallState(CallState.CONNECTED)
         endpointDisplayName = call?.endpoints?.firstOrNull()?.userDisplayName
         onCallConnect?.invoke()
@@ -135,9 +156,27 @@ abstract class AudioCallManager(
         answeredElsewhere: Boolean,
     ) {
         Log.i(APP_TAG, "AudioCallManager::onCallDisconnected answeredElsewhere: $answeredElsewhere")
+        when {
+            answeredElsewhere -> {
+                managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ANSWERED_ELSEWHERE))
+            }
+            _callState.value == CallState.DISCONNECTING -> {
+                managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+            }
+            _callState.value == CallState.CONNECTED -> {
+                managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.REMOTE))
+            }
+            _callState.value == CallState.INCOMING -> {
+                managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.MISSED))
+            }
+            else -> {
+                managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.OTHER))
+            }
+        }
         setCallState(CallState.DISCONNECTED)
         removeCall()
-        onCallDisconnect?.invoke(false, context.getString(R.string.call_state_disconnected))
+        managedCallConnection?.destroy()
+        onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
     }
 
     override fun onCallFailed(
@@ -148,14 +187,21 @@ abstract class AudioCallManager(
     ) {
         Log.i(APP_TAG, "AudioCallManager::onCallFailed code: $code, description: $description")
         removeCall()
+        when (code) {
+            486 -> managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.BUSY))
+            603 -> managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.REJECTED))
+            else -> managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.ERROR))
+        }
         setCallState(CallState.FAILED)
         playFailedTone()
+        managedCallConnection?.destroy()
         onCallDisconnect?.invoke(true, description)
     }
 
     override fun onCallRinging(call: ICall?, headers: Map<String, String>?) {
         Log.d(APP_TAG, "AudioCallManager::onCallRinging")
         setCallState(CallState.RINGING)
+        managedCallConnection?.setDialing()
         playProgressTone()
     }
 
@@ -176,12 +222,10 @@ abstract class AudioCallManager(
             CallState.CONNECTING -> {
                 setCallState(CallState.CONNECTING)
             }
-
             CallState.RINGING -> {
                 setCallState(CallState.RINGING)
                 playProgressTone()
             }
-
             CallState.CONNECTED -> {
                 setCallState(CallState.CONNECTED)
                 if (_onHold.value == false) {
@@ -189,101 +233,119 @@ abstract class AudioCallManager(
                     playConnectedTone()
                 }
             }
-
             CallState.INCOMING -> {
                 setCallState(CallState.RECONNECTING)
             }
-
             else -> {
                 _previousCallState.value?.let { setCallState(it) }
             }
         }
     }
 
-    override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) = endpoint.setEndpointListener(this)
+    override fun onEndpointAdded(call: ICall, endpoint: IEndpoint) =
+        endpoint.setEndpointListener(this)
 
     @Throws(CallManagerException::class)
-    open fun createOutgoingCall(user: String) = executeOrThrow {
-        // App won't start new call if already have one, because it supports only single managed call at a time.
-        if (callExists) {
-            throw alreadyManagingCallError
+    fun createOutgoingCall(user: String) =
+        executeOrThrow {
+            // App won't start new call if already have one, because it supports only single managed call at a time.
+            if (callExists) {
+                throw alreadyManagingCallError
+            }
+            setCallState(CallState.OUTGOING)
+            managedCall = client.call(user, callSettings)?.also {
+                endpointUsername = user
+                it.addCallListener(this)
+            }
+                ?: throw callCreationError
         }
-        setCallState(CallState.OUTGOING)
-        managedCall = client.call(user, callSettings)?.apply {
-            endpointUsername = user
-            addCallListener(this@AudioCallManager)
-        } ?: throw callCreationError
-    }
 
     @Throws(CallManagerException::class)
-    open fun startOutgoingCall() {
-        _callDuration.postValue(0)
-        setCallState(CallState.CONNECTING)
-    }
-
-    @Throws(CallManagerException::class)
-    open fun answerIncomingCall() = executeOrThrow {
-        if (_callState.value == CallState.CONNECTING) {
-            return@executeOrThrow
-        }
-        notificationHelper.cancelIncomingCallNotification()
-        _callDuration.postValue(0)
-        if (callState.value == CallState.RECONNECTING) {
-            //  setActive() is required here to notify wearable devices that the incoming call has been answered.
-            playReconnectingTone()
-        } else {
+    fun startOutgoingCall() =
+        executeOrThrow {
+            endpointUsername?.let { username -> telecomManager.addOutgoingCall(username) }
+            _callDuration.postValue(0)
             setCallState(CallState.CONNECTING)
         }
-        onCallAnswer?.invoke()
-        managedCall?.answer(callSettings) ?: throw noActiveCallError
-    }
 
     @Throws(CallManagerException::class)
-    fun declineIncomingCall() = executeOrThrow {
-        notificationHelper.cancelIncomingCallNotification()
-        setCallState(CallState.DISCONNECTING)
-        managedCall?.reject(RejectMode.DECLINE, null) ?: throw noActiveCallError
-    }
-
-    @Throws(CallManagerException::class)
-    fun muteOngoingCall(mute: Boolean) = executeOrThrow {
-        managedCall?.sendAudio(!mute).also { _muted.postValue(mute) } ?: throw noActiveCallError
-    }
-
-    open fun holdOngoingCall(hold: Boolean, onCompletion: () -> Unit = {}) = managedCall?.hold(
-        hold,
-        object : ICallCompletionHandler {
-            override fun onComplete() {
-                onCompletion()
-                _onHold.postValue(hold)
-                if (hold) {
-                    _callTimer.cancel()
-                } else {
-                    managedCall?.let { startCallTimer(it) }
-                }
-                _callState.value?.let {
-                    notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = it, isOnHold = hold)
-                }
+    fun answerIncomingCall() =
+        executeOrThrow {
+            if (_callState.value == CallState.CONNECTING) {
+                return@executeOrThrow
             }
-
-            override fun onFailure(e: CallException) {}
-        },
-    )
+            notificationHelper.cancelIncomingCallNotification()
+            _callDuration.postValue(0)
+            if (callState.value == CallState.RECONNECTING) {
+                //  setActive() is required here to notify wearable devices that the incoming call has been answered.
+                managedCallConnection?.setActive()
+                playReconnectingTone()
+            } else {
+                setCallState(CallState.CONNECTING)
+            }
+            onCallAnswer?.invoke()
+            managedCall?.answer(callSettings)
+                ?: throw noActiveCallError
+        }
 
     @Throws(CallManagerException::class)
-    open fun hangupOngoingCall() = executeOrThrow {
-        setCallState(CallState.DISCONNECTING)
-        _callTimer.cancel()
-        managedCall?.hangup(null) ?: throw noActiveCallError
+    fun declineIncomingCall() =
+        executeOrThrow {
+            notificationHelper.cancelIncomingCallNotification()
+            setCallState(CallState.DISCONNECTING)
+            managedCall?.reject(RejectMode.DECLINE, null)
+                ?: throw noActiveCallError
+        }
+
+    @Throws(CallManagerException::class)
+    fun muteOngoingCall(mute: Boolean) =
+        executeOrThrow {
+            managedCall?.sendAudio(!mute).also { _muted.postValue(mute) }
+                ?: throw noActiveCallError
+        }
+
+    @Throws(CallManagerException::class)
+    fun holdOngoingCall(hold: Boolean) {
+        executeOrThrow {
+            managedCall?.hold(hold, object : ICallCompletionHandler {
+                override fun onComplete() {
+                    _onHold.postValue(hold)
+                    if (hold) {
+                        managedCallConnection?.setOnHold()
+                        _callTimer.cancel()
+                    } else {
+                        managedCallConnection?.setActive()
+                        managedCall?.let { startCallTimer(it) }
+                    }
+                    _callState.value?.let {
+                        notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = it, isOnHold = hold)
+                    }
+                }
+
+                override fun onFailure(e: CallException) {}
+            }) ?: throw noActiveCallError
+        }
     }
 
     @Throws(CallManagerException::class)
-    fun sendDTMF(DTMF: String) = executeOrThrow {
-        managedCall?.sendDTMF(DTMF) ?: throw noActiveCallError
-    }
+    fun hangupOngoingCall() =
+        executeOrThrow {
+            managedCallConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+            setCallState(CallState.DISCONNECTING)
+            _callTimer.cancel()
+            managedCall?.hangup(null)
+                ?: throw noActiveCallError
+        }
 
     @Throws(CallManagerException::class)
-    protected fun executeOrThrow(executable: () -> Unit) {
+    fun sendDTMF(DTMF: String) =
+        executeOrThrow {
+            managedCall?.sendDTMF(DTMF)
+                ?: throw noActiveCallError
+        }
+
+    @Throws(CallManagerException::class)
+    private fun executeOrThrow(executable: () -> Unit) {
         try {
             executable()
         } catch (e: CallException) {
@@ -312,7 +374,7 @@ abstract class AudioCallManager(
         stopReconnectingTone()
     }
 
-    protected fun startCallTimer(call: ICall) {
+    private fun startCallTimer(call: ICall) {
         _callTimer = Timer("callTimer").apply {
             scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
                 _callDuration.postValue(call.callDuration)
@@ -342,55 +404,64 @@ abstract class AudioCallManager(
             val filter = IntentFilter().apply {
                 addAction(ACTION_HANGUP_ONGOING_CALL)
             }
-            ContextCompat.registerReceiver(context, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             notificationHelper.createOngoingCallNotification(
-                context,
+                appContext,
                 endpointDisplayName ?: endpointUsername,
-                context.getString(R.string.call_in_progress),
+                appContext.getString(R.string.call_in_progress),
                 MainActivity::class.java,
             )
 
-            Intent(context, CallService::class.java).apply {
-                action = ACTION_FOREGROUND_SERVICE_START
-                context.startService(this)
+            Intent(appContext, CallService::class.java).let {
+                it.action = ACTION_FOREGROUND_SERVICE_START
+                appContext.startService(it)
             }
         }
     }
 
     private fun stopForegroundService() {
-        Intent(context, CallService::class.java).apply {
-            action = ACTION_FOREGROUND_SERVICE_STOP
-            context.stopService(this)
+        Intent(appContext, CallService::class.java).let {
+            it.action = ACTION_FOREGROUND_SERVICE_STOP
+            appContext.stopService(it)
         }
     }
 
     /// Incoming call visuals
 
-    abstract fun showIncomingCallUI()
+    fun showIncomingCallUI() {
+        if (callExists) {
+            showIncomingCallNotification()
+            if (Shared.appInForeground) {
+                showIncomingCallFragment()
+            }
+        } else {
+            managedCallConnection?.destroy()
+        }
+    }
 
-    protected fun showIncomingCallNotification() {
-        Intent(context, CallActivity::class.java).let { intent ->
+    private fun showIncomingCallNotification() {
+        Intent(appContext, CallActivity::class.java).let { intent ->
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
 
             val filter = IntentFilter().apply {
                 addAction(ACTION_ANSWER_INCOMING_CALL)
                 addAction(ACTION_DECLINE_INCOMING_CALL)
             }
-            ContextCompat.registerReceiver(context, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            ContextCompat.registerReceiver(appContext, callBroadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             notificationHelper.showIncomingCallNotification(
-                context,
+                appContext,
                 intent,
-                endpointDisplayName ?: context.getString(R.string.unknown_user),
+                endpointDisplayName ?: appContext.getString(R.string.unknown_user),
             )
         }
     }
 
     fun showIncomingCallFragment(answer: Boolean = false) {
-        Intent(context, CallActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(IS_INCOMING_CALL, true)
-            putExtra(ACTION_ANSWER_INCOMING_CALL, answer)
-            startActivity(context, this, null)
+        Intent(appContext, CallActivity::class.java).also {
+            it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            it.putExtra(IS_INCOMING_CALL, true)
+            it.putExtra(ACTION_ANSWER_INCOMING_CALL, answer)
+            startActivity(appContext, it, null)
         }
     }
 
@@ -429,8 +500,12 @@ abstract class AudioCallManager(
     }
 }
 
-private class AudioCallActionReceiver(private val onReceive: (AudioCallActionReceiver) -> Unit) : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) = onReceive(this)
+private class AudioCallActionReceiver(private val onReceive: (AudioCallActionReceiver) -> Unit) :
+    BroadcastReceiver() {
+    override fun onReceive(
+        context: Context,
+        intent: Intent
+    ) = onReceive(this)
 }
 
 class AudioCallBroadcastReceiver : BroadcastReceiver() {
