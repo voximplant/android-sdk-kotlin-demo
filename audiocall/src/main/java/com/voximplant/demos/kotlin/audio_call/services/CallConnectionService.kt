@@ -18,8 +18,8 @@ class CallConnectionService : ConnectionService() {
         connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
     ): Connection? {
         Log.i(APP_TAG, "CallConnectionService::onCreateIncomingConnection $request")
-        return if (audioCallManager is AudioCallManagerWithTelecom) {
-            (audioCallManager as AudioCallManagerWithTelecom).createIncomingConnection()?.apply {
+        return if (audioCallManager is AudioCallManagerTelecom) {
+            (audioCallManager as AudioCallManagerTelecom).createIncomingConnection()?.apply {
                 setRinging()
             }
         } else {
@@ -40,8 +40,8 @@ class CallConnectionService : ConnectionService() {
         request: ConnectionRequest?,
     ): Connection? {
         Log.i(APP_TAG, "CallConnectionService::onCreateOutgoingConnection $request")
-        return if (audioCallManager is AudioCallManagerWithTelecom) {
-            (audioCallManager as AudioCallManagerWithTelecom).createOutgoingConnection()
+        return if (audioCallManager is AudioCallManagerTelecom) {
+            (audioCallManager as AudioCallManagerTelecom).createOutgoingConnection()
         } else {
             return null
         }

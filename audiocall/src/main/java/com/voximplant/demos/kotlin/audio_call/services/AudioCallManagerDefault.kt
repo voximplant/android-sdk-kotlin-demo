@@ -10,7 +10,7 @@ import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import java.util.*
 
-class AudioCallManagerBase(
+class AudioCallManagerDefault(
     context: Context,
     client: IClient,
 ) : AudioCallManager(context, client) {

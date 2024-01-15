@@ -16,9 +16,9 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerBase
+import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerDefault
 import com.voximplant.demos.kotlin.audio_call.services.AudioCallManager
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerWithTelecom
+import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerTelecom
 import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.Voximplant
@@ -62,9 +62,9 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
         Shared.fileLogger = FileLogger(this)
         Shared.authService = AuthService(client, applicationContext)
         audioCallManager = if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)) {
-            AudioCallManagerWithTelecom(applicationContext, client)
+            AudioCallManagerTelecom(applicationContext, client)
         } else {
-            AudioCallManagerBase(applicationContext, client)
+            AudioCallManagerDefault(applicationContext, client)
         }
         Shared.shareHelper = ShareHelper.also {
             it.init(

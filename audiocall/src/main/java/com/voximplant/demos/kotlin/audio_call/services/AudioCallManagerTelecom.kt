@@ -14,7 +14,7 @@ import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import java.util.*
 
-class AudioCallManagerWithTelecom(
+class AudioCallManagerTelecom(
     context: Context,
     client: IClient,
 ) : AudioCallManager(context, client) {
@@ -23,7 +23,7 @@ class AudioCallManagerWithTelecom(
     private var managedCallConnection: CallConnection? = null
 
     fun createIncomingConnection(): CallConnection? {
-        Log.i(APP_TAG, "AudioCallManagerWithTelecom::createIncomingConnection")
+        Log.i(APP_TAG, "AudioCallManagerTelecom::createIncomingConnection")
         managedCallConnection = CallConnection()
         managedCallConnection?.setInitialized()
         audioDeviceManager.setTelecomConnection(managedCallConnection)
@@ -31,7 +31,7 @@ class AudioCallManagerWithTelecom(
     }
 
     fun createOutgoingConnection(): CallConnection? {
-        Log.i(APP_TAG, "AudioCallManagerWithTelecom::createOutgoingConnection")
+        Log.i(APP_TAG, "AudioCallManagerTelecom::createOutgoingConnection")
         managedCallConnection = CallConnection()
         managedCallConnection?.setInitialized()
         audioDeviceManager.setTelecomConnection(managedCallConnection)
