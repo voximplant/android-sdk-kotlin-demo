@@ -41,7 +41,7 @@ class AudioCallManagerTelecom(
 
     override fun onIncomingCall(call: ICall, video: Boolean, headers: Map<String?, String?>?) {
         super.onIncomingCall(call, video, headers)
-        telecomManager.addIncomingCall()
+        if (callState.value == CallState.INCOMING) telecomManager.addIncomingCall()
     }
 
     override fun onCallConnected(call: ICall?, headers: Map<String?, String?>?) {

@@ -17,7 +17,7 @@ class AudioCallManagerDefault(
 
     override fun onIncomingCall(call: ICall, video: Boolean, headers: Map<String?, String?>?) {
         super.onIncomingCall(call, video, headers)
-        showIncomingCallUI()
+        if (callState.value == CallState.INCOMING) showIncomingCallUI()
     }
 
     @Throws(CallManagerException::class)
