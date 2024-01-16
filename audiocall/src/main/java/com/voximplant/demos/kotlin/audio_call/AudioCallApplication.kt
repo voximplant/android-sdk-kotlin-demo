@@ -16,8 +16,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
-import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerDefault
 import com.voximplant.demos.kotlin.audio_call.services.AudioCallManager
+import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerDefault
 import com.voximplant.demos.kotlin.audio_call.services.AudioCallManagerTelecom
 import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.utils.*
@@ -27,6 +27,7 @@ import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")
 lateinit var permissionsHelper: PermissionsHelper
+
 @SuppressLint("StaticFieldLeak")
 lateinit var audioCallManager: AudioCallManager
 
@@ -61,7 +62,7 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             )
         Shared.fileLogger = FileLogger(this)
         Shared.authService = AuthService(client, applicationContext)
-        audioCallManager = if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)) {
+        audioCallManager = if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM) || applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CONNECTION_SERVICE)) {
             AudioCallManagerTelecom(applicationContext, client)
         } else {
             AudioCallManagerDefault(applicationContext, client)
