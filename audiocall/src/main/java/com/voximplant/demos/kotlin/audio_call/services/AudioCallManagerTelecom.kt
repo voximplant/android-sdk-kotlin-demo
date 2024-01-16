@@ -32,10 +32,10 @@ class AudioCallManagerTelecom(
 
     fun createOutgoingConnection(): CallConnection? {
         Log.i(APP_TAG, "AudioCallManagerTelecom::createOutgoingConnection")
+        startOutgoingCallInternal()
         managedCallConnection = CallConnection()
         managedCallConnection?.setInitialized()
         audioDeviceManager.setTelecomConnection(managedCallConnection)
-        managedCall?.start() ?: throw noActiveCallError
         return managedCallConnection
     }
 
@@ -101,7 +101,6 @@ class AudioCallManagerTelecom(
 
     @RequiresPermission(anyOf = [Manifest.permission.CALL_PHONE, Manifest.permission.MANAGE_OWN_CALLS])
     override fun startOutgoingCall() {
-        super.startOutgoingCall()
         endpointUsername?.let { username -> telecomManager.addOutgoingCall(username) }
     }
 

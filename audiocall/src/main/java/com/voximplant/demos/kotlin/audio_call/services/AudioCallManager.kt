@@ -42,7 +42,7 @@ abstract class AudioCallManager(
 ) : IClientIncomingCallListener, ICallListener, IEndpointListener, IAudioDeviceEventsListener {
 
     // Call management
-    protected var managedCall: ICall? = null
+    private var managedCall: ICall? = null
     val callExists: Boolean
         get() = managedCall != null
     private val _callState = MutableLiveData(CallState.NONE)
@@ -215,8 +215,11 @@ abstract class AudioCallManager(
         } ?: throw callCreationError
     }
 
+    abstract fun startOutgoingCall()
+
     @Throws(CallManagerException::class)
-    open fun startOutgoingCall() {
+    protected fun startOutgoingCallInternal() = executeOrThrow {
+        managedCall?.start() ?: throw noActiveCallError
         _callDuration.postValue(0)
         setCallState(CallState.CONNECTING)
     }

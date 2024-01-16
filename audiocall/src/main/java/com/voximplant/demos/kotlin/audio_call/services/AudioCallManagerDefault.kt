@@ -21,10 +21,7 @@ class AudioCallManagerDefault(
     }
 
     @Throws(CallManagerException::class)
-    override fun startOutgoingCall() = executeOrThrow {
-        super.startOutgoingCall()
-        managedCall?.start() ?: throw noActiveCallError
-    }
+    override fun startOutgoingCall() = startOutgoingCallInternal()
 
     override fun showIncomingCallUI() {
         if (callExists) {
