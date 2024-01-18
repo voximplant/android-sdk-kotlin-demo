@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.video_call.stories.call
@@ -183,7 +183,6 @@ class CallViewModel : BaseViewModel() {
         voximplantCallManager.selectAudioDevice(id)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(request: ((Intent?) -> Unit) -> Unit) {
         enableHoldButton.postValue(false)
         enableVideoButton.postValue(false)

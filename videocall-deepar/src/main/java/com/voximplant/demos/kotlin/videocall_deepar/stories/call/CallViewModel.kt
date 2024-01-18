@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.videocall_deepar.stories.call
@@ -154,19 +154,15 @@ class CallViewModel : BaseViewModel() {
         voximplantCallManager.customVideoSource?.setCustomVideoSourceListener(object : ICustomVideoSourceListener {
             override fun onStarted() {
                 if (surfaceTextureHelper?.surfaceTexture != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        voximplantCallManager.setRenderSurface?.invoke(
-                            Surface(surfaceTextureHelper.surfaceTexture),
-                            Size(cameraPreset.height, cameraPreset.width)
-                        )
-                    }
+                    voximplantCallManager.setRenderSurface?.invoke(
+                        Surface(surfaceTextureHelper.surfaceTexture),
+                        Size(cameraPreset.height, cameraPreset.width)
+                    )
                 }
             }
 
             override fun onStopped() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    voximplantCallManager.setRenderSurface?.invoke(null, Size(0, 0))
-                }
+                voximplantCallManager.setRenderSurface?.invoke(null, Size(0, 0))
             }
         })
         voximplantCallManager.managedCall?.useCustomVideoSource(voximplantCallManager.customVideoSource)

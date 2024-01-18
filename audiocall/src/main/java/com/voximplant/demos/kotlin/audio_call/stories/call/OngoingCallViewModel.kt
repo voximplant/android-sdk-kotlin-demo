@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.stories.call
@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import com.voximplant.demos.kotlin.audio_call.R
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
@@ -60,7 +61,7 @@ class OngoingCallViewModel : ViewModel() {
             _callStatus.postValue(formattedCallDuration)
         }
 
-        _callStatus.addSource(audioCallManager.callState) { callState ->
+        _callStatus.addSource(audioCallManager.callState.asLiveData()) { callState ->
             _callStatus.postValue(callState.toString())
             _callState.postValue(callState)
             updateDisplayName()
@@ -176,7 +177,7 @@ class OngoingCallViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        _callStatus.removeSource(audioCallManager.callState)
+        _callStatus.removeSource(audioCallManager.callState.asLiveData())
         _callStatus.removeSource(audioCallManager.callDuration)
         _callStatus.removeSource(audioCallManager.onHold)
     }
