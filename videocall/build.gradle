@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.voximplant.demos.kotlin.video_call"
-        minSdk 19
+        minSdk 21
         targetSdk 33
         multiDexEnabled true
         versionCode 1

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.video_call.stories.call
@@ -98,11 +98,7 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
         }
 
         binding.sharingButton.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                model.shareScreen(::requestScreenCapture)
-            } else {
-                Toast.makeText(applicationContext, getString(R.string.screen_sharing_min_api_warning), Toast.LENGTH_LONG).show()
-            }
+            model.shareScreen(::requestScreenCapture)
         }
 
         binding.videoButton.setOnClickListener {
@@ -244,7 +240,6 @@ class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
                 screenSharingRequestCompletion?.invoke(null)
         }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun requestScreenCapture(completion: (Intent?) -> Unit) {
         val mediaProjectionManager =
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager

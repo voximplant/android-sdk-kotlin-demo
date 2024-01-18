@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.services
@@ -14,7 +14,6 @@ import android.os.Looper
 import android.util.Log
 import android.util.Size
 import android.view.Surface
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -177,10 +176,12 @@ class VoximplantCallManager(
             CallState.CONNECTING -> {
                 setCallState(CallState.CONNECTING)
             }
+
             CallState.RINGING -> {
                 setCallState(CallState.RINGING)
                 playProgressTone()
             }
+
             CallState.CONNECTED -> {
                 setCallState(CallState.CONNECTED)
                 if (_onHold.value == false) {
@@ -188,6 +189,7 @@ class VoximplantCallManager(
                 }
                 playConnectedTone()
             }
+
             else -> {
                 _previousCallState.value?.let { setCallState(it) }
             }
@@ -238,7 +240,7 @@ class VoximplantCallManager(
             Shared.notificationHelper.cancelIncomingCallNotification()
             setCallState(CallState.DISCONNECTING)
             managedCall?.reject(RejectMode.DECLINE, null)
-                ?: throw  noActiveCallError
+                ?: throw noActiveCallError
         }
 
     @Throws(CallManagerException::class)
@@ -274,7 +276,6 @@ class VoximplantCallManager(
         audioDeviceManager.selectAudioDevice(audioDeviceManager.audioDevices[id])
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) =
         managedCall?.startScreenSharing(intent, object : ICallCompletionHandler {
             override fun onComplete() {
