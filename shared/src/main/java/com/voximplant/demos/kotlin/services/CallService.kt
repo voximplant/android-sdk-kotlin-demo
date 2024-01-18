@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.services
 
 import android.app.Service
@@ -7,11 +11,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.voximplant.demos.kotlin.utils.*
 import kotlin.math.min
 
@@ -33,12 +35,10 @@ class CallService : Service(), SensorEventListener {
                     getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return@let
                 try {
                     if (proximityWakelock == null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            proximityWakelock = powerManager.newWakeLock(
-                                PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
-                                "Voximplant:demo-proximity"
-                            )
-                        }
+                        proximityWakelock = powerManager.newWakeLock(
+                            PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
+                            "Voximplant:demo-proximity"
+                        )
                     }
                     sensorManager.registerListener(
                         this,
@@ -60,7 +60,6 @@ class CallService : Service(), SensorEventListener {
         return START_NOT_STICKY
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onSensorChanged(sensorEvent: SensorEvent) {
         if (sensorEvent.sensor.type != Sensor.TYPE_PROXIMITY) {
             return

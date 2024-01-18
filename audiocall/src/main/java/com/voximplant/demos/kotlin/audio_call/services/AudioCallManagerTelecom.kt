@@ -6,14 +6,17 @@ package com.voximplant.demos.kotlin.audio_call.services
 
 import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.telecom.DisconnectCause
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.O)
 class AudioCallManagerTelecom(
     context: Context,
     client: IClient,

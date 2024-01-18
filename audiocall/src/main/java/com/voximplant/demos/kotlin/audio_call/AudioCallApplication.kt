@@ -48,8 +48,10 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
                 arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.POST_NOTIFICATIONS)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT)
-            } else {
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS)
+            } else {
+                arrayOf(Manifest.permission.RECORD_AUDIO)
             }
 
         permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
@@ -62,7 +64,7 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             )
         Shared.fileLogger = FileLogger(this)
         Shared.authService = AuthService(client, applicationContext)
-        audioCallManager = if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM) || applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CONNECTION_SERVICE)) {
+        audioCallManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM) || applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CONNECTION_SERVICE))) {
             AudioCallManagerTelecom(applicationContext, client)
         } else {
             AudioCallManagerDefault(applicationContext, client)

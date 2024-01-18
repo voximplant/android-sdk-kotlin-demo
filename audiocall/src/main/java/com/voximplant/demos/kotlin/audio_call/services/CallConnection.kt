@@ -1,16 +1,19 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.services
 
+import android.os.Build
 import android.telecom.CallAudioState
 import android.telecom.Connection
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
 import com.voximplant.demos.kotlin.utils.Shared
 
+@RequiresApi(Build.VERSION_CODES.O)
 class CallConnection : Connection() {
 
     override fun onShowIncomingCallUi() {

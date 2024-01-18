@@ -263,9 +263,7 @@ abstract class AudioCallManager(
                 } else {
                     managedCall?.let { startCallTimer(it) }
                 }
-                _callState.value?.let {
-                    notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = it, isOnHold = hold)
-                }
+                notificationHelper.updateOngoingNotification(userName = endpointUsername, callState = _callState.value, isOnHold = hold)
             }
 
             override fun onFailure(e: CallException) {}

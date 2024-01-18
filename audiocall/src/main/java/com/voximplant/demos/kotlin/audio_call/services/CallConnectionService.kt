@@ -4,14 +4,17 @@
 
 package com.voximplant.demos.kotlin.audio_call.services
 
+import android.os.Build
 import android.telecom.Connection
 import android.telecom.ConnectionRequest
 import android.telecom.ConnectionService
 import android.telecom.PhoneAccountHandle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.utils.APP_TAG
 
+@RequiresApi(Build.VERSION_CODES.O)
 class CallConnectionService : ConnectionService() {
 
     override fun onCreateIncomingConnection(
