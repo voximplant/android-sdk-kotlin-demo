@@ -3,6 +3,12 @@ This article provides a step-by-step tutorial to integrate a self-managed `Conne
 
 A self-managed `ConnectionService` resolves the situation of multiple calls from various applications that also use the ConnectionService API, such as switching between calls on hold or answering an incoming call when you're already on a call. It also allows answering or declining calls on wearable devices.
 
+## Check system feature availability
+A self-managed `ConnectionService` can only be used if the system has `FEATURE_TELECOM` or `FEATURE_CONNECTION_SERVICE` features. 
+Otherwise, the system throws an exception on any TelecomManager API call. 
+
+System features can be checked using [PackageManager.hasSystemFeature](https://developer.android.com/reference/android/content/pm/PackageManager#hasSystemFeature(java.lang.String)).
+
 ## Manifest declarations and permissions
 To integrate a self-managed `ConnectionService`, declare the `MANAGE_OWN_CALLS` permission in the AndroidManifest.xml file.
 ```XML

@@ -1,12 +1,16 @@
 # Voximplant Audio Call Demo with ConnectionService integration
 
-This demo demonstrates audio call of the Voximplant Android SDK with ConnectionService integration. The application supports audio calls between this Android app and other apps that use any Voximplant SDK. 
+This demo demonstrates audio call of the Voximplant Android SDK with/without [ConnectionService](ConnectionService.MD) integration.
+The application supports audio calls between this Android app and other apps that use any Voximplant SDK. 
+It uses two ways to control calls:
+- Default (`AudioCallManagerDefault`)
+- Integration with self-managed ConnectionService (`AudioCallManagerTelecom`)
 
-Based on MVVM architectural pattern.
+The choice of implementation depends on the Android version on the device and the availability of `FEATURE_TELECOM` or `FEATURE_CONNECTION_SERVICE` in the system.
 
 `ConnectionService` is an abstract service that could be implemented by any apps which either: 
 1. Can make phone calls (VoIP or otherwise) and want those calls to be integrated into the built-in phone app. Referred to as a system managed `ConnectionService`.
-2. Are a standalone calling app and don't want their calls to be integrated into the built-in phone app. Referred to as a self managed `ConnectionService`.
+2. Are a standalone calling app and don't want their calls to be integrated into the built-in phone app. Referred to as a self-managed `ConnectionService`.
 `ConnectionService` requires Android API level 23 according to the [official Android documentation](https://developer.android.com/reference/android/telecom/ConnectionService), but this app uses `Connection.PROPERTY_SELF_MANAGED` which requires API level 26.
 
 ## Features
