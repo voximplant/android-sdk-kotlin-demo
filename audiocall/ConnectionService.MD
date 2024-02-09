@@ -4,10 +4,10 @@ This article provides a step-by-step tutorial to integrate a self-managed `Conne
 A self-managed `ConnectionService` resolves the situation of multiple calls from various applications that also use the ConnectionService API, such as switching between calls on hold or answering an incoming call when you're already on a call. It also allows answering or declining calls on wearable devices.
 
 ## Check system feature availability
-A self-managed `ConnectionService` can only be used if the system has `FEATURE_TELECOM` or `FEATURE_CONNECTION_SERVICE` features. 
-Otherwise, the system throws an exception on any TelecomManager API call. 
+A self-managed `ConnectionService` can only be used if the system has the `FEATURE_TELECOM` or `FEATURE_CONNECTION_SERVICE` features.
+Otherwise, the system throws an exception on any TelecomManager API call.
 
-System features can be checked using [PackageManager.hasSystemFeature](https://developer.android.com/reference/android/content/pm/PackageManager#hasSystemFeature(java.lang.String)).
+System features can be checked via [PackageManager.hasSystemFeature](https://developer.android.com/reference/android/content/pm/PackageManager#hasSystemFeature(java.lang.String)).
 
 ## Manifest declarations and permissions
 To integrate a self-managed `ConnectionService`, declare the `MANAGE_OWN_CALLS` permission in the AndroidManifest.xml file.
@@ -93,7 +93,7 @@ The Voximplant Android SDK provides the following capabilities for an ongoing ca
 
 Mute and audio device changing capabilities are fully managed by the Voximplant Android SDK and do not require any `Connection` API call.
 
-However, to put the call on hold, the application `Connection` state should be changed via the `Connection.setOnHold()` API. Please be sure to change the `Connection` state only if `ICall.hold()` is completed successfully. 
+However, to put the call on hold, the application `Connection` state should be changed via the `Connection.setOnHold()` API. Please be sure to change the `Connection` state only if `ICall.hold()` is completed successfully.
 
 ```Kotlin
 call?.hold(hold, object : ICallCompletionHandler {
@@ -116,9 +116,9 @@ Please note:
 <img src="../screenshots/schemes/connection_scheme_ongoing_call.png">
 
 ### End ongoing call
-Either a user or a remote party can end an ongoing call. 
+Either a user or a remote party can end an ongoing call.
 
-If the user ends the call, the application should call `ICall.hangup()` API, so the Voximplant Android SDK triggers the `ICallListener.onCallDisconnected()` event. 
+If the user ends the call, the application should call `ICall.hangup()` API, so the Voximplant Android SDK triggers the `ICallListener.onCallDisconnected()` event.
 
 If the remote party ends the call, the Voximplant Android SDK informs the application by triggering the `ICallListener.onCallDisconnected()` event.
 
