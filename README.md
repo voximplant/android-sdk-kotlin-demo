@@ -1,7 +1,7 @@
 # Voximplant Kotlin Demos
 
-## [Audio Call with ConnectionService](audiocall)
-This demo demonstrates audio call of the Voximplant Android SDK with ConnectionService integration.
+## [Audio Call](audiocall)
+This demo demonstrates audio call of the Voximplant Android SDK with/without [ConnectionService](audiocall/ConnectionService.MD) integration.
 
 ## [Video Call](videocall)
 The demo demonstrates basic video call functionality of the Voximplant Android SDK.
