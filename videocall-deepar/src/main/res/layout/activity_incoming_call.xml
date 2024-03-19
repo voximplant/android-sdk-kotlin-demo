@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -9,9 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
         android:gravity="center_horizontal"
-        android:theme="@style/AppTheme"
         tools:context=".stories.incoming_call.IncomingCallActivity">
 
         <ImageButton
@@ -22,7 +24,7 @@
             android:layout_marginEnd="40dp"
             android:background="@drawable/button_image_passive"
             android:contentDescription="@string/answer"
-            app:tint="@color/colorButton"
+            app:tint="@color/colorPrimary"
             app:layout_constraintEnd_toStartOf="@+id/decline_call_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +78,6 @@
             android:contentDescription="@string/app_name"
             android:cropToPadding="false"
             android:scaleType="fitCenter"
-            app:tint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -125,7 +126,7 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.75" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/preset_camera_switch"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

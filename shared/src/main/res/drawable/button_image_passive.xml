@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <stroke
         android:width="2sp"
-        android:color="@color/colorButton" />
-    <solid android:color="@color/colorPrimary" />
+        android:color="@color/colorPrimary" />
+    <solid android:color="@color/colorPrimaryDark" />
     <size
         android:width="65sp"
         android:height="65sp" />

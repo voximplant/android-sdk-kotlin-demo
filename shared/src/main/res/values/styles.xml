@@ -1,44 +1,17 @@
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorSecondary">@color/containerLight</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorOnBackground">@color/container</item>
-        <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
 
-    <style name="NoActionBar" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorError">@color/colorRed</item>
 
-    <style name="AppTheme.ActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/text</item>
-        <item name="background">@color/colorBackground</item>
-        <item name="titleTextStyle">@style/AppTheme.TitleTextStyle</item>
-    </style>
-
-    <style name="AppTheme.TitleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/text</item>
-    </style>
-
-    <style name="AppTheme.SpecialAccent" parent="AppTheme">
-        <item name="colorAccent">@android:color/white</item>
-    </style>
-
-    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <style name="AppTheme.LoginScreenTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@android:color/white</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@android:color/white</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
     </style>
 
 </resources>

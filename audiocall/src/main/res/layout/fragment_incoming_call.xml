@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -11,7 +15,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
         android:gravity="center_horizontal"
         tools:context=".stories.call.IncomingCallFragment">
 
@@ -95,7 +98,7 @@
                     android:padding="8dp"
                     android:scaleType="centerCrop"
                     app:srcCompat="@drawable/ic_phone_black_40dp"
-                    app:tint="@color/colorButton" />
+                    app:tint="@color/colorPrimary" />
             </androidx.cardview.widget.CardView>
 
             <TextView
