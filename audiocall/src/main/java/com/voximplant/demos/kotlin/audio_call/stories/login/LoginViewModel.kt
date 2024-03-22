@@ -1,43 +1,48 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.stories.login
 
 import androidx.lifecycle.MutableLiveData
-import com.voximplant.demos.kotlin.services.*
 import com.voximplant.demos.kotlin.audio_call.R
-import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.services.AuthService
+import com.voximplant.demos.kotlin.services.AuthServiceListener
+import com.voximplant.demos.kotlin.utils.AuthError
+import com.voximplant.demos.kotlin.utils.BaseViewModel
+import com.voximplant.demos.kotlin.utils.Shared
+import com.voximplant.sdk.client.Node
 
 private val String.appendingVoxDomain get() = "$this.voximplant.com"
 
 class LoginViewModel : BaseViewModel(), AuthServiceListener {
     private val authService: AuthService = Shared.authService
     val didLogin = MutableLiveData<Unit>()
-    val invalidInputError = MutableLiveData<Pair<Boolean, Int>>()
-    val usernameFieldText = MutableLiveData<String>()
-    val passwordFieldText = MutableLiveData<String>()
+    val username = MutableLiveData<String>()
+    val password = MutableLiveData<String>()
+    val node = MutableLiveData<Node?>()
+    val usernameFieldError = MutableLiveData<Int?>()
+    val passwordFieldError = MutableLiveData<Int?>()
+    val nodeFieldError = MutableLiveData<Int?>()
 
     init {
         authService.listener = this
     }
 
     fun login(username: String?, password: String?) {
+        val node = this.node.value
+
         when {
-            username.isNullOrEmpty() -> invalidInputError.postValue(
-                Pair(
-                    true,
-                    R.string.empty_field_warning
-                )
-            )
-            password.isNullOrEmpty() -> invalidInputError.postValue(
-                Pair(
-                    false,
-                    R.string.empty_field_warning
-                )
-            )
-            else -> authService.login(username.appendingVoxDomain, password)
+            username.isNullOrEmpty() -> usernameFieldError.postValue(R.string.required_field)
+            password.isNullOrEmpty() -> passwordFieldError.postValue(R.string.required_field)
+            node == null -> nodeFieldError.postValue(R.string.required_field)
+            else -> authService.login(username.appendingVoxDomain, password, node)
         }
+    }
+
+    fun changeNode(node: Node) {
+        this.node.value = node
+        nodeFieldError.postValue(null)
     }
 
     override fun onCreate() {
@@ -50,8 +55,8 @@ class LoginViewModel : BaseViewModel(), AuthServiceListener {
 
     override fun onResume() {
         super.onResume()
-        usernameFieldText.postValue(Shared.authService.username?.substringBefore(".voximplant.com"))
-        passwordFieldText.postValue("")
+        username.postValue(Shared.authService.username?.substringBefore(".voximplant.com"))
+        password.postValue("")
     }
 
     override fun onLoginSuccess(displayName: String) {
@@ -64,18 +69,8 @@ class LoginViewModel : BaseViewModel(), AuthServiceListener {
         super.onLoginFailed(error)
         hideProgress.postValue(Unit)
         when (error) {
-            AuthError.InvalidUsername -> invalidInputError.postValue(
-                Pair(
-                    true,
-                    R.string.invalid_username_warning
-                )
-            )
-            AuthError.InvalidPassword -> invalidInputError.postValue(
-                Pair(
-                    false,
-                    R.string.invalid_password_warning
-                )
-            )
+            AuthError.InvalidUsername -> usernameFieldError.postValue(R.string.invalid_username_warning)
+            AuthError.InvalidPassword -> passwordFieldError.postValue(R.string.invalid_password_warning)
             else -> postError(error)
         }
     }

@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <resources>
     <string name="voximplant_com">.voximplant.com</string>
 
@@ -6,10 +10,23 @@
     <string name="action_sign_in_token">LOG IN WITH TOKEN</string>
     <string name="prompt_login">USER@APP.ACCOUNT</string>
     <string name="prompt_password">PASSWORD</string>
+    <string name="node">Node</string>
+    <string-array name="node_array">
+        <item>Node 1</item>
+        <item>Node 2</item>
+        <item>Node 3</item>
+        <item>Node 4</item>
+        <item>Node 5</item>
+        <item>Node 6</item>
+        <item>Node 7</item>
+        <item>Node 8</item>
+        <item>Node 9</item>
+        <item>Node 10</item>
+    </string-array>
 
     <string name="logging_in">Logging in…</string>
     <string name="logged_in_as">Logged in as</string>
-    <string name="empty_field_warning">Field must not be empty</string>
+    <string name="required_field">Required</string>
     <string name="invalid_username_warning">Invalid username</string>
     <string name="invalid_password_warning">Invalid password</string>
 

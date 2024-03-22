@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call.stories.main
@@ -18,7 +18,7 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
     val displayName = MutableLiveData<String>()
     val moveToCall = MutableLiveData<Unit>()
     val moveToLogin = MutableLiveData<Unit>()
-    val invalidInputError = MutableLiveData<Int>()
+    val callToFieldError = MutableLiveData<Int>()
 
     init {
         authService.listener = this
@@ -31,7 +31,7 @@ class MainViewModel : BaseViewModel(), AuthServiceListener {
 
     fun call(user: String?) {
         when {
-            user.isNullOrEmpty() -> invalidInputError.postValue(R.string.empty_field_warning)
+            user.isNullOrEmpty() -> callToFieldError.postValue(R.string.required_field)
             else -> {
                 showProgress.postValue(R.string.reconnecting)
                 authService.reconnectIfNeeded { error ->

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.video_call.stories.main
 
 import android.Manifest
@@ -8,9 +12,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.widget.EditText
 import androidx.core.app.ActivityCompat
+import androidx.core.widget.doOnTextChanged
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.video_call.R
 import com.voximplant.demos.kotlin.video_call.databinding.ActivityMainBinding
@@ -31,7 +36,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         val reducer = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.reduce_size)
         val increaser = AnimatorInflater.loadAnimator(this.applicationContext, R.animator.regain_size)
 
-        binding.callTo.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
+        binding.callTo.editText?.setText(LAST_OUTGOING_CALL_USERNAME.getStringFromPrefs(applicationContext).orEmpty())
 
         binding.startCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
@@ -48,9 +53,9 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
 
         binding.startCallButton.setOnClickListener {
-            binding.callTo.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
+            binding.callTo.editText?.text.toString().saveToPrefs(applicationContext, LAST_OUTGOING_CALL_USERNAME)
             if (permissionsHelper.allPermissionsGranted()) {
-                model.call(binding.callTo.text.toString())
+                model.call(binding.callTo.editText?.text.toString())
             } else {
                 ActivityCompat.requestPermissions(this, permissionsHelper.requiredPermissions, 1)
             }
@@ -78,8 +83,12 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             }
         }
 
-        model.invalidInputError.observe(this) { value ->
+        model.callToFieldError.observe(this) { value ->
             showError(binding.callTo, resources.getString(value))
+        }
+
+        binding.callTo.editText?.doOnTextChanged { _, _, _, _ ->
+            showError(binding.callTo, null)
         }
 
         model.localVideoPresetEnabled.observe(this) { value ->
@@ -87,9 +96,12 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
     }
 
-    private fun showError(textView: EditText, text: String) {
+    private fun showError(textView: TextInputLayout, text: String?) {
         textView.error = text
-        textView.requestFocus()
+        textView.isErrorEnabled = text != null
+        if (text != null) {
+            textView.requestFocus()
+        }
     }
 
     private fun animate(view: View, animator: Animator) {
@@ -99,7 +111,7 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
     override fun onStart() {
         super.onStart()
-        permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.text.toString()) }
+        permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.editText?.text.toString()) }
         permissionsHelper.permissionDenied = { permission, openAppSettings ->
             var message: String? = null
             if (permission == Manifest.permission.RECORD_AUDIO) {

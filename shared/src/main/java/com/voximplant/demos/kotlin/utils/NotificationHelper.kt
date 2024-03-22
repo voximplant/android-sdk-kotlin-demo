@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.utils
@@ -127,7 +127,7 @@ class NotificationHelper(
                 setSilent(Shared.appInForeground)
                 setSmallIcon(R.drawable.ic_vox_notification)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    color = context.getColor(R.color.colorPrimary)
+                    color = context.getColor(R.color.colorPrimaryDark)
                 }
                 setContentTitle(appName)
                 setContentText("$displayName ${context.getString(R.string.username_is_calling)}")
@@ -190,7 +190,7 @@ class NotificationHelper(
                 setLocalOnly(true)
                 setSmallIcon(R.drawable.ic_vox_notification)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    color = context.getColor(R.color.colorPrimary)
+                    color = context.getColor(R.color.colorPrimaryDark)
                 }
                 setContentTitle("${context.getString(R.string.ongoing)} $APP_TAG $appName")
                 setContentText("$userName - $text")
@@ -225,7 +225,7 @@ class NotificationHelper(
                 when {
                     callState == CallState.RECONNECTING -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            color = context.getColor(R.color.colorPrimary)
+                            color = context.getColor(R.color.colorPrimaryDark)
                             setColorized(false)
                         }
                         setContentText("$userName - $callState")
@@ -239,7 +239,7 @@ class NotificationHelper(
                     }
                     else -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            color = context.getColor(R.color.colorPrimary)
+                            color = context.getColor(R.color.colorPrimaryDark)
                             setColorized(false)
                         }
                         setContentText("$userName - ${context.getString(R.string.call_in_progress)}")

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <solid android:color="@color/colorGray" />
+    <solid android:color="@color/colorPrimaryDark" />
 
     <corners android:radius="12dp" />
 
