@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ */
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -8,7 +12,7 @@ buildscript {
         firebase_crashlytics_version = '2.9.9'
         firebase_bom_version = '32.3.1'
 
-        voximplant_sdk_version = '2.39.0'
+        voximplant_sdk_version = '2.40.1'
 
         material_version = '1.9.0'
         appcompat_version = '1.6.1'

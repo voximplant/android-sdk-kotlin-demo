@@ -23,8 +23,8 @@ import com.voximplant.sdk.call.*
 import com.voximplant.sdk.client.IClient
 import com.voximplant.sdk.client.IClientIncomingCallListener
 import com.voximplant.sdk.hardware.*
-import org.webrtc.RendererCommon.RendererEvents
-import org.webrtc.VideoSink
+import com.voximplant.webrtc.RendererCommon.RendererEvents
+import com.voximplant.webrtc.VideoSink
 import java.util.*
 import kotlin.concurrent.scheduleAtFixedRate
 

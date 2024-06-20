@@ -28,8 +28,8 @@ import com.voximplant.demos.kotlin.video_call.databinding.ActivityCallBinding
 import com.voximplant.demos.kotlin.video_call.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.video_call.stories.main.MainActivity
 import com.voximplant.sdk.hardware.AudioDevice
-import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
-import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
+import com.voximplant.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
+import com.voximplant.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
     private lateinit var binding: ActivityCallBinding
