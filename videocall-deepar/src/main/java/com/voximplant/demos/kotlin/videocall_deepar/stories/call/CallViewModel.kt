@@ -20,7 +20,7 @@ import com.voximplant.demos.kotlin.videocall_deepar.deepARHelper
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.hardware.AudioDevice
 import com.voximplant.sdk.hardware.ICustomVideoSourceListener
-import org.webrtc.SurfaceTextureHelper
+import com.voximplant.webrtc.SurfaceTextureHelper
 import java.text.SimpleDateFormat
 import java.util.*
 

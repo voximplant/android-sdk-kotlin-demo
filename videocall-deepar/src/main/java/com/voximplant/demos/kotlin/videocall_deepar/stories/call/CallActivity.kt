@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.videocall_deepar.stories.call
@@ -19,8 +19,8 @@ import com.voximplant.demos.kotlin.videocall_deepar.databinding.ActivityCallBind
 import com.voximplant.demos.kotlin.videocall_deepar.stories.call_failed.CallFailedActivity
 import com.voximplant.demos.kotlin.videocall_deepar.stories.main.MainActivity
 import com.voximplant.sdk.hardware.AudioDevice
-import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
-import org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
+import com.voximplant.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL
+import com.voximplant.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT
 
 class CallActivity : BaseActivity<CallViewModel>(CallViewModel::class.java) {
     private lateinit var binding: ActivityCallBinding
