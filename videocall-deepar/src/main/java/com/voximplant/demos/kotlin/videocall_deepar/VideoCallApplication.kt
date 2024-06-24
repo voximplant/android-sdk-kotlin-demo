@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ */
+
 package com.voximplant.demos.kotlin.videocall_deepar
 
 import android.Manifest
@@ -21,7 +25,7 @@ import com.voximplant.demos.kotlin.videocall_deepar.stories.incoming_call.Incomi
 import com.voximplant.sdk.Voximplant
 import com.voximplant.sdk.call.VideoFlags
 import com.voximplant.sdk.client.ClientConfig
-import org.webrtc.EglBase
+import com.voximplant.webrtc.EglBase
 import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")

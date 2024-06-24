@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2021, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.utils
@@ -9,7 +9,7 @@ import android.telecom.PhoneAccount
 import com.voximplant.demos.kotlin.services.AuthService
 import com.voximplant.demos.kotlin.services.VoximplantCallManager
 import com.voximplant.sdk.hardware.ICameraManager
-import org.webrtc.EglBase
+import com.voximplant.webrtc.EglBase
 
 object Shared {
     var appInForeground: Boolean = false

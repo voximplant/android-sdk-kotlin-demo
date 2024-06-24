@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+/*
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ */
+
 // Uncomment this line to enable push notifications
 // google-services.json file is required
 //apply plugin: 'com.google.gms.google-services'
@@ -16,7 +20,7 @@ android {
         targetSdk 33
         multiDexEnabled true
         versionCode 1
-        versionName "1.4.0"
+        versionName "1.4.1"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
