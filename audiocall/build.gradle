@@ -43,6 +43,7 @@ android {
     buildFeatures {
         viewBinding true
         dataBinding true
+        buildConfig true
     }
     namespace 'com.voximplant.demos.kotlin.audio_call'
 }
