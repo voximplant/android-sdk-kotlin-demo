@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.kotlin.audio_call
@@ -43,19 +43,6 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
             ClientConfig().also { it.packageName = packageName },
         )
 
-        val requiredPermissions =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.POST_NOTIFICATIONS)
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH_CONNECT)
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_OWN_CALLS)
-            } else {
-                arrayOf(Manifest.permission.RECORD_AUDIO)
-            }
-
-        permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions)
-
         Shared.notificationHelper =
             NotificationHelper(
                 applicationContext,
@@ -69,6 +56,24 @@ class AudioCallApplication : MultiDexApplication(), LifecycleObserver {
         } else {
             AudioCallManagerDefault(applicationContext, client)
         }
+
+        val requiredPermissions: Set<String> = buildSet {
+            add(Manifest.permission.RECORD_AUDIO)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                add(Manifest.permission.MANAGE_OWN_CALLS)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (audioCallManager !is AudioCallManagerTelecom) { // BLUETOOTH_CONNECT permission is not required while using Telecom Connection.
+                    add(Manifest.permission.BLUETOOTH_CONNECT)
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        permissionsHelper = PermissionsHelper(applicationContext, requiredPermissions.toTypedArray())
+
         Shared.shareHelper = ShareHelper.also {
             it.init(
                 this,
