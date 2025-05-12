@@ -17,4 +17,6 @@
     <string name="_0">0</string>
     <string name="number_sign">#</string>
     <string name="keypad">Keypad</string>
+
+    <string name="allow_notifications_on_lock_screen_dialog_message">Please allow AudioCall to be shown on the lock screen so that you can receive calls when your device is locked.</string>
 </resources>

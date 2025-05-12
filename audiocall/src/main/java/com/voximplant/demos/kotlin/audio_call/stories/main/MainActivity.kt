@@ -8,12 +8,17 @@ import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.widget.doOnTextChanged
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.voximplant.demos.kotlin.audio_call.R
@@ -42,6 +47,23 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
         binding.callTo.editText?.doOnTextChanged { _, _, _, _ ->
             showError(binding.callTo, null)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            if (!notificationManager.canUseFullScreenIntent()) {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(getString(R.string.allow_notifications_on_lock_screen_dialog_title))
+                    .setMessage(getString(R.string.allow_notifications_on_lock_screen_dialog_message))
+                    .setNegativeButton(getString(R.string.not_now)) { _, _ -> }
+                    .setPositiveButton(getString(R.string.settings)) { _, _ ->
+                        val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                        startActivity(intent)
+                    }
+                    .show()
+            }
         }
 
         binding.startCallButton.setOnTouchListener { view, motionEvent ->

@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">VideoCall</string>
     <string name="welcome_label_text">VideoCall Demo</string>
+
+    <string name="allow_notifications_on_lock_screen_dialog_message">Please allow VideoCall to be shown on the lock screen so that you can receive calls when your device is locked.</string>
 </resources>

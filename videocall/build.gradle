@@ -12,15 +12,15 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.voximplant.demos.kotlin.video_call"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         multiDexEnabled true
         versionCode 1
-        versionName "1.5.1"
+        versionName "1.6.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
