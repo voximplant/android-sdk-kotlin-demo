@@ -7,7 +7,7 @@ plugins {
 
 // Uncomment this line to enable push notifications
 // google-services.json file is required
-    id 'com.google.gms.google-services'
+//    id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'kotlin-android'
     id 'kotlin-kapt'

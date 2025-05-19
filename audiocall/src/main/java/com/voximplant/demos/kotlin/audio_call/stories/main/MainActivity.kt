@@ -63,51 +63,22 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
         ActivityCompat.requestPermissions(this, permissionsHelper.requiredPermissions, 1)
 
-        if ("xiaomi" == Build.MANUFACTURER.lowercase()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!isCustomPermissionGranted(OP_BACKGROUND_START_ACTIVITY) || !isCustomPermissionGranted(OP_SHOW_WHEN_LOCKED)) {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(getString(R.string.allow_notifications_on_lock_screen_dialog_title))
-                        .setMessage(getString(R.string.allow_notifications_on_lock_screen_dialog_message))
-                        .setPositiveButton(getString(R.string.settings)) { _, _ ->
-                            val intent = Intent("miui.intent.action.APP_PERM_EDITOR")
-                            intent.setClassName(
-                                "com.miui.securitycenter",
-                                "com.miui.permcenter.permissions.PermissionsEditorActivity"
-                            )
-                            intent.putExtra("extra_pkgname", packageName)
-                            try {
-                                startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.d("Voximplant", e.message.toString())
-                            }
-                        }
-                        .setNegativeButton(getString(R.string.not_now)) { _, _ -> }
-                        .setCancelable(false)
-                        .show()
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        // This code is required because on Xiaomi devices, extra permissions must be granted in MIUI/HyperOS settings to show notifications on the lock screen.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && ((isXiaomi() && (!isXiaomiCustomPermissionGranted(OP_BACKGROUND_START_ACTIVITY) || !isXiaomiCustomPermissionGranted(OP_SHOW_WHEN_LOCKED))) || (!isXiaomi() && !notificationManager.canUseFullScreenIntent()))) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(getString(R.string.allow_notifications_on_lock_screen_dialog_title))
+                .setMessage(getString(R.string.allow_notifications_on_lock_screen_dialog_message))
+                .setNegativeButton(getString(R.string.not_now)) { _, _ -> }
+                .setPositiveButton(getString(R.string.settings)) { _, _ ->
+                    try {
+                        startActivity(getPermissionIntent())
+                    } catch (e: Exception) {
+                        Log.d("Voximplant", e.message.toString())
+                    }
                 }
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-                if (!notificationManager.canUseFullScreenIntent()) {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(getString(R.string.allow_notifications_on_lock_screen_dialog_title))
-                        .setMessage(getString(R.string.allow_notifications_on_lock_screen_dialog_message))
-                        .setNegativeButton(getString(R.string.not_now)) { _, _ -> }
-                        .setPositiveButton(getString(R.string.settings)) { _, _ ->
-                            val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
-                                data = Uri.parse("package:$packageName")
-                            }
-                            try {
-                                startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.d("Voximplant", e.message.toString())
-                            }
-                        }
-                        .show()
-                }
-            }
+                .show()
         }
 
         binding.startCallButton.setOnTouchListener { view, motionEvent ->
@@ -163,7 +134,40 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         }
     }
 
-    private fun isCustomPermissionGranted(permission: Int): Boolean {
+    override fun onStart() {
+        super.onStart()
+        permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.editText?.text.toString()) }
+        permissionsHelper.permissionDenied = { permission, openAppSettings ->
+            var message: String? = null
+            if (permission == Manifest.permission.RECORD_AUDIO) {
+                message = applicationContext.getString(R.string.permission_mic_to_call)
+            } else if (permission == Manifest.permission.BLUETOOTH_CONNECT) {
+                message = applicationContext.getString(R.string.permission_bluetooth_to_call)
+            }
+            if (message != null) {
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).setAction(applicationContext.getString(R.string.settings)) { openAppSettings() }.show()
+            }
+        }
+    }
+
+    override fun onBackPressed() {}
+
+    private fun getPermissionIntent(): Intent {
+        return if (isXiaomi()) {
+            Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity")
+                putExtra("extra_pkgname", packageName)
+            }
+        } else {
+            Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                data = Uri.parse("package:$packageName")
+            }
+        }
+    }
+
+    private fun isXiaomi(): Boolean = "xiaomi" == Build.MANUFACTURER.lowercase()
+
+    private fun isXiaomiCustomPermissionGranted(permission: Int): Boolean {
         return try {
             val mgr = this.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
             val m: Method = AppOpsManager::class.java.getMethod(
@@ -182,24 +186,6 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             true
         }
     }
-
-    override fun onStart() {
-        super.onStart()
-        permissionsHelper.allPermissionsGranted = { model.call(binding.callTo.editText?.text.toString()) }
-        permissionsHelper.permissionDenied = { permission, openAppSettings ->
-            var message: String? = null
-            if (permission == Manifest.permission.RECORD_AUDIO) {
-                message = applicationContext.getString(R.string.permission_mic_to_call)
-            } else if (permission == Manifest.permission.BLUETOOTH_CONNECT) {
-                message = applicationContext.getString(R.string.permission_bluetooth_to_call)
-            }
-            if (message != null) {
-                Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).setAction(applicationContext.getString(R.string.settings)) { openAppSettings() }.show()
-            }
-        }
-    }
-
-    override fun onBackPressed() {}
 
     private fun showError(textView: TextInputLayout, text: String?) {
         textView.error = text
