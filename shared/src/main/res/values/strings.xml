@@ -102,5 +102,8 @@
     <string name="permission_bluetooth_to_call">To make calls, grant access to nearby devices</string>
     <string name="permission_denied">permission denied</string>
 
+    <string name="allow_notifications_on_lock_screen_dialog_title">Allow app to show notifications on lock screen</string>
+    <string name="not_now">Not now</string>
+
     <string name="enable_camera_label">Enable camera</string>
 </resources>

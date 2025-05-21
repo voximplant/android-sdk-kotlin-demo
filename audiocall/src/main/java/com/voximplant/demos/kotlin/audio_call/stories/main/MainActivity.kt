@@ -8,12 +8,21 @@ import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
+import android.app.AppOpsManager
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Process
+import android.provider.Settings
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.widget.doOnTextChanged
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.voximplant.demos.kotlin.audio_call.R
@@ -21,7 +30,15 @@ import com.voximplant.demos.kotlin.audio_call.databinding.ActivityMainBinding
 import com.voximplant.demos.kotlin.audio_call.permissionsHelper
 import com.voximplant.demos.kotlin.audio_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.audio_call.stories.login.LoginActivity
-import com.voximplant.demos.kotlin.utils.*
+import com.voximplant.demos.kotlin.utils.BaseActivity
+import com.voximplant.demos.kotlin.utils.IS_INCOMING_CALL
+import com.voximplant.demos.kotlin.utils.IS_ONGOING_CALL
+import com.voximplant.demos.kotlin.utils.IS_OUTGOING_CALL
+import com.voximplant.demos.kotlin.utils.LAST_OUTGOING_CALL_USERNAME
+import com.voximplant.demos.kotlin.utils.Shared
+import com.voximplant.demos.kotlin.utils.getStringFromPrefs
+import com.voximplant.demos.kotlin.utils.saveToPrefs
+import java.lang.reflect.Method
 
 class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
     private lateinit var binding: ActivityMainBinding
@@ -44,6 +61,26 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
             showError(binding.callTo, null)
         }
 
+        ActivityCompat.requestPermissions(this, permissionsHelper.requiredPermissions, 1)
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        // This code is required because on Xiaomi devices, extra permissions must be granted in MIUI/HyperOS settings to show notifications on the lock screen.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && ((isXiaomi() && (!isXiaomiCustomPermissionGranted(OP_BACKGROUND_START_ACTIVITY) || !isXiaomiCustomPermissionGranted(OP_SHOW_WHEN_LOCKED))) || (!isXiaomi() && !notificationManager.canUseFullScreenIntent()))) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(getString(R.string.allow_notifications_on_lock_screen_dialog_title))
+                .setMessage(getString(R.string.allow_notifications_on_lock_screen_dialog_message))
+                .setNegativeButton(getString(R.string.not_now)) { _, _ -> }
+                .setPositiveButton(getString(R.string.settings)) { _, _ ->
+                    try {
+                        startActivity(getPermissionIntent())
+                    } catch (e: Exception) {
+                        Log.d("Voximplant", e.message.toString())
+                    }
+                }
+                .show()
+        }
+
         binding.startCallButton.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) animate(view, reducer)
             if (motionEvent.action == MotionEvent.ACTION_UP) animate(view, increaser)
@@ -63,8 +100,6 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
             if (permissionsHelper.allPermissionsGranted()) {
                 model.call(binding.callTo.editText?.text.toString())
-            } else {
-                ActivityCompat.requestPermissions(this, permissionsHelper.requiredPermissions, 1)
             }
         }
 
@@ -117,6 +152,41 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
 
     override fun onBackPressed() {}
 
+    private fun getPermissionIntent(): Intent {
+        return if (isXiaomi()) {
+            Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity")
+                putExtra("extra_pkgname", packageName)
+            }
+        } else {
+            Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                data = Uri.parse("package:$packageName")
+            }
+        }
+    }
+
+    private fun isXiaomi(): Boolean = "xiaomi" == Build.MANUFACTURER.lowercase()
+
+    private fun isXiaomiCustomPermissionGranted(permission: Int): Boolean {
+        return try {
+            val mgr = this.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val m: Method = AppOpsManager::class.java.getMethod(
+                "checkOpNoThrow",
+                Int::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType,
+                String::class.java
+            )
+            m.invoke(
+                mgr,
+                permission,
+                Process.myUid(),
+                this.packageName
+            ) == AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) {
+            true
+        }
+    }
+
     private fun showError(textView: TextInputLayout, text: String?) {
         textView.error = text
         textView.isErrorEnabled = text != null
@@ -130,12 +200,9 @@ class MainActivity : BaseActivity<MainViewModel>(MainViewModel::class.java) {
         animator.start()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionsHelper.permissionsResult(permissions, grantResults)
+    companion object {
+
+        private const val OP_BACKGROUND_START_ACTIVITY = 10021
+        private const val OP_SHOW_WHEN_LOCKED = 10020
     }
 }
