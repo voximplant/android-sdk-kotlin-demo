@@ -350,9 +350,11 @@ abstract class AudioCallManager(
                 MainActivity::class.java,
             )
 
-            Intent(context, CallService::class.java).apply {
-                action = ACTION_FOREGROUND_SERVICE_START
-                context.startService(this)
+            notificationHelper.ongoingCallNotification?.let {
+                Intent(context, CallService::class.java).apply {
+                    action = ACTION_FOREGROUND_SERVICE_START
+                    context.startService(this)
+                }
             }
         }
     }

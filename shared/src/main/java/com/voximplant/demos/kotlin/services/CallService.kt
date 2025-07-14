@@ -27,7 +27,7 @@ class CallService : Service(), SensorEventListener {
         if (action == ACTION_FOREGROUND_SERVICE_START) {
             startForeground(
                 Shared.notificationHelper.ongoingCallNotificationId,
-                Shared.notificationHelper.ongoingCallNotification.build()
+                Shared.notificationHelper.ongoingCallNotification?.build()
             )
             (getSystemService(Context.SENSOR_SERVICE) as? SensorManager)?.let { sensorManager ->
                 val proximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) ?: return@let

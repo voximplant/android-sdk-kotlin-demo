@@ -21,7 +21,7 @@ class NotificationHelper(
     private val appName: String,
 ) {
     private lateinit var incomingCallNotification: NotificationCompat.Builder
-    lateinit var ongoingCallNotification: NotificationCompat.Builder
+    var ongoingCallNotification: NotificationCompat.Builder? = null
     var ongoingCallNotificationId: Int = INVALID_NOTIFICATION_ID
         private set
 
@@ -215,7 +215,7 @@ class NotificationHelper(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
             )
         if (ongoingCallNotificationId != INVALID_NOTIFICATION_ID) {
-            ongoingCallNotification.apply {
+            ongoingCallNotification?.apply {
                 clearActions()
                 addAction(
                     R.drawable.ic_baseline_call_end_24,
@@ -247,7 +247,7 @@ class NotificationHelper(
                 }
             }
 
-            notificationManager.notify(ongoingCallNotificationId, ongoingCallNotification.build())
+            notificationManager.notify(ongoingCallNotificationId, ongoingCallNotification?.build())
             Log.d(APP_TAG, "NotificationHelper::updateOngoingNotification id: $ongoingCallNotificationId")
         }
     }

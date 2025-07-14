@@ -452,9 +452,11 @@ class VoximplantCallManager(
                 callActivity,
             )
 
-            Intent(appContext, CallService::class.java).let {
-                it.action = ACTION_FOREGROUND_SERVICE_START
-                appContext.startService(it)
+            Shared.notificationHelper.ongoingCallNotification?.let {
+                Intent(appContext, CallService::class.java).let {
+                    it.action = ACTION_FOREGROUND_SERVICE_START
+                    appContext.startService(it)
+                }
             }
         }
     }
