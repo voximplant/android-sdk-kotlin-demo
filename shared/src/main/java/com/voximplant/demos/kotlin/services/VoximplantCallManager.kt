@@ -298,14 +298,6 @@ class VoximplantCallManager(
     }
 
     fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) {
-        Intent(appContext, CallService::class.java).apply {
-            action = ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                appContext.startForegroundService(this)
-            } else {
-                appContext.startService(this)
-            }
-        }
         managedCall?.sendVideo(send, object : ICallCompletionHandler {
             override fun onComplete() {
                 _sendingLocalVideo.postValue(send)
