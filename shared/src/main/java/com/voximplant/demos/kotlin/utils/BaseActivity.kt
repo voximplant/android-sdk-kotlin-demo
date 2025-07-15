@@ -11,7 +11,7 @@ abstract class BaseActivity<T : BaseViewModel>(private val modelType: Class<T>) 
     AppCompatActivity() {
 
     protected val model: T
-        get() = ViewModelProvider { this.viewModelStore }[modelType]
+        get() = ViewModelProvider (this)[modelType]
 
     private val rootViewGroup: ViewGroup
         get() = window.decorView.rootView as ViewGroup

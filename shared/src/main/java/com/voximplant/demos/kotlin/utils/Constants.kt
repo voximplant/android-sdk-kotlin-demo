@@ -17,7 +17,9 @@ const val ACTION_HANGUP_ONGOING_CALL = "action_hangup_ongoing_call"
 
 const val PRESET_SEND_LOCAL_VIDEO = "preset_send_local_video"
 
-const val ACTION_FOREGROUND_SERVICE_START = "com.voximplant.demos.kotlin.videocall.service_start"
+const val ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START = "com.voximplant.demos.kotlin.audiocall.service_start"
+const val ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START = "com.voximplant.demos.kotlin.videocall.service_start"
+const val ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START = "ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START"
 const val ACTION_FOREGROUND_SERVICE_STOP = "com.voximplant.demos.kotlin.videocall.service_stop"
 
 const val TIMER_DELAY_MS = 1000L

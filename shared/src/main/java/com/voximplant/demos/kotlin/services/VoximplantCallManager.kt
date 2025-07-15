@@ -276,7 +276,15 @@ class VoximplantCallManager(
         audioDeviceManager.selectAudioDevice(audioDeviceManager.audioDevices[id])
     }
 
-    fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) =
+    fun shareScreen(intent: Intent, completion: (CallManagerException?) -> Unit) {
+        Intent(appContext, CallService::class.java).apply {
+            action = ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                appContext.startForegroundService(this)
+            } else {
+                appContext.startService(this)
+            }
+        }
         managedCall?.startScreenSharing(intent, object : ICallCompletionHandler {
             override fun onComplete() {
                 sharingScreen = true
@@ -287,8 +295,17 @@ class VoximplantCallManager(
                 completion(callManagerException(e))
             }
         }) ?: completion(noActiveCallError)
+    }
 
-    fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) =
+    fun sendVideo(send: Boolean, completion: (CallManagerException?) -> Unit) {
+        Intent(appContext, CallService::class.java).apply {
+            action = ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                appContext.startForegroundService(this)
+            } else {
+                appContext.startService(this)
+            }
+        }
         managedCall?.sendVideo(send, object : ICallCompletionHandler {
             override fun onComplete() {
                 _sendingLocalVideo.postValue(send)
@@ -300,6 +317,7 @@ class VoximplantCallManager(
                 completion(callManagerException(e))
             }
         }) ?: completion(noActiveCallError)
+    }
 
     @Throws(CallManagerException::class)
     fun hangup() =
@@ -453,8 +471,12 @@ class VoximplantCallManager(
             )
 
             Intent(appContext, CallService::class.java).let {
-                it.action = ACTION_FOREGROUND_SERVICE_START
-                appContext.startService(it)
+                it.action = ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(it)
+                } else {
+                    appContext.startService(it)
+                }
             }
         }
     }
