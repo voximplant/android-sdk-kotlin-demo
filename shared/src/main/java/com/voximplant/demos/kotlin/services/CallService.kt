@@ -33,7 +33,6 @@ class CallService : Service(), SensorEventListener {
                 Shared.notificationHelper.ongoingCallNotificationId,
                 Shared.notificationHelper.ongoingCallNotification.build(),
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    Log.d("LOG_TAG", "CallService ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE")
                     when (action) {
                         ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START -> {
                             ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
