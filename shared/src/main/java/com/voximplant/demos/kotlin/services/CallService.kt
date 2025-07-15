@@ -26,7 +26,6 @@ class CallService : Service(), SensorEventListener {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val action = intent.action ?: return START_NOT_STICKY
-        Log.d("LOG_TAG", "CallService action = $action | Shared.notificationHelper.ongoingCallNotification = ${Shared.notificationHelper.ongoingCallNotification}")
 
         if (action == ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START || action == ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START || action == ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START) {
             ServiceCompat.startForeground(
