@@ -460,6 +460,7 @@ class VoximplantCallManager(
                 endpointDisplayName ?: endpointUsername,
                 appContext.getString(R.string.call_in_progress),
                 callActivity,
+                CallBroadcastReceiver::class.java,
             )
 
             Intent(appContext, CallService::class.java).let {
@@ -555,7 +556,8 @@ class VoximplantCallManager(
             Shared.notificationHelper.showIncomingCallNotification(
                 appContext,
                 intent,
-                endpointDisplayName ?: endpointUsername.orEmpty()
+                endpointDisplayName ?: endpointUsername.orEmpty(),
+                CallBroadcastReceiver::class.java,
             )
         }
     }

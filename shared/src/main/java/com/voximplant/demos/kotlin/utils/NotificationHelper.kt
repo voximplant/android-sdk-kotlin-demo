@@ -94,6 +94,7 @@ class NotificationHelper(
         context: Context,
         intent: Intent,
         displayName: String,
+        receiver: Class<*>,
     ) {
         val incomingCallPendingIntent =
             PendingIntent.getActivity(
@@ -113,14 +114,14 @@ class NotificationHelper(
             )
         }
 
-        val declineCallIntent = Intent(context, CallBroadcastReceiver::class.java).apply {
-            action = ACTION_HANGUP_ONGOING_CALL
+        val declineCallIntent = Intent(context, receiver).apply {
+            action = ACTION_DECLINE_INCOMING_CALL
         }
         val declinePendingIntent = PendingIntent.getBroadcast(
             context,
             2,
             declineCallIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
         incomingCallNotification =
@@ -165,6 +166,7 @@ class NotificationHelper(
         userName: String?,
         text: String?,
         cls: Class<*>,
+        receiver: Class<*>,
     ) {
         ongoingCallNotificationId = Random.nextInt(from = 1, until = Int.MAX_VALUE)
         val intentOngoingCall = Intent(context, cls).let { intent ->
@@ -180,14 +182,14 @@ class NotificationHelper(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
             )
 
-        val hangupCallIntent = Intent(context, CallBroadcastReceiver::class.java).apply {
+        val hangupCallIntent = Intent(context, receiver).apply {
             action = ACTION_HANGUP_ONGOING_CALL
         }
         val hangupCallPendingIntent = PendingIntent.getBroadcast(
             context,
             1,
             hangupCallIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
         ongoingCallNotification =

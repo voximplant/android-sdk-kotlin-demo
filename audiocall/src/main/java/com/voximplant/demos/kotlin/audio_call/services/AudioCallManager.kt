@@ -349,6 +349,7 @@ abstract class AudioCallManager(
                 endpointDisplayName ?: endpointUsername,
                 context.getString(R.string.call_in_progress),
                 MainActivity::class.java,
+                AudioCallBroadcastReceiver::class.java,
             )
 
             Intent(context, CallService::class.java).apply {
@@ -386,6 +387,7 @@ abstract class AudioCallManager(
                 context,
                 intent,
                 endpointDisplayName ?: context.getString(R.string.unknown_user),
+                AudioCallBroadcastReceiver::class.java,
             )
         }
     }
