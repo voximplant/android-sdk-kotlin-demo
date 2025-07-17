@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -348,11 +349,16 @@ abstract class AudioCallManager(
                 endpointDisplayName ?: endpointUsername,
                 context.getString(R.string.call_in_progress),
                 MainActivity::class.java,
+                AudioCallBroadcastReceiver::class.java,
             )
 
             Intent(context, CallService::class.java).apply {
-                action = ACTION_FOREGROUND_SERVICE_START
-                context.startService(this)
+                action = ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(this)
+                } else {
+                    context.startService(this)
+                }
             }
         }
     }
@@ -381,6 +387,7 @@ abstract class AudioCallManager(
                 context,
                 intent,
                 endpointDisplayName ?: context.getString(R.string.unknown_user),
+                AudioCallBroadcastReceiver::class.java,
             )
         }
     }

@@ -7,7 +7,7 @@
 buildscript {
     ext {
         kotlin_version = '1.9.25'
-        gradle_version = '8.5.2'
+        gradle_version = '8.6.0'
         google_services_version = '4.3.15'
         firebase_crashlytics_version = '2.9.9'
         firebase_bom_version = '32.3.1'
@@ -16,7 +16,7 @@ buildscript {
 
         material_version = '1.9.0'
         appcompat_version = '1.6.1'
-        core_ctx_version = '1.10.1'
+        core_ctx_version = '1.13.1'
         constraintLayout_version = '2.1.4'
         vectordrawable_version = '1.1.0'
         preferences_ktx_version = '1.2.1'

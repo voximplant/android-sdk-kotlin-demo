@@ -13,6 +13,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.voximplant.demos.kotlin.services.CallBroadcastReceiver
 import kotlin.random.Random
 
 class NotificationHelper(
@@ -93,6 +94,7 @@ class NotificationHelper(
         context: Context,
         intent: Intent,
         displayName: String,
+        receiver: Class<*>,
     ) {
         val incomingCallPendingIntent =
             PendingIntent.getActivity(
@@ -111,13 +113,17 @@ class NotificationHelper(
                 PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
             )
         }
-        val declinePendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                2,
-                Intent().setAction(ACTION_DECLINE_INCOMING_CALL),
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
-            )
+
+        val declineCallIntent = Intent(context, receiver).apply {
+            action = ACTION_DECLINE_INCOMING_CALL
+        }
+        val declinePendingIntent = PendingIntent.getBroadcast(
+            context,
+            2,
+            declineCallIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
         incomingCallNotification =
             NotificationCompat.Builder(context, INCOMING_CALL_CHANNEL_ID).apply {
                 setCategory(NotificationCompat.CATEGORY_CALL)
@@ -160,6 +166,7 @@ class NotificationHelper(
         userName: String?,
         text: String?,
         cls: Class<*>,
+        receiver: Class<*>,
     ) {
         ongoingCallNotificationId = Random.nextInt(from = 1, until = Int.MAX_VALUE)
         val intentOngoingCall = Intent(context, cls).let { intent ->
@@ -174,13 +181,17 @@ class NotificationHelper(
                 intentOngoingCall,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
             )
-        val hangupCallPendingIntent =
-            PendingIntent.getBroadcast(
-                context,
-                1,
-                Intent().setAction(ACTION_HANGUP_ONGOING_CALL),
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
-            )
+
+        val hangupCallIntent = Intent(context, receiver).apply {
+            action = ACTION_HANGUP_ONGOING_CALL
+        }
+        val hangupCallPendingIntent = PendingIntent.getBroadcast(
+            context,
+            1,
+            hangupCallIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
         ongoingCallNotification =
             NotificationCompat.Builder(context, ONGOING_CALL_CHANNEL_ID).apply {
                 setCategory(NotificationCompat.CATEGORY_CALL)
