@@ -7,13 +7,16 @@ package com.voximplant.demos.kotlin.services
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
+import androidx.core.app.ServiceCompat
 import com.voximplant.demos.kotlin.utils.*
 import kotlin.math.min
 
@@ -24,10 +27,29 @@ class CallService : Service(), SensorEventListener {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val action = intent.action ?: return START_NOT_STICKY
 
-        if (action == ACTION_FOREGROUND_SERVICE_START) {
-            startForeground(
+        if (action == ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START || action == ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START || action == ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START) {
+            ServiceCompat.startForeground(
+                this,
                 Shared.notificationHelper.ongoingCallNotificationId,
-                Shared.notificationHelper.ongoingCallNotification.build()
+                Shared.notificationHelper.ongoingCallNotification.build(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    when (action) {
+                        ACTION_FOREGROUND_SERVICE_AUDIO_CALL_START -> {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        }
+                        ACTION_FOREGROUND_SERVICE_VIDEO_CALL_START -> {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+                        }
+                        ACTION_FOREGROUND_SERVICE_SCREEN_SHARING_START -> {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                        }
+                        else -> {
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        }
+                    }
+                } else {
+                    0
+                }
             )
             (getSystemService(Context.SENSOR_SERVICE) as? SensorManager)?.let { sensorManager ->
                 val proximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) ?: return@let
