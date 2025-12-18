@@ -110,7 +110,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
                 8 -> model.changeNode(Node.NODE_9)
                 9 -> model.changeNode(Node.NODE_10)
                 10 -> model.changeNode(Node.NODE_11)
-                11 -> model.changeNode(Node.NODE_11) //TODO (Rodion) change to "Node12"
+                11 -> model.changeNode(Node.NODE_12)
             }
         }
 
@@ -127,7 +127,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
                 Node.NODE_9 -> 8
                 Node.NODE_10 -> 9
                 Node.NODE_11 -> 10
-                Node.NODE_11 -> 11 //TODO (Rodion) change to "Node12"
+                Node.NODE_12 -> 11
                 null -> null
             }
 
