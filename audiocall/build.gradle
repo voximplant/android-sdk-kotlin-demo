@@ -22,7 +22,7 @@ android {
         targetSdk 34
         multiDexEnabled true
         versionCode 1
-        versionName "1.8.2"
+        versionName "1.8.3"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
