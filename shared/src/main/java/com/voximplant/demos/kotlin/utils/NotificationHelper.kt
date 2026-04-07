@@ -283,7 +283,7 @@ class NotificationHelper(
         createBackgroundPushNotificationChannel()
         val backgroundPushPendingIntent = PendingIntent.getActivity(
             this,
-            1,
+            2,
             packageManager.getLaunchIntentForPackage(packageName),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
