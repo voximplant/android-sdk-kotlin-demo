@@ -123,7 +123,6 @@ abstract class AudioCallManager(
         call?.let { startCallTimer(it) }
         playConnectedTone()
         startForegroundCallService()
-        stopForegroundPushService()
     }
 
     override fun onCallAudioStarted(call: ICall?) {

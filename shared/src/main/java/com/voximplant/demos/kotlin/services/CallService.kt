@@ -79,6 +79,8 @@ class CallService : Service(), SensorEventListener {
             stopSelf()
         }
 
+        this.stopService(Intent(this, BackgroundPushService::class.java))
+
         return START_NOT_STICKY
     }
 

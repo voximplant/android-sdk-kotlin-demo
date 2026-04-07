@@ -434,6 +434,7 @@ class VoximplantCallManager(
         showLocalVideoView.postValue(false)
         showRemoteVideoView.postValue(false)
         onCallDisconnect?.invoke(false, appContext.getString(R.string.call_state_disconnected))
+        stopForegroundPushService()
     }
 
     override fun onCallFailed(
@@ -447,6 +448,7 @@ class VoximplantCallManager(
         setCallState(CallState.FAILED)
         playFailedTone()
         onCallDisconnect?.invoke(true, description)
+        stopForegroundPushService()
     }
 
     private fun startForegroundCallService() {
@@ -512,6 +514,10 @@ class VoximplantCallManager(
             it.action = ACTION_FOREGROUND_SERVICE_STOP
             appContext.stopService(it)
         }
+    }
+
+    private fun stopForegroundPushService() {
+        appContext.stopService(Intent(appContext, BackgroundPushService::class.java))
     }
 
     private fun addRenderer(videoStream: IVideoStream, videoSink: VideoSink, isLocal: Boolean) {
