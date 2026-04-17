@@ -93,6 +93,7 @@
     <string name="error_already_managing_call">Already managing a call</string>
     <string name="error_creating_call">There was an error creating call</string>
 
+    <string name="background_push_notification_channel_name">Background push</string>
     <string name="notification_incoming_call">Receive incoming call</string>
     <string name="notification_ongoing_call">Ongoing call status</string>
     <string name="notification_group_calls">Calls</string>

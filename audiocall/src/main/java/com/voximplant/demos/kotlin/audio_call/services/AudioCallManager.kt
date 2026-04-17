@@ -19,6 +19,7 @@ import androidx.lifecycle.MutableLiveData
 import com.voximplant.demos.kotlin.audio_call.audioCallManager
 import com.voximplant.demos.kotlin.audio_call.stories.call.CallActivity
 import com.voximplant.demos.kotlin.audio_call.stories.main.MainActivity
+import com.voximplant.demos.kotlin.services.BackgroundPushService
 import com.voximplant.demos.kotlin.services.CallService
 import com.voximplant.demos.kotlin.utils.*
 import com.voximplant.demos.kotlin.utils.Shared.notificationHelper
@@ -138,6 +139,7 @@ abstract class AudioCallManager(
         setCallState(CallState.DISCONNECTED)
         removeCall()
         onCallDisconnect?.invoke(false, context.getString(R.string.call_state_disconnected))
+        stopForegroundPushService()
     }
 
     override fun onCallFailed(
@@ -151,6 +153,7 @@ abstract class AudioCallManager(
         setCallState(CallState.FAILED)
         playFailedTone()
         onCallDisconnect?.invoke(true, description)
+        stopForegroundPushService()
     }
 
     override fun onCallRinging(call: ICall?, headers: Map<String, String>?) {
@@ -390,6 +393,10 @@ abstract class AudioCallManager(
                 AudioCallBroadcastReceiver::class.java,
             )
         }
+    }
+
+    private fun stopForegroundPushService() {
+        context.stopService(Intent(context, BackgroundPushService::class.java))
     }
 
     fun showIncomingCallFragment(answer: Boolean = false) {

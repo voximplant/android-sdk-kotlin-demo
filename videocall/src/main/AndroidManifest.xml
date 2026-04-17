@@ -66,6 +66,11 @@
             android:screenOrientation="nosensor" />
 
         <service
+            android:name="com.voximplant.demos.kotlin.services.BackgroundPushService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
+
+        <service
             android:name="com.voximplant.demos.kotlin.services.CallService"
             android:exported="false"
             android:foregroundServiceType="microphone|camera|mediaProjection" />

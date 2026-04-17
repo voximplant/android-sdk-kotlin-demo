@@ -12,8 +12,9 @@ import android.media.AudioManager
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
-import com.voximplant.demos.kotlin.services.CallBroadcastReceiver
+import androidx.core.app.NotificationManagerCompat
 import kotlin.random.Random
 
 class NotificationHelper(
@@ -274,8 +275,45 @@ class NotificationHelper(
         Log.d(APP_TAG, "NotificationHelper::cancelOngoingCallNotification id: $ongoingCallNotificationId")
     }
 
+    fun createBackgroundPushNotification(): Notification = with(context) {
+        return@with createBackgroundPushNotification()
+    }
+
+    private fun Context.createBackgroundPushNotification(): Notification {
+        createBackgroundPushNotificationChannel()
+        val backgroundPushPendingIntent = PendingIntent.getActivity(
+            this,
+            2,
+            packageManager.getLaunchIntentForPackage(packageName),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        return NotificationCompat.Builder(this, BACKGROUND_PUSH_CHANNEL_ID).apply {
+            setContentIntent(backgroundPushPendingIntent)
+            setSmallIcon(R.drawable.ic_vox_notification)
+            priority = NotificationCompat.PRIORITY_LOW
+            setCategory(NotificationCompat.CATEGORY_SERVICE)
+            setShowWhen(false)
+            setContentText("Running checks for incoming calls")
+        }.build()
+    }
+
+    private fun Context.createBackgroundPushNotificationChannel() {
+        val channel = NotificationChannelCompat.Builder(
+            BACKGROUND_PUSH_CHANNEL_ID,
+            NotificationManagerCompat.IMPORTANCE_MIN,
+        ).apply {
+            setName(getString(R.string.background_push_notification_channel_name))
+            setVibrationEnabled(false)
+            setSound(null, null)
+        }.build()
+        NotificationManagerCompat.from(this).createNotificationChannel(channel)
+    }
+
+
     companion object {
         private const val NOTIFICATION_CALLS_GROUP_ID = "VoximplantGroupCalls"
+        private const val BACKGROUND_PUSH_CHANNEL_ID = "VoximplantChannel_0_BackgroundPush"
         private const val INCOMING_CALL_CHANNEL_ID = "VoximplantChannel_1_IncomingCall"
         private const val ONGOING_CALL_CHANNEL_ID = "VoximplantChannel_2_OngoingCall"
         private const val incomingCallNotificationId = 100
