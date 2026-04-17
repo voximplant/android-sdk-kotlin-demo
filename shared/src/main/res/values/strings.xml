@@ -23,6 +23,7 @@
         <item>Node 9</item>
         <item>Node 10</item>
         <item>Node 11</item>
+        <item>Node 12</item>
     </string-array>
 
     <string name="logging_in">Logging in…</string>
