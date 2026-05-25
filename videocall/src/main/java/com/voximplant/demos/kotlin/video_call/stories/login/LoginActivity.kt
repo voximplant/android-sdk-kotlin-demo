@@ -111,6 +111,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
                 9 -> model.changeNode(Node.NODE_10)
                 10 -> model.changeNode(Node.NODE_11)
                 11 -> model.changeNode(Node.NODE_12)
+                12 -> model.changeNode(Node.NODE_13)
             }
         }
 
@@ -128,6 +129,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(LoginViewModel::class.java) {
                 Node.NODE_10 -> 9
                 Node.NODE_11 -> 10
                 Node.NODE_12 -> 11
+                Node.NODE_13 -> 12
                 null -> null
             }
 

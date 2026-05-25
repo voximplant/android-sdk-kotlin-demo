@@ -55,6 +55,7 @@ class AuthService(
             9L -> Node.NODE_10
             10L -> Node.NODE_11
             11L -> Node.NODE_12
+            12L -> Node.NODE_13
             else -> null
         }
         private set(value) {
@@ -71,6 +72,7 @@ class AuthService(
                 Node.NODE_10 -> 9L
                 Node.NODE_11 -> 10L
                 Node.NODE_12 -> 11L
+                Node.NODE_13 -> 12L
                 null -> null
             }.let { node ->
                 if (node != null) {
